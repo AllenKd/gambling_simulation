@@ -1,0 +1,12 @@
+
+\.idea/
+
+config/__pycache__/
+
+player/__pycache__/
+
+*.pyc
+
+player/logfile
+
+\venv/

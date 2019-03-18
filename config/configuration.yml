@@ -1,0 +1,7 @@
+ratio_per_game: 1.75
+bet_base: 100
+stratagy_size: 20
+support_strategy:
+  - linear_response
+  - fibonacci_base
+  - foo_double
