@@ -9,7 +9,7 @@ class StrategyProvider(object):
         self.ratio_per_game = ratio_per_game
         self.bet_base = bet_base
         self.size = size
-        self.logger = get_logger(0)
+        self.logger = get_logger('strategy provider')
 
         linear = self.linear_response()
         fibonacci = self.fibonacci_base()

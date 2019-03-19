@@ -10,3 +10,5 @@ player/__pycache__/
 player/logfile
 
 \venv/
+
+*.log
