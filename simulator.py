@@ -5,7 +5,7 @@ import pandas as pd
 from player import Player
 from banker import Banker
 from config.logger import get_logger
-from sqlalchemy import create_engine, table, column
+from sqlalchemy import create_engine
 
 
 class Simulator(object):
@@ -47,7 +47,7 @@ class Simulator(object):
 
     def start_simulation(self):
         for player in self.players:
-            threading.Thread(target=self.battle(player)).start()
+            threading.Thread(target=self.battle, args=(player,)).start()
 
 
 if __name__ == '__main__':
