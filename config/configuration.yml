@@ -10,3 +10,4 @@ DB:
   port: 3306
   user: "allen"
   password: "password"
+  schema: "gambling_simulation"

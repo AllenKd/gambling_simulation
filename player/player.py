@@ -19,7 +19,7 @@ class Player(object):
         self.battle_summarize = None
         self.max_continuous_lost_count = 0
 
-        with open('../config/configuration.yml', 'r') as config:
+        with open('config/configuration.yml', 'r') as config:
             self.config = yaml.load(config)
 
         self.logger.info('strategy: {}, initial money: {}'.format(self.strategy, self.money))
@@ -76,12 +76,13 @@ class Player(object):
 
     def summarize(self):
         self.logger.info('summarize battle result')
-        self.battle_summarize = {'initial money': self.money,
+        self.battle_summarize = {'player_id': self.id,
+                                 'initial money': self.money,
                                  'still_survival': len(self.battle_statistic.index) == len(self.bet_data),
-                                 'win_ratio': sum(self.battle_result) / len(self.battle_result),
+                                 'win_ratio': (sum(self.battle_result) / len(self.battle_result))[0],
                                  'max_continuous_lose_count': self.max_continuous_lost_count,
                                  'final_money': self.final_money,
-                                 'final_result': self.final_money > self.money}
+                                 'final_result': bool(self.final_money > self.money)}
 
 
 if __name__ == '__main__':
