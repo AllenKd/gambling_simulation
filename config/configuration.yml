@@ -5,3 +5,8 @@ support_strategy:
   - linear_response
   - fibonacci_base
   - foo_double
+DB:
+  host: "192.168.31.61"
+  port: 3306
+  user: "allen"
+  password: "password"

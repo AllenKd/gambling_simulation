@@ -72,8 +72,12 @@ class Player(object):
             [int((self.config['ratio_per_game'] - 1) * self.config['bet_base'] * i) for i in
              range(1, len(self.battle_statistic.index) + 1)])
 
+        self.summarize()
+
     def summarize(self):
-        self.battle_summarize = {'still_survival': len(self.battle_statistic.index) == len(self.bet_data),
+        self.logger.info('summarize battle result')
+        self.battle_summarize = {'initial money': self.money,
+                                 'still_survival': len(self.battle_statistic.index) == len(self.bet_data),
                                  'win_ratio': sum(self.battle_result) / len(self.battle_result),
                                  'max_continuous_lose_count': self.max_continuous_lost_count,
                                  'final_money': self.final_money,
