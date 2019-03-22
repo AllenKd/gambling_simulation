@@ -9,8 +9,10 @@ class Player(object):
     def __init__(self, player_id, play_times, combination=1, money=5000, strategy='linear_response'):
         self.id = player_id
         self.logger = get_logger('player{}'.format(self.id))
+        with open('config/configuration.yml', 'r') as config:
+            self.config = yaml.load(config)
         self.bet_data = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
-        self.strategy = StrategyProvider(1.75).get_strategy(strategy_name=strategy, kind='base')
+        self.strategy = StrategyProvider(self.config['ratio_per_game']).get_strategy(strategy_name=strategy, kind='base')
         self.strategy.columns = [column.replace('{} '.format(strategy), '') for column in self.strategy.columns]
         self.battle_statistic = pd.DataFrame(columns=['current_put', 'win_result', 'current_response', 'subtotal'])
         self.money = money
@@ -19,10 +21,7 @@ class Player(object):
         self.battle_summarize = None
         self.max_continuous_lost_count = 0
 
-        with open('../config/configuration.yml', 'r') as config:
-            self.config = yaml.load(config)
-
-        self.logger.info('strategy: {}, initial money: {}'.format(self.strategy, self.money))
+        self.logger.info('strategy: {}, initial money: {}'.format(strategy, self.money))
 
     def battle(self, banker_result):
         self.logger.info('start battle'.format(self.id))
@@ -72,12 +71,17 @@ class Player(object):
             [int((self.config['ratio_per_game'] - 1) * self.config['bet_base'] * i) for i in
              range(1, len(self.battle_statistic.index) + 1)])
 
+        self.summarize()
+
     def summarize(self):
-        self.battle_summarize = {'still_survival': len(self.battle_statistic.index) == len(self.bet_data),
-                                 'win_ratio': sum(self.battle_result) / len(self.battle_result),
+        self.logger.info('summarize battle result')
+        self.battle_summarize = {'player_id': self.id,
+                                 'initial money': self.money,
+                                 'still_survival': len(self.battle_statistic.index) == len(self.bet_data),
+                                 'win_ratio': (sum(self.battle_result) / len(self.battle_result))[0],
                                  'max_continuous_lose_count': self.max_continuous_lost_count,
                                  'final_money': self.final_money,
-                                 'final_result': self.final_money > self.money}
+                                 'final_result': bool(self.final_money > self.money)}
 
 
 if __name__ == '__main__':
