@@ -12,7 +12,9 @@ class Player(object):
         with open('config/configuration.yml', 'r') as config:
             self.config = yaml.load(config)
         self.bet_data = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
-        self.strategy = StrategyProvider(self.config['ratio_per_game']).get_strategy(strategy_name=strategy, kind='base')
+        self.strategy_name = strategy
+        self.strategy = StrategyProvider(self.config['ratio_per_game']).get_strategy(strategy_name=strategy,
+                                                                                     kind='base')
         self.strategy.columns = [column.replace('{} '.format(strategy), '') for column in self.strategy.columns]
         self.battle_statistic = pd.DataFrame(columns=['current_put', 'win_result', 'current_response', 'subtotal'])
         self.money = money
@@ -46,6 +48,7 @@ class Player(object):
             self.logger.info('put {} at {} run'.format(current_put, run))
             self.final_money -= current_put
             if self.final_money < 0:
+                self.final_money += current_put
                 self.logger.info('no money to bet, out'.format(self.id))
                 break
 
@@ -76,6 +79,7 @@ class Player(object):
     def summarize(self):
         self.logger.info('summarize battle result')
         self.battle_summarize = {'player_id': self.id,
+                                 'strategy': self.strategy_name,
                                  'initial money': self.money,
                                  'still_survival': len(self.battle_statistic.index) == len(self.bet_data),
                                  'win_ratio': (sum(self.battle_result) / len(self.battle_result))[0],
