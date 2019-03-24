@@ -76,6 +76,7 @@ class Simulator(object):
     def summarize_gambling(self):
         self.logger.info('start summarize gambling')
         strategies = {k: defaultdict(int) for k in self.player_strategy.keys()}
+        strategies['all'] = defaultdict(int)
         for player in self.players:
             strategies[player.strategy_name]['win_player_ratio'] += (player.battle_summarize['final_result']) / \
                                                                     self.player_strategy[player.strategy_name]
@@ -94,9 +95,10 @@ class Simulator(object):
             strategies['all']['final_banker_money'] += self.player_init_money - player.battle_summarize['final_money']
 
         summarize_data = pd.DataFrame.from_dict(strategies).T
-        summarize_data['strategy'] = summarize_data.index
+        summarize_data.insert(0, 'strategy', summarize_data.index)
         summarize_data.reset_index(drop=True)
 
+        self.logger.info('gambling summarize: {}'.format(summarize_data))
         if self.to_db:
             summarize_data.to_sql(con=self.engine, name='gambling_summarize', if_exists='append',
                                   schema=self.config['DB']['schema'], index=False)
