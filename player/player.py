@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import yaml
 from config.logger import get_logger
-from bet_strategy import StrategyProvider
+from strategy_provider import StrategyProvider
 
 
 class Player(object):
@@ -30,7 +30,7 @@ class Player(object):
         self.battle_result = self.bet_data == banker_result
         self.logger.debug('player battle result: {}, win ratio: {}'.format(self.battle_result,
                                                                            np.sum(self.battle_result) / len(
-                                                                               self.battle_result)))
+                                                                               self.bet_data)))
         self._gen_battle_statistic_table()
         return self.battle_result
 
