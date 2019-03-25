@@ -1,6 +1,8 @@
 import numpy as np
 import math
 import pandas as pd
+import yaml
+import os
 from config.logger import get_logger
 
 
@@ -19,7 +21,7 @@ class StrategyProvider(object):
     def all_strategy_table(self):
         return self.strategy_table
 
-    def get_strategy(self, strategy_name, kind='unit'):
+    def get_table_base_strategy(self, strategy_name, kind='unit'):
         flatten_columns = [' '.join(col).strip() for col in self.strategy_table.columns.values]
         selected_strategy = self.strategy_table.copy()
         selected_strategy.columns = flatten_columns
@@ -31,6 +33,18 @@ class StrategyProvider(object):
                        not column.endswith('unit') and column.startswith(strategy_name)])
         if kind == 'all':
             return selected_strategy
+
+    def get_residual_base_strategy(self, strategy_name, residual_chips=None):
+        if strategy_name == 'kelly':
+            if residual_chips is None:
+                self.logger.error('no residual chips specified')
+                return 0
+
+            self.logger.info('get kelly strategy')
+            with open(os.path.abspath('__file__{}'.format('/../config/configuration.yml')), 'r') as config:
+                config = yaml.load(config)
+                return self.kelly_formula(chips=residual_chips, response_ratio=config['gambling']['ratio_per_game'],
+                                          win_prob=1 / 2 ** config['gambling']['combination'])
 
     def linear_response(self):
         self.logger.info('start gen linear response table')
@@ -85,11 +99,11 @@ class StrategyProvider(object):
         current_put_unit = 2 ** np.arange(self.size)
         return self._gen_strategy_table(current_put_unit, 'foo_double')
 
-    def kelly_formula(self, win_prob=0.5, response_ratio=None):
+    def kelly_formula(self, chips, win_prob=0.5, response_ratio=None):
         # get optimized betting ratio
         response_ratio = self.ratio_per_game if not response_ratio else response_ratio
-
-        return (win_prob * (response_ratio + 1) - 1) / response_ratio
+        bet_ratio = (win_prob * (response_ratio + 1) - 1) / response_ratio
+        return round(bet_ratio * chips, -2)
 
     def _gen_strategy_table(self, current_put_unit, strategy_name):
         strategy = pd.DataFrame({'current_put_unit': current_put_unit,
