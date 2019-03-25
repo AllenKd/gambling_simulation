@@ -25,3 +25,9 @@ fibonacci series.
 
 Put double bet of last run if lose, otherwise put minimum bet.
 
+## TODO
+
+- [ ] Dockerize
+- [ ] Add strategy based on Kelly formula
+- [ ] Make some plot to display gambling pattern
+
