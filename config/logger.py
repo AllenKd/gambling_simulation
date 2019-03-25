@@ -1,5 +1,6 @@
 import logging
 import datetime
+import yaml
 
 
 init = False
@@ -8,10 +9,12 @@ init = False
 def get_logger(player_id):
     global init
     if not init:
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s %(filename)s %(lineno)d %(name)s: %(levelname)s %(message)s',
-                            datefmt='%y-%m-%d %H:%M:%S',
-                            filename='log/{:%Y-%m-%d}.log'.format(datetime.datetime.now()))
+        with open('configuration.yaml', 'r') as config:
+            level = logging.getLevelName(yaml.load(config['logging']['level']))
+            logging.basicConfig(level=level,
+                                format='%(asctime)s %(filename)s %(lineno)d %(name)s: %(levelname)s %(message)s',
+                                datefmt='%y-%m-%d %H:%M:%S',
+                                filename='log/{:%Y-%m-%d}.log'.format(datetime.datetime.now()))
 
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
