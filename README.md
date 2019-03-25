@@ -28,6 +28,7 @@ Put double bet of last run if lose, otherwise put minimum bet.
 ## TODO
 
 - [ ] Dockerize
-- [ ] Add strategy based on Kelly formula
+- [x] Add strategy based on Kelly formula
 - [ ] Make some plot to display gambling pattern
+- [ ] Use real data from NBA
 

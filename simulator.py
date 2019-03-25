@@ -20,15 +20,15 @@ class Simulator(object):
         self.logger = get_logger('simulator')
         self.player_init_money = player_init_money
         self.banker = Banker(play_times=play_times)
-        strategy_provider = StrategyProvider(self.config['ratio_per_game'])
+        strategy_provider = StrategyProvider(self.config['gambling']['ratio_per_game'])
 
         if isinstance(player_strategy, list):
             self.players = [Player(player_id=i, play_times=play_times, combination=combination, money=player_init_money,
-                                   strategy=strategy, strategy_provider=strategy_provider) for i, strategy in
+                                   strategy_name=strategy, strategy_provider=strategy_provider) for i, strategy in
                             zip(range(1, number_of_player + 1), player_strategy)]
         elif isinstance(player_strategy, str):
             self.players = [Player(player_id=i, play_times=play_times, combination=combination, money=player_init_money,
-                                   strategy=player_strategy, strategy_provider=strategy_provider) for i in
+                                   strategy_name=player_strategy, strategy_provider=strategy_provider) for i in
                             range(1, number_of_player + 1)]
             player_strategy = [player_strategy] * number_of_player
         else:
