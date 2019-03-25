@@ -109,11 +109,3 @@ class Simulator(object):
             summarize_data.to_sql(con=self.engine, name='gambling_summarize', if_exists='append',
                                   schema=self.config['DB']['schema'], index=False)
         return summarize_data
-
-
-if __name__ == '__main__':
-    times = 1000
-    strategy_list = ['linear_response'] * 300 + ['fibonacci_base'] * 300 + ['foo_double'] * 300
-    a = Simulator(play_times=times, number_of_player=len(strategy_list), player_init_money=100000, to_db=True,
-                  player_strategy=strategy_list)
-    a.start_simulation()

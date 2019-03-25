@@ -21,7 +21,7 @@ class StrategyProvider(object):
 
     def get_strategy(self, strategy_name, kind='unit'):
         flatten_columns = [' '.join(col).strip() for col in self.strategy_table.columns.values]
-        selected_strategy = self.strategy_table
+        selected_strategy = self.strategy_table.copy()
         selected_strategy.columns = flatten_columns
         if kind == 'unit':
             return selected_strategy.filter(regex='^{}.*unit$'.format(strategy_name))
@@ -111,13 +111,3 @@ class StrategyProvider(object):
         for i in range(2, self.size + 1):
             fibonacci_numbers.append(fibonacci_numbers[i - 1] + fibonacci_numbers[i - 2])
         return np.array(fibonacci_numbers[1:])
-
-
-if __name__ == '__main__':
-    import yaml
-
-    with open('../config/configuration.yml', 'r') as config:
-        c = yaml.load(config)
-    a = StrategyProvider(1.75)
-    d = a.get_strategy(c['support_strategy'][0], kind='base')
-    print(d)

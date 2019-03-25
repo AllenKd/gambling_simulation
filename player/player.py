@@ -84,11 +84,3 @@ class Player(object):
                                  'max_continuous_lose_count': self.max_continuous_lost_count,
                                  'final_money': self.final_money,
                                  'final_result': bool(self.final_money > self.money)}
-
-
-if __name__ == '__main__':
-    times = 100
-    a = Player(player_id=0, play_times=times, combination=1, money=10000)
-    banker_result = np.random.randint(2, size=times).reshape(times, 1)
-    a.battle(banker_result)
-    print(a.battle_statistic)
