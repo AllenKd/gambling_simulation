@@ -2,19 +2,17 @@ import numpy as np
 import pandas as pd
 import yaml
 from config.logger import get_logger
-from strategy_provider import StrategyProvider
 
 
 class Player(object):
-    def __init__(self, player_id, play_times, combination=1, money=5000, strategy='linear_response'):
+    def __init__(self, player_id, play_times, strategy_provider, combination=1, money=5000, strategy='linear_response'):
         self.id = player_id
         self.logger = get_logger('player{}'.format(self.id))
         with open('config/configuration.yml', 'r') as config:
             self.config = yaml.load(config)
         self.bet_data = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
         self.strategy_name = strategy
-        self.strategy = StrategyProvider(self.config['ratio_per_game']).get_strategy(strategy_name=strategy,
-                                                                                     kind='base')
+        self.strategy = strategy_provider.get_strategy(strategy_name=strategy, kind='base')
         self.strategy.columns = [column.replace('{} '.format(strategy), '') for column in self.strategy.columns]
         self.battle_statistic = pd.DataFrame(columns=['current_put', 'win_result', 'current_response', 'subtotal'])
         self.money = money
