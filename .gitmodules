@@ -1,4 +1,4 @@
-[submodule "./pipeline"]
-	path = ./pipeline
+[submodule "pipeline"]
+	path = pipeline
 	url = git@github.com:AllenKd/pipeline.git
-	branch = develop
+    branch = develop
