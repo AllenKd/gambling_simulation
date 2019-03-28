@@ -3,6 +3,7 @@ import threading
 import pymysql
 import pandas as pd
 from player import Player
+from strategy_provider import StrategyProvider
 from banker import Banker
 from config.logger import get_logger
 from sqlalchemy import create_engine
@@ -12,17 +13,23 @@ from collections import defaultdict, Counter
 class Simulator(object):
     def __init__(self, play_times, number_of_player, player_init_money, combination=1,
                  player_strategy='linear_response', to_db=False):
+
+        with open('config/configuration.yml', 'r') as config:
+            self.config = yaml.load(config)
+
         self.logger = get_logger('simulator')
         self.player_init_money = player_init_money
         self.banker = Banker(play_times=play_times)
+        strategy_provider = StrategyProvider(self.config['gambling']['ratio_per_game'])
 
         if isinstance(player_strategy, list):
             self.players = [Player(player_id=i, play_times=play_times, combination=combination, money=player_init_money,
-                                   strategy=strategy) for i, strategy in
+                                   strategy_name=strategy, strategy_provider=strategy_provider) for i, strategy in
                             zip(range(1, number_of_player + 1), player_strategy)]
         elif isinstance(player_strategy, str):
             self.players = [Player(player_id=i, play_times=play_times, combination=combination, money=player_init_money,
-                                   strategy=player_strategy) for i in range(1, number_of_player + 1)]
+                                   strategy_name=player_strategy, strategy_provider=strategy_provider) for i in
+                            range(1, number_of_player + 1)]
             player_strategy = [player_strategy] * number_of_player
         else:
             self.logger.error('un-support strategy: {}'.format(player_strategy))
@@ -32,15 +39,13 @@ class Simulator(object):
 
         self.to_db = to_db
         if self.to_db:
-            with open('config/configuration.yml', 'r') as config:
-                self.config = yaml.load(config)
-                user = self.config['DB']['user']
-                password = self.config['DB']['password']
-                host = self.config['DB']['host']
-                self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
-                self.engine.execute('CREATE SCHEMA IF NOT EXISTS {}'.format(self.config['DB']['schema']))
-                self.db = pymysql.connect(host=host, user=user, passwd=password, db=self.config['DB']['schema'],
-                                          charset='utf8')
+            user = self.config['DB']['user']
+            password = self.config['DB']['password']
+            host = self.config['DB']['host']
+            self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
+            self.engine.execute('CREATE SCHEMA IF NOT EXISTS {}'.format(self.config['DB']['schema']))
+            self.db = pymysql.connect(host=host, user=user, passwd=password, db=self.config['DB']['schema'],
+                                      charset='utf8')
 
     def battle(self, player):
         self.logger.info('start battle with player: {}'.format(player.id))
@@ -60,6 +65,7 @@ class Simulator(object):
                              schema=self.config['DB']['schema'], index=False)
 
     def start_simulation(self):
+        self.logger.info('start simulation')
         battle_threads = []
         for player in self.players:
             battle_thread = threading.Thread(name=player.id, target=self.battle, args=(player,))
@@ -103,11 +109,3 @@ class Simulator(object):
             summarize_data.to_sql(con=self.engine, name='gambling_summarize', if_exists='append',
                                   schema=self.config['DB']['schema'], index=False)
         return summarize_data
-
-
-if __name__ == '__main__':
-    times = 100
-    strategy_list = ['linear_response'] * 10 + ['fibonacci_base'] * 10 + ['foo_double'] * 10
-    a = Simulator(play_times=times, number_of_player=30, player_init_money=10000, to_db=True,
-                  player_strategy=strategy_list)
-    a.start_simulation()

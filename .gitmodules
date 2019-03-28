@@ -1,0 +1,4 @@
+[submodule "pipeline"]
+	path = pipeline
+	url = git@github.com:AllenKd/pipeline.git
+    branch = develop
