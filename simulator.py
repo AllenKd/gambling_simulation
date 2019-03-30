@@ -2,9 +2,9 @@ import yaml
 import threading
 import pymysql
 import pandas as pd
-from player import Player
-from strategy_provider import StrategyProvider
-from banker import Banker
+from player.player import Player
+from player.strategy_provider import StrategyProvider
+from banker.banker import Banker
 from config.logger import get_logger
 from sqlalchemy import create_engine
 from collections import defaultdict, Counter
