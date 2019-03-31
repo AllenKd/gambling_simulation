@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 import os
 from config.logger import get_logger
+from config import constant
 
 
 class StrategyProvider(object):
@@ -11,7 +12,7 @@ class StrategyProvider(object):
         self.ratio_per_game = ratio_per_game
         self.bet_base = bet_base
         self.size = size
-        self.logger = get_logger('strategy provider')
+        self.logger = get_logger(self.__class__.__name__)
 
         linear = self.linear_response()
         fibonacci = self.fibonacci_base()
@@ -35,7 +36,7 @@ class StrategyProvider(object):
             return selected_strategy
 
     def get_residual_base_strategy(self, strategy_name, residual_chips=None):
-        if strategy_name == 'kelly':
+        if strategy_name == constant.kelly:
             if residual_chips is None:
                 self.logger.error('no residual chips specified')
                 return 0
@@ -43,8 +44,9 @@ class StrategyProvider(object):
             self.logger.info('get kelly strategy')
             with open(os.path.abspath('__file__{}'.format('/../config/configuration.yml')), 'r') as config:
                 config = yaml.load(config)
-                return self.kelly_formula(chips=residual_chips, response_ratio=config['gambling']['ratio_per_game'],
-                                          win_prob=1 / 2 ** config['gambling']['combination'])
+                return self.kelly_formula(chips=residual_chips,
+                                          response_ratio=config[constant.gambling][constant.ratio_per_game],
+                                          win_prob=1 / 2 ** config[constant.gambling][constant.combination])
 
     def linear_response(self):
         self.logger.info('start gen linear response table')
@@ -67,19 +69,19 @@ class StrategyProvider(object):
         win_response = current_put * self.ratio_per_game
         subtotal = win_response - accumulative_put
 
-        strategy = pd.DataFrame({'expected_win_unit': expected_total_ratio,
-                                 'current_put_unit': current_put_unit,
-                                 'accumulative_put_unit': accumulative_put_unit,
-                                 'win_response_unit': win_response_unit,
-                                 'subtotal_unit': subtotal_unit,
-                                 'expected_win': expected_total,
-                                 'current_put': current_put,
-                                 'accumulative_put': accumulative_put,
-                                 'win_response': win_response,
-                                 'subtotal': subtotal
+        strategy = pd.DataFrame({constant.expected_win_unit: expected_total_ratio,
+                                 constant.current_put_unit: current_put_unit,
+                                 constant.accumulative_put_unit: accumulative_put_unit,
+                                 constant.win_response_unit: win_response_unit,
+                                 constant.subtotal_unit: subtotal_unit,
+                                 constant.expected_win: expected_total,
+                                 constant.current_put: current_put,
+                                 constant.accumulative_put: accumulative_put,
+                                 constant.win_response: win_response,
+                                 constant.subtotal: subtotal
                                  })
 
-        columns = [np.array(['linear_response'] * len(strategy.columns)),
+        columns = [np.array([constant.linear_response] * len(strategy.columns)),
                    strategy.columns]
         strategy.columns = columns
         return strategy
@@ -93,11 +95,11 @@ class StrategyProvider(object):
 
     def fibonacci_base(self):
         current_put_unit = self._get_fib_array()
-        return self._gen_strategy_table(current_put_unit, 'fibonacci_base')
+        return self._gen_strategy_table(current_put_unit, constant.fibonacci_base)
 
     def foo_double(self):
         current_put_unit = 2 ** np.arange(self.size)
-        return self._gen_strategy_table(current_put_unit, 'foo_double')
+        return self._gen_strategy_table(current_put_unit, constant.foo_double)
 
     def kelly_formula(self, chips, win_prob=0.5, response_ratio=None):
         # get optimized betting ratio
@@ -106,14 +108,14 @@ class StrategyProvider(object):
         return round(bet_ratio * chips, -2)
 
     def _gen_strategy_table(self, current_put_unit, strategy_name):
-        strategy = pd.DataFrame({'current_put_unit': current_put_unit,
-                                 'accumulative_put_unit': np.cumsum(current_put_unit),
-                                 'win_response_unit': current_put_unit * self.ratio_per_game,
-                                 'subtotal_unit': current_put_unit * self.ratio_per_game - np.cumsum(current_put_unit),
-                                 'current_put': current_put_unit * self.bet_base,
-                                 'accumulative_put': np.cumsum(current_put_unit) * self.bet_base,
-                                 'win_response': current_put_unit * self.ratio_per_game * self.bet_base,
-                                 'subtotal': (current_put_unit * self.ratio_per_game - np.cumsum(
+        strategy = pd.DataFrame({constant.current_put_unit: current_put_unit,
+                                 constant.accumulative_put_unit: np.cumsum(current_put_unit),
+                                 constant.win_response_unit: current_put_unit * self.ratio_per_game,
+                                 constant.subtotal_unit: current_put_unit * self.ratio_per_game - np.cumsum(current_put_unit),
+                                 constant.current_put: current_put_unit * self.bet_base,
+                                 constant.accumulative_put: np.cumsum(current_put_unit) * self.bet_base,
+                                 constant.win_response: current_put_unit * self.ratio_per_game * self.bet_base,
+                                 constant.subtotal: (current_put_unit * self.ratio_per_game - np.cumsum(
                                      current_put_unit)) * self.bet_base})
         columns = [np.array([strategy_name] * len(strategy.columns)),
                    strategy.columns]
