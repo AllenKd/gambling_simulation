@@ -6,7 +6,7 @@ kelly = 'kelly'
 
 # bet strategy
 random = 'random'
-as_last = 'as_last'
+follow_last = 'follow_last'
 keep_false = 'keep_false'
 keep_true = 'keep_true'
 
@@ -42,7 +42,7 @@ schema = 'schema'
 # columns of table player_summarize
 player_summarize = 'player_summarize'
 player_id = 'player_id'
-strategy = 'strategy'
+put_strategy = 'put_strategy'
 initial_money = 'initial money'
 still_survival = 'still_survival'
 win_ratio = 'win_ratio'
