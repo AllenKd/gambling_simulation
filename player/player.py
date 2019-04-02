@@ -8,14 +8,19 @@ from config import constant
 
 class Player(object):
     def __init__(self, player_id, play_times, strategy_provider, combination=1, money=5000,
-                 put_strategy='linear_response', bet_strategy='random', bet_data=None):
+                 put_strategy='linear_response', bet_strategy=constant.random, bet_data=None):
         self.id = player_id
         self.logger = get_logger('player{}'.format(self.id))
         with open(os.path.abspath('__file__{}'.format('/../config/configuration.yml')), 'r') as config:
             self.config = yaml.load(config)
 
-        # if bet_strategy =
-        self.bet_data = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
+        self.bet_strategy = bet_strategy
+        if bet_data:
+            self.bet_data = bet_data
+        else:
+            self.bet_data = None
+            self._init_bet_data(play_times, combination)
+
         self.strategy_name = put_strategy
 
         # check if the strategy can be represent as a table
@@ -36,14 +41,36 @@ class Player(object):
 
         self.logger.info('strategy: {}, initial money: {}'.format(put_strategy, self.money))
 
+    def _init_bet_data(self, play_times, combination):
+        if self.bet_strategy == constant.random:
+            self.bet_data = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
+
+        if self.bet_strategy == constant.keep_false:
+            self.bet_data = np.zeros((play_times, 1), dtype=int)
+
+        if self.bet_strategy == constant.keep_true:
+            self.bet_data = np.ones((play_times, 1), dtype=int)
+
+        if self.bet_strategy == constant.follow_last:
+            # the bet strategy cannot be determine at this stage
+            self.bet_data = None
+
     def battle(self, banker_result):
         self.logger.info('start battle'.format(self.id))
+        if self.bet_data is None:
+            self.logger.info('prepare bet data for bet strategy: {}'.format(self.bet_strategy))
+            self._prepare_bet_data(banker_result)
         self.battle_result = self.bet_data == banker_result
         self.logger.debug('player battle result: {}, win ratio: {}'.format(self.battle_result,
                                                                            np.sum(self.battle_result) / len(
                                                                                self.bet_data)))
         self._gen_battle_statistic_table()
         return self.battle_result
+
+    def _prepare_bet_data(self, banker_result):
+        if self.bet_strategy == constant.follow_last:
+            self.logger.debug('generate bet data for strategy: {}'.format(self.bet_strategy))
+            self.bet_data = np.roll(banker_result, 1)
 
     def _gen_battle_statistic_table(self):
         self.logger.info('start generate battle statistic table')
@@ -94,7 +121,7 @@ class Player(object):
     def summarize(self):
         self.logger.info('summarize battle result')
         self.battle_summarize = {constant.player_id: self.id,
-                                 constant.strategy: self.strategy_name,
+                                 constant.put_strategy: self.strategy_name,
                                  constant.initial_money: self.money,
                                  constant.still_survival: len(self.battle_statistic.index) == len(self.bet_data),
                                  constant.win_ratio: (sum(self.battle_result) / len(self.battle_result))[0],

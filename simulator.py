@@ -13,7 +13,7 @@ from config import constant
 
 class Simulator(object):
     def __init__(self, play_times, number_of_player, player_init_money, combination=1,
-                 player_strategy=constant.linear_response, to_db=False):
+                 player_put_strategy=constant.linear_response, player_bet_strategy=constant.random, to_db=False):
 
         with open('config/configuration.yml', 'r') as config:
             self.config = yaml.load(config)
@@ -22,21 +22,10 @@ class Simulator(object):
         self.player_init_money = player_init_money
         self.banker = Banker(play_times=play_times)
         strategy_provider = StrategyProvider(self.config[constant.gambling][constant.ratio_per_game])
+        self.players = self.init_players(player_put_strategy, player_bet_strategy, strategy_provider, number_of_player,
+                                         play_times, combination)
 
-        if isinstance(player_strategy, list):
-            self.players = [Player(player_id=i, play_times=play_times, combination=combination, money=player_init_money,
-                                   put_strategy=strategy, strategy_provider=strategy_provider) for i, strategy in
-                            zip(range(1, number_of_player + 1), player_strategy)]
-        elif isinstance(player_strategy, str):
-            self.players = [Player(player_id=i, play_times=play_times, combination=combination, money=player_init_money,
-                                   put_strategy=player_strategy, strategy_provider=strategy_provider) for i in
-                            range(1, number_of_player + 1)]
-            player_strategy = [player_strategy] * number_of_player
-        else:
-            self.logger.error('un-support strategy: {}'.format(player_strategy))
-            return
-
-        self.player_strategy = Counter(player_strategy)
+        self.player_strategy = Counter(player_put_strategy)
 
         self.to_db = to_db
         if self.to_db:
@@ -47,6 +36,18 @@ class Simulator(object):
             self.engine.execute('CREATE SCHEMA IF NOT EXISTS {}'.format(self.config[constant.DB][constant.schema]))
             self.db = pymysql.connect(host=host, user=user, passwd=password,
                                       db=self.config[constant.DB][constant.schema], charset='utf8')
+
+    def init_players(self, player_put_strategy, player_bet_strategy, strategy_provider, number_of_players, play_times,
+                     combination):
+        player_bet_strategy = [player_bet_strategy] * number_of_players if isinstance(player_bet_strategy,
+                                                                                      str) else player_bet_strategy
+        player_put_strategy = [player_put_strategy] * number_of_players if isinstance(player_put_strategy,
+                                                                                      str) else player_put_strategy
+
+        return [Player(player_id=i, play_times=play_times, combination=combination, money=self.player_init_money,
+                       put_strategy=put_strategy, bet_strategy=bet_strategy, strategy_provider=strategy_provider) for
+                i, put_strategy, bet_strategy in
+                zip(range(1, number_of_players + 1), player_put_strategy, player_bet_strategy)]
 
     def battle(self, player):
         self.logger.info('start battle with player: {}'.format(player.id))
@@ -116,7 +117,7 @@ class Simulator(object):
                                                                                   constant.final_money]
 
         summarize_data = pd.DataFrame.from_dict(strategies).T
-        summarize_data.insert(0, constant.strategy, summarize_data.index)
+        summarize_data.insert(0, constant.put_strategy, summarize_data.index)
         summarize_data.reset_index(drop=True)
 
         self.logger.info('gambling summarize: {}'.format(summarize_data))
