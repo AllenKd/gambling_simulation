@@ -11,6 +11,15 @@ support_strategy:
   fibonacci_base: true
   foo_double: true
   kelly: false
+
+crawler:
+  urlPattern: "https://www.playsport.cc/predictgame.php?action=scale&allianceid=3&gametime={}&sid={}"
+  dateFormat: "yyyymmdd"
+  memberType:
+    all: 0
+    moreThan60Percent: 1
+    allPrefer: 2
+    top100: 3
 DB:
   host: "192.168.31.61"
   port: 3306
