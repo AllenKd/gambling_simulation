@@ -34,6 +34,7 @@ class Crawler(object):
                 self.append_point_spread_info(row_content, custom_row)
 
                 custom_row = not custom_row
+                assert self.check_data_consistent()
             return
 
     def append_game_id(self, row_content):
@@ -84,6 +85,7 @@ class Crawler(object):
     def append_point_spread_info(self, row_content, custom_row):
         spread_info = row_content.find('td', {'class': 'td-universal-bet01'}).text.strip()
         if len(spread_info) != 1:
+            # get national point spread info
             self.logger.info('the row contains national spread point info')
             national_spread_from = constant.chinese_mapping[spread_info[0]]
             national_spread_point, hit_percentage = re.findall(r'\d+', spread_info)
@@ -96,31 +98,40 @@ class Crawler(object):
             self.game_info[constant.response_if_meet_spread_point].append(hit_percentage)
 
         if custom_row:
+            # get national total point info
             national_total_point = row_content.find('td', {'class': 'td-universal-bet02'}).text.strip()
             national_total_point = re.findall(r'\d+\.\d+', national_total_point)[0]  # filter our first float
             self.game_info[constant.national_total_point].append(float(national_total_point))
 
+            # get local point spread info
             local_host_spread_point = row_content.find('td', {'class': 'td-bank-bet01'}).text.strip()
             # filter out float
             local_host_spread_point, spread_point_response_ratio = re.findall(r'[+-]?\d+\.\d+', local_host_spread_point)
             self.game_info[constant.local_host_point_spread].append(float(local_host_spread_point))
             self.game_info[constant.local_host_point_spread_response_ratio].append(float(spread_point_response_ratio))
 
+            # get local total point info
             local_total_point = row_content.find('td', {'class': 'td-bank-bet02'}).text.strip()
             # filter out float
             local_total_point, total_point_response = re.findall(r'\d+\.\d+', local_total_point)
             self.game_info[constant.local_total_point_threshold].append(float(local_total_point))
             self.game_info[constant.local_total_point_threshold_response_ratio].append(float(total_point_response))
 
+            # get guest response ratio of no point spread at local
             local_origin_guest_response_ratio = row_content.find('td', {'class': 'td-bank-bet03'}).text.strip()
             local_origin_guest_response_ratio = re.findall(r'\d+\.\d+', local_origin_guest_response_ratio)[0]
             self.game_info[constant.local_origin_guest_response_ratio].append(float(local_origin_guest_response_ratio))
         else:
+            # get host response ratio of no point spread at local
             local_origin_host_response_ratio = row_content.find('td', {'class': 'td-bank-bet03'}).text.strip()
             local_origin_host_response_ratio = re.findall(r'\d+\.\d+', local_origin_host_response_ratio)[0]
             self.game_info[constant.local_origin_host_response_ratio].append(float(local_origin_host_response_ratio))
 
+        return
 
+    def check_data_consistent(self):
+        length_list = [len(i) for i in self.game_info.values()]
+        return length_list.count(length_list[0]) == len(length_list)
 
     def get_url(self, date, member_type=1):
         return self.config['crawler']['urlPattern'].format(date, member_type)
