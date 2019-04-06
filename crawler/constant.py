@@ -1,10 +1,33 @@
 from collections import defaultdict
 
-game_id = 'game_id'
+# prediction
 percentage_national_point_spread_guest = 'percentage_national_point_spread_guest'
 percentage_national_point_spread_host = 'percentage_national_point_spread_host'
 population_national_point_spread_guest = 'population_national_point_spread_guest'
 population_national_point_spread_host = 'population_national_point_spread_host'
+
+percentage_national_total_point_guest = 'percentage_national_total_point_guest'
+percentage_national_total_point_host = 'percentage_national_total_point_host'
+population_national_total_point_guest = 'population_national_total_point_guest'
+population_national_total_point_host = 'population_national_total_point_host'
+
+percentage_local_point_spread_guest = 'percentage_local_point_spread_guest'
+percentage_local_point_spread_host = 'percentage_local_point_spread_host'
+population_local_point_spread_guest = 'population_local_point_spread_guest'
+population_local_point_spread_host = 'population_local_point_spread_host'
+
+percentage_local_total_point_guest = 'percentage_local_total_point_guest'
+percentage_local_total_point_host = 'percentage_local_total_point_host'
+population_local_total_point_guest = 'population_local_total_point_guest'
+population_local_total_point_host = 'population_local_total_point_host'
+
+percentage_local_original_guest = 'percentage_local_original_guest'
+percentage_local_original_host = 'percentage_local_original_host'
+population_local_original_guest = 'population_local_original_guest'
+population_local_original_host = 'population_local_original_host'
+
+
+game_id = 'game_id'
 play_time = 'play_time'
 host_id = 'host_id'
 guest_id = 'guest_id'
@@ -22,6 +45,14 @@ local_origin_guest_response_ratio = 'local_origin_guest_response_ratio'
 local_origin_host_response_ratio = 'local_origin_host_response_ratio'
 guest = 'guest'
 host = 'host'
+
+# prediction group
+all_member = 'all_member'
+more_than_sixty = 'more_than_sixty'
+all_prefer = 'all_prefer'
+top_100 = 'top_100'
+prediction_group = {all_member: 0, more_than_sixty: 1, all_prefer: 2, top_100: 3}
+
 
 chinese_mapping = {'客': 'guest', '主': 'host', '贏': True, '輸': False}
 team_name_mapping = {'密爾瓦基公鹿': 'MIL',

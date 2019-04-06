@@ -26,6 +26,11 @@ class Crawler(object):
         self.prediction_info_all_prefer = defaultdict(list)
         self.prediction_info_top_100 = defaultdict(list)
 
+        self.prediction = {constant.all_member: self.prediction_info_all_member,
+                           constant.more_than_sixty: self.prediction_info_more_than_sixty,
+                           constant.all_prefer: self.prediction_info_all_prefer,
+                           constant.top_100: self.prediction_info_top_100}
+
         self.start_date = datetime.datetime.strptime(start_date, '%Y%m%d')
         self.total_date = total_day
         self.end_date = self.start_date + datetime.timedelta(
@@ -40,35 +45,118 @@ class Crawler(object):
                                   db=self.config[string_constant.DB][string_constant.schema], charset='utf8')
 
     def start_crawler(self):
+        # crawl for each date
         for date in pd.date_range(start=self.start_date, end=self.end_date):
-            self.get_game_data(datetime.datetime.strftime(date, '%Y%m%d'))
+            # crawl for each prediction group
+            for prediction_group in constant.prediction_group.keys():
+                res = requests.get(self.get_url(date, constant.prediction_group[prediction_group]))
+                soup = BeautifulSoup(res.text, 'html.parser')
+                if prediction_group == constant.all_member:
+                    # get game info for once
+                    self.get_game_data(datetime.datetime.strftime(date, '%Y%m%d'), soup)
+                    self.write_to_db(pd.DataFrame.from_dict(self.game_info))
 
-    def get_game_data(self, date):
-        for member_type in self.config['crawler']['memberType'].values():
-            res = requests.get(self.get_url(date, member_type))
-            soup = BeautifulSoup(res.text, 'html.parser')
+                # get prediction info for each prediction group
+                self.get_prediction_data(datetime.datetime.strftime(date, '%Y%m%d'), soup, prediction_group)
 
-            custom_row = True
-            for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
-                if custom_row:
-                    assert self.check_data_consistent()
-                    self.append_game_id(row_content, date)
-                    self.append_game_time(row_content)
-                    self.append_team_name(row_content)
-                    self.append_score(row_content)
-                    self.append_total_point_info(row_content)
-                self.append_point_spread_info(row_content, custom_row)
-                self.append_response_ratio_info(row_content, custom_row)
-                custom_row = not custom_row
-            self.write_to_db(pd.DataFrame.from_dict(self.game_info))
-            return
+    def get_game_data(self, date, soup):
+        self.logger.info('start crawl and parse data: {}'.format(date))
+        custom_row = True
+        for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
+            if custom_row:
+                assert self.check_data_consistent()
+                self.append_game_id(row_content, date)
+                self.append_game_time(row_content)
+                self.append_team_name(row_content)
+                self.append_score(row_content)
+                self.append_total_point_info(row_content)
+            self.append_point_spread_info(row_content, custom_row)
+            self.append_response_ratio_info(row_content, custom_row)
+            custom_row = not custom_row
+        self.logger.info('finished crawl and parse data: {}'.format(date))
+        return
 
-    def append_game_id(self, row_content, date):
+    def get_prediction_data(self, date, soup, group):
+        guest_row = True
+        for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
+            if guest_row:
+                self.append_game_id(row_content, date, group)
+            self.append_prediction_national_point_spread(row_content, guest_row, group)
+            self.append_prediction_national_total_point(row_content, guest_row, group)
+            self.append_prediction_local_point_spread(row_content, guest_row, group)
+            self.append_prediction_local_total_point(row_content, guest_row, group)
+            self.append_prediction_local_original(row_content, guest_row, group)
+            guest_row = not guest_row
+
+    def append_prediction_national_point_spread(self, row_content, guest_row, group):
+        date = row_content.find('td', {'class': 'td-universal-bet01'}).find_next('td').text.strip()
+        date = re.findall(r'\d+', date)
+        percentage, population = date if len(date) == 2 else 0
+        if guest_row:
+            self.prediction[group][constant.percentage_national_point_spread_guest].append(percentage)
+            self.prediction[group][constant.population_national_point_spread_guest].append(population)
+        else:
+            self.prediction[group][constant.percentage_national_point_spread_host].append(percentage)
+            self.prediction[group][constant.population_national_point_spread_host].append(population)
+        return
+
+    def append_prediction_national_total_point(self, row_content, guest_row, group):
+        date = row_content.find('td', {'class': 'td-universal-bet02'}).find_next('td').text.strip()
+        date = re.findall(r'\d+', date)
+        percentage, population = date if len(date) == 2 else 0
+        if guest_row:
+            self.prediction[group][constant.percentage_national_total_point_guest].append(percentage)
+            self.prediction[group][constant.population_national_total_point_guest].append(population)
+        else:
+            self.prediction[group][constant.percentage_national_total_point_host].append(percentage)
+            self.prediction[group][constant.population_national_total_point_host].append(population)
+        return
+
+    def append_prediction_local_point_spread(self, row_content, guest_row, group):
+        date = row_content.find('td', {'class': 'td-bank-bet01'}).find_next('td').text.strip()
+        date = re.findall(r'\d+', date)
+        percentage, population = date if len(date) == 2 else 0
+        if guest_row:
+            self.prediction[group][constant.percentage_local_point_spread_guest].append(percentage)
+            self.prediction[group][constant.population_local_point_spread_guest].append(population)
+        else:
+            self.prediction[group][constant.percentage_local_point_spread_host].append(percentage)
+            self.prediction[group][constant.population_local_point_spread_host].append(population)
+        return
+
+    def append_prediction_local_total_point(self, row_content, guest_row, group):
+        date = row_content.find('td', {'class': 'td-bank-bet02'}).find_next('td').text.strip()
+        date = re.findall(r'\d+', date)
+        percentage, population = date if len(date) == 2 else 0
+        if guest_row:
+            self.prediction[group][constant.percentage_local_total_point_guest].append(percentage)
+            self.prediction[group][constant.population_local_total_point_guest].append(population)
+        else:
+            self.prediction[group][constant.percentage_local_total_point_host].append(percentage)
+            self.prediction[group][constant.population_local_total_point_host].append(population)
+        return
+
+    def append_prediction_local_original(self, row_content, guest_row, group):
+        date = row_content.find('td', {'class': 'td-bank-bet03'}).find_next('td').text.strip()
+        date = re.findall(r'\d+', date)
+        percentage, population = date if len(date) == 2 else 0
+        if guest_row:
+            self.prediction[group][constant.percentage_local_original_guest].append(percentage)
+            self.prediction[group][constant.population_local_original_guest].append(population)
+        else:
+            self.prediction[group][constant.percentage_local_original_host].append(percentage)
+            self.prediction[group][constant.population_local_original_host].append(population)
+        return
+
+    def append_game_id(self, row_content, date, group=None):
         self.logger.info(
             'current column size of {}: {}'.format(constant.game_id, len(self.game_info[constant.game_id])))
         game_id = date + row_content.find('td', 'td-gameinfo').find('h3').text
         self.logger.info('append game id: {}'.format(game_id))
-        self.game_info[constant.game_id].append(game_id)
+        if group:
+            self.prediction[group][constant.game_id].append(game_id)
+        else:
+            self.game_info[constant.game_id].append(game_id)
         return
 
     def append_game_time(self, row_content):
@@ -104,9 +192,6 @@ class Crawler(object):
         self.game_info[constant.guest].append(constant.team_name_mapping[guest])
         self.game_info[constant.host].append(constant.team_name_mapping[host])
         return
-
-    def get_prediction_data(self, row_text_list):
-        pass
 
     def append_point_spread_info(self, row_content, custom_row):
         spread_info = row_content.find('td', {'class': 'td-universal-bet01'}).text.strip()
@@ -170,8 +255,7 @@ class Crawler(object):
         game_data.to_sql(con=self.engine,
                          name='game_info',
                          if_exists='append',
-                         schema=self.config[string_constant.DB][string_constant.schema],
-                         index_label='game_id')
+                         schema=self.config[string_constant.DB][string_constant.schema])
         return
 
     def check_data_consistent(self):
