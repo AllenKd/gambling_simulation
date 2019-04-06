@@ -54,13 +54,14 @@ class Crawler(object):
                 if prediction_group == constant.all_member:
                     # get game info for once
                     self.get_game_data(datetime.datetime.strftime(date, '%Y%m%d'), soup)
-                    self.write_to_db(pd.DataFrame.from_dict(self.game_info))
+                    self.write_to_db(pd.DataFrame.from_dict(self.game_info), constant.game_data)
 
                 # get prediction info for each prediction group
                 self.get_prediction_data(datetime.datetime.strftime(date, '%Y%m%d'), soup, prediction_group)
+                self.write_to_db(pd.DataFrame.from_dict(self.prediction[prediction_group]), constant.prediction_data)
 
     def get_game_data(self, date, soup):
-        self.logger.info('start crawl and parse data: {}'.format(date))
+        self.logger.info('start crawl and parse game data: {}'.format(date))
         custom_row = True
         for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
             if custom_row:
@@ -73,10 +74,11 @@ class Crawler(object):
             self.append_point_spread_info(row_content, custom_row)
             self.append_response_ratio_info(row_content, custom_row)
             custom_row = not custom_row
-        self.logger.info('finished crawl and parse data: {}'.format(date))
+        self.logger.info('finished crawl and parse game data: {}'.format(date))
         return
 
     def get_prediction_data(self, date, soup, group):
+        self.logger.info('start crawl and parse prediction data: {}'.format(date))
         guest_row = True
         for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
             if guest_row:
@@ -87,11 +89,13 @@ class Crawler(object):
             self.append_prediction_local_total_point(row_content, guest_row, group)
             self.append_prediction_local_original(row_content, guest_row, group)
             guest_row = not guest_row
+        self.logger.info('finished crawl and parse prediction data: {}'.format(date))
+        return
 
     def append_prediction_national_point_spread(self, row_content, guest_row, group):
         date = row_content.find('td', {'class': 'td-universal-bet01'}).find_next('td').text.strip()
         date = re.findall(r'\d+', date)
-        percentage, population = date if len(date) == 2 else 0
+        percentage, population = date if len(date) == 2 else (0, 0)
         if guest_row:
             self.prediction[group][constant.percentage_national_point_spread_guest].append(percentage)
             self.prediction[group][constant.population_national_point_spread_guest].append(population)
@@ -103,7 +107,7 @@ class Crawler(object):
     def append_prediction_national_total_point(self, row_content, guest_row, group):
         date = row_content.find('td', {'class': 'td-universal-bet02'}).find_next('td').text.strip()
         date = re.findall(r'\d+', date)
-        percentage, population = date if len(date) == 2 else 0
+        percentage, population = date if len(date) == 2 else (0, 0)
         if guest_row:
             self.prediction[group][constant.percentage_national_total_point_guest].append(percentage)
             self.prediction[group][constant.population_national_total_point_guest].append(population)
@@ -115,7 +119,7 @@ class Crawler(object):
     def append_prediction_local_point_spread(self, row_content, guest_row, group):
         date = row_content.find('td', {'class': 'td-bank-bet01'}).find_next('td').text.strip()
         date = re.findall(r'\d+', date)
-        percentage, population = date if len(date) == 2 else 0
+        percentage, population = date if len(date) == 2 else (0, 0)
         if guest_row:
             self.prediction[group][constant.percentage_local_point_spread_guest].append(percentage)
             self.prediction[group][constant.population_local_point_spread_guest].append(population)
@@ -127,7 +131,7 @@ class Crawler(object):
     def append_prediction_local_total_point(self, row_content, guest_row, group):
         date = row_content.find('td', {'class': 'td-bank-bet02'}).find_next('td').text.strip()
         date = re.findall(r'\d+', date)
-        percentage, population = date if len(date) == 2 else 0
+        percentage, population = date if len(date) == 2 else (0, 0)
         if guest_row:
             self.prediction[group][constant.percentage_local_total_point_guest].append(percentage)
             self.prediction[group][constant.population_local_total_point_guest].append(population)
@@ -139,7 +143,7 @@ class Crawler(object):
     def append_prediction_local_original(self, row_content, guest_row, group):
         date = row_content.find('td', {'class': 'td-bank-bet03'}).find_next('td').text.strip()
         date = re.findall(r'\d+', date)
-        percentage, population = date if len(date) == 2 else 0
+        percentage, population = date if len(date) == 2 else (0, 0)
         if guest_row:
             self.prediction[group][constant.percentage_local_original_guest].append(percentage)
             self.prediction[group][constant.population_local_original_guest].append(population)
@@ -213,7 +217,7 @@ class Crawler(object):
             local_host_spread_point = row_content.find('td', {'class': 'td-bank-bet01'}).text.strip()
             # filter out float
             data = re.findall(r'[+-]?\d+\.\d+', local_host_spread_point)
-            local_host_spread_point, spread_point_response_ratio = data if len(data) == 2 else 0
+            local_host_spread_point, spread_point_response_ratio = data if len(data) == 2 else (0, 0)
             self.game_info[constant.local_host_point_spread].append(float(local_host_spread_point))
             self.game_info[constant.local_host_point_spread_response_ratio].append(float(spread_point_response_ratio))
 
@@ -221,7 +225,7 @@ class Crawler(object):
             local_total_point = row_content.find('td', {'class': 'td-bank-bet02'}).text.strip()
             # filter out float
             data = re.findall(r'\d+\.\d+', local_total_point)
-            local_total_point, total_point_response = data if len(data) == 2 else 0
+            local_total_point, total_point_response = data if len(data) == 2 else (0, 0)
             self.game_info[constant.local_total_point_threshold].append(float(local_total_point))
             self.game_info[constant.local_total_point_threshold_response_ratio].append(float(total_point_response))
 
@@ -250,12 +254,14 @@ class Crawler(object):
             local_origin_host_response_ratio = ratio[0] if ratio else 0
             self.game_info[constant.local_origin_host_response_ratio].append(float(local_origin_host_response_ratio))
 
-    def write_to_db(self, game_data):
+    def write_to_db(self, df, table_name):
         self.logger.info('start write game data to db')
-        game_data.to_sql(con=self.engine,
-                         name='game_info',
-                         if_exists='append',
-                         schema=self.config[string_constant.DB][string_constant.schema])
+        df.to_sql(con=self.engine,
+                  name=table_name,
+                  index_label='game_id',
+                  index=False,
+                  if_exists='append',
+                  schema=self.config[string_constant.DB][string_constant.schema])
         return
 
     def check_data_consistent(self):
