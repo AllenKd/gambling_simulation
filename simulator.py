@@ -1,14 +1,16 @@
-import yaml
 import threading
-import pymysql
+from collections import defaultdict, Counter
+
 import pandas as pd
+import pymysql
+import yaml
+from sqlalchemy import create_engine
+
+from banker.banker import Banker
+from config import string_constant
+from config.logger import get_logger
 from player.player import Player
 from player.strategy_provider import StrategyProvider
-from banker.banker import Banker
-from config.logger import get_logger
-from sqlalchemy import create_engine
-from collections import defaultdict, Counter
-from config import string_constant
 
 
 class Simulator(object):

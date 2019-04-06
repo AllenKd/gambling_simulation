@@ -1,9 +1,11 @@
+import os
+
 import numpy as np
 import pandas as pd
 import yaml
-import os
-from config.logger import get_logger
+
 from config import string_constant
+from config.logger import get_logger
 
 
 class Player(object):
