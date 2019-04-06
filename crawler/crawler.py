@@ -65,7 +65,7 @@ class Crawler(object):
         custom_row = True
         for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
             if custom_row:
-                assert self.check_data_consistent()
+                assert self.check_data_consistent(self.game_info)
                 self.append_game_id(row_content, date)
                 self.append_game_time(row_content)
                 self.append_team_name(row_content)
@@ -82,6 +82,7 @@ class Crawler(object):
         guest_row = True
         for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
             if guest_row:
+                assert self.check_data_consistent(self.prediction[group])
                 self.append_game_id(row_content, date, group)
             self.append_prediction_national_point_spread(row_content, guest_row, group)
             self.append_prediction_national_total_point(row_content, guest_row, group)
@@ -264,8 +265,8 @@ class Crawler(object):
                   schema=self.config[string_constant.DB][string_constant.schema])
         return
 
-    def check_data_consistent(self):
-        length_list = [len(i) for i in self.game_info.values()]
+    def check_data_consistent(self, table):
+        length_list = [len(i) for i in table.values()]
         return length_list.count(length_list[0]) == len(length_list) if length_list else True
 
     def get_url(self, date, member_type=1):
