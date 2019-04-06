@@ -24,6 +24,21 @@ guest = 'guest'
 host = 'host'
 
 chinese_mapping = {'客': 'guest', '主': 'host', '贏': True, '輸': False}
+team_name_mapping = {'密爾瓦基公鹿': 'MIL',
+                     '亞特蘭大老鷹': 'ATL',
+                     '達拉斯獨行俠': 'DAL',
+                     '洛杉磯湖人': 'LAL',
+                     '紐奧良鵜鶘': 'NO',
+                     '沙加緬度國王': 'SAC',
+                     '聖安東尼奧馬刺': 'SA',
+                     '華盛頓巫師': 'WAS',
+                     '丹佛金塊': 'DEN',
+                     '夏洛特黃蜂': 'CHA',
+                     '金州勇士': 'GS',
+                     '曼斐斯灰熊': 'MEM',
+                     '洛杉磯快艇': 'LAC',
+                     '奧克拉荷馬雷霆': 'OKC',
+                     '底特律活塞': 'DET'}
 
 default_prediction_table = defaultdict(list).fromkeys((game_id,
                                                        percentage_national_point_spread_guest,
