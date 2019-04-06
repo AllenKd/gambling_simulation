@@ -58,7 +58,8 @@ class Crawler(object):
 
                 # get prediction info for each prediction group
                 self.get_prediction_data(datetime.datetime.strftime(date, '%Y%m%d'), soup, prediction_group)
-                self.write_to_db(pd.DataFrame.from_dict(self.prediction[prediction_group]), constant.prediction_data)
+                self.write_to_db(pd.DataFrame.from_dict(self.prediction[prediction_group]),
+                                 '{}_{}'.format(constant.prediction_data, prediction_group))
 
     def get_game_data(self, date, soup):
         self.logger.info('start crawl and parse game data: {}'.format(date))
@@ -263,6 +264,7 @@ class Crawler(object):
                   index=False,
                   if_exists='append',
                   schema=self.config[string_constant.DB][string_constant.schema])
+        self.logger.info('finished write game data to db')
         return
 
     def check_data_consistent(self, table):
