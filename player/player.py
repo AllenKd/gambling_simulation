@@ -13,8 +13,8 @@ class Player(object):
                  put_strategy='linear_response', bet_strategy=string_constant.random, bet_data=None):
         self.id = player_id
         self.logger = get_logger('player{}'.format(self.id))
-        with open(os.path.abspath('__file__{}'.format('/../config/configuration.yml')), 'r') as config:
-            self.config = yaml.load(config)
+        with open('config/configuration.yml', 'r') as config:
+            self.config = yaml.load(config, Loader=yaml.FullLoader)
 
         self.bet_strategy = bet_strategy
         if bet_data:

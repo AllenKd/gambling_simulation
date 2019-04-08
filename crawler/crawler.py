@@ -18,7 +18,7 @@ class Crawler(object):
     def __init__(self, start_date, total_day=None, end_date=None):
         self.logger = get_logger(self.__class__.__name__)
         with open('config/configuration.yml') as config:
-            self.config = yaml.load(config)
+            self.config = yaml.load(config, Loader=yaml.FullLoader)
         self.data = None
         self.game_info = defaultdict(list)
         self.prediction_info_all_member = defaultdict(list)
