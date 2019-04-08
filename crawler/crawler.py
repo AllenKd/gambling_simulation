@@ -7,7 +7,7 @@ import pymysql
 import requests
 import yaml
 from bs4 import BeautifulSoup
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
 
 from config import string_constant
 from config.logger import get_logger
@@ -44,6 +44,57 @@ class Crawler(object):
         self.db = pymysql.connect(host=host, user=user, passwd=password,
                                   db=self.config[string_constant.DB][string_constant.schema], charset='utf8')
 
+    def create_tables(self):
+        self.engine.execute('USE {}'.format(self.config[string_constant.DB][string_constant.schema]))
+        game_data = Table(constant.game_data, MetaData(),
+                          Column(constant.game_id, String(12), primary_key=True),
+                          Column(constant.play_time, String(10)),
+                          Column(constant.am_pm, String(2)),
+                          Column(constant.guest, String(5)),
+                          Column(constant.host, String(5)),
+                          Column(constant.guest_score, Integer),
+                          Column(constant.host_score, Integer),
+                          Column(constant.national_total_point, Float),
+                          Column(constant.national_host_point_spread, Integer),
+                          Column(constant.win_if_meet_spread_point, Integer),
+                          Column(constant.response_ratio_if_hit_spread_point, Float),
+                          Column(constant.local_host_point_spread, Float),
+                          Column(constant.local_host_point_spread_response_ratio, Float),
+                          Column(constant.local_total_point_threshold, Float),
+                          Column(constant.local_total_point_threshold_response_ratio, Float),
+                          Column(constant.local_origin_guest_response_ratio, Float),
+                          Column(constant.local_origin_host_response_ratio, Float))
+
+        # prediction table template for each prediction group
+        def template(table_name): return Table('{}_{}'.format(constant.prediction_data, table_name), MetaData(),
+                                               Column(constant.game_id, String(12), primary_key=True),
+                                               Column(constant.percentage_national_point_spread_guest, Integer),
+                                               Column(constant.population_national_point_spread_guest, Integer),
+                                               Column(constant.percentage_national_total_point_guest, Integer),
+                                               Column(constant.population_national_total_point_guest, Integer),
+                                               Column(constant.percentage_local_point_spread_guest, Integer),
+                                               Column(constant.population_local_point_spread_guest, Integer),
+                                               Column(constant.percentage_local_total_point_guest, Integer),
+                                               Column(constant.population_local_total_point_guest, Integer),
+                                               Column(constant.percentage_local_original_guest, Integer),
+                                               Column(constant.population_local_original_guest, Integer),
+                                               Column(constant.percentage_national_point_spread_host, Integer),
+                                               Column(constant.population_national_point_spread_host, Integer),
+                                               Column(constant.percentage_national_total_point_host, Integer),
+                                               Column(constant.population_national_total_point_host, Integer),
+                                               Column(constant.percentage_local_point_spread_host, Integer),
+                                               Column(constant.population_local_point_spread_host, Integer),
+                                               Column(constant.percentage_local_total_point_host, Integer),
+                                               Column(constant.population_local_total_point_host, Integer),
+                                               Column(constant.percentage_local_original_host, Integer),
+                                               Column(constant.population_local_original_host, Integer))
+        # create each table
+        game_data.create(self.engine)
+        template(constant.all_member).create(self.engine)
+        template(constant.more_than_sixty).create(self.engine)
+        template(constant.all_prefer).create(self.engine)
+        template(constant.top_100).create(self.engine)
+
     def start_crawler(self):
         # crawl for each date
         for date in pd.date_range(start=self.start_date, end=self.end_date):
@@ -55,11 +106,15 @@ class Crawler(object):
                     # get game info for once
                     self.get_game_data(datetime.datetime.strftime(date, '%Y%m%d'), soup)
                     self.write_to_db(pd.DataFrame.from_dict(self.game_info), constant.game_data)
+                    # clean cache after write to db
+                    self.game_info = defaultdict(list)
 
                 # get prediction info for each prediction group
                 self.get_prediction_data(datetime.datetime.strftime(date, '%Y%m%d'), soup, prediction_group)
                 self.write_to_db(pd.DataFrame.from_dict(self.prediction[prediction_group]),
                                  '{}_{}'.format(constant.prediction_data, prediction_group))
+                # clean cache after write to db
+                self.prediction[prediction_group] = defaultdict(list)
 
     def get_game_data(self, date, soup):
         self.logger.info('start crawl and parse game data: {}'.format(date))
@@ -155,22 +210,28 @@ class Crawler(object):
         return
 
     def append_game_id(self, row_content, date, group=None):
-        self.logger.info(
-            'current column size of {}: {}'.format(constant.game_id, len(self.game_info[constant.game_id])))
         game_id = date + row_content.find('td', 'td-gameinfo').find('h3').text
-        self.logger.info('append game id: {}'.format(game_id))
+
         if group:
+            self.logger.debug(
+                'current column size of {}: {}'.format(constant.game_id, len(self.prediction[group][constant.game_id])))
             self.prediction[group][constant.game_id].append(game_id)
         else:
+            self.logger.debug(
+                'current column size of {}: {}'.format(constant.game_id, len(self.game_info[constant.game_id])))
             self.game_info[constant.game_id].append(game_id)
+
+        self.logger.info('append game id: {}'.format(game_id))
         return
 
     def append_game_time(self, row_content):
         self.logger.info(
             'current column size of {}: {}'.format(constant.play_time, len(self.game_info[constant.play_time])))
         game_time = row_content.find('td', 'td-gameinfo').find('h4').text
+        apm, time = game_time.split()
         self.logger.info('append play time: {}'.format(game_time))
-        self.game_info[constant.play_time].append(game_time)
+        self.game_info[constant.play_time].append(time)
+        self.game_info[constant.am_pm].append(apm)
         return
 
     def append_score(self, row_content):
@@ -203,16 +264,16 @@ class Crawler(object):
         spread_info = row_content.find('td', {'class': 'td-universal-bet01'}).text.strip()
         if len(spread_info) != 1:
             # get national point spread info
-            self.logger.info('the row contains national spread point info')
+            self.logger.debug('the row contains national spread point info')
             national_spread_from = constant.chinese_mapping[spread_info[0]]
             national_spread_point, hit_percentage = re.findall(r'\d+', spread_info)
             hit_result = constant.chinese_mapping[re.findall(r'[輸贏]', spread_info)[0]]
-            hit_percentage = int(hit_percentage) + 100 if hit_result else int(hit_percentage)
+            hit_percentage = int(hit_percentage) + 100 if hit_result else int(hit_percentage) / 100
             national_spread_point = -int(national_spread_point) if national_spread_from == constant.guest else int(
                 national_spread_point)
             self.game_info[constant.national_host_point_spread].append(national_spread_point)
             self.game_info[constant.win_if_meet_spread_point].append(hit_result)
-            self.game_info[constant.response_if_meet_spread_point].append(hit_percentage)
+            self.game_info[constant.response_ratio_if_hit_spread_point].append(hit_percentage)
 
         if custom_row:
             # get local point spread info and response ratio
@@ -257,7 +318,7 @@ class Crawler(object):
             self.game_info[constant.local_origin_host_response_ratio].append(float(local_origin_host_response_ratio))
 
     def write_to_db(self, df, table_name):
-        self.logger.info('start write game data to db')
+        self.logger.info('start write game data to db: {}'.format(table_name))
         df.to_sql(con=self.engine,
                   name=table_name,
                   index_label='game_id',
