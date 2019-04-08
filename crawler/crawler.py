@@ -32,7 +32,8 @@ class Crawler(object):
                            constant.top_100: self.prediction_info_top_100}
 
         self.start_date = datetime.datetime.strptime(start_date, '%Y%m%d')
-        self.total_date = total_day
+        self.total_day = total_day
+        total_day -= 1
         self.end_date = self.start_date + datetime.timedelta(
             total_day) if total_day is not None else datetime.datetime.strptime(end_date, '%Y%m%d')
 
@@ -88,6 +89,7 @@ class Crawler(object):
                                                Column(constant.population_local_total_point_host, Integer),
                                                Column(constant.percentage_local_original_host, Integer),
                                                Column(constant.population_local_original_host, Integer))
+
         # create each table
         game_data.create(self.engine)
         template(constant.all_member).create(self.engine)
@@ -96,6 +98,7 @@ class Crawler(object):
         template(constant.top_100).create(self.engine)
 
     def start_crawler(self):
+        total_crawled_game = 0
         # crawl for each date
         for date in pd.date_range(start=self.start_date, end=self.end_date):
             # crawl for each prediction group
@@ -107,6 +110,7 @@ class Crawler(object):
                     self.get_game_data(datetime.datetime.strftime(date, '%Y%m%d'), soup)
                     self.write_to_db(pd.DataFrame.from_dict(self.game_info), constant.game_data)
                     # clean cache after write to db
+                    total_crawled_game += len(self.game_info[constant.game_id])
                     self.game_info = defaultdict(list)
 
                 # get prediction info for each prediction group
@@ -115,6 +119,10 @@ class Crawler(object):
                                  '{}_{}'.format(constant.prediction_data, prediction_group))
                 # clean cache after write to db
                 self.prediction[prediction_group] = defaultdict(list)
+
+        self.logger.info(
+            'crawler task done, total crawled games: {}, days: {}'.format(total_crawled_game, self.total_day))
+        return
 
     def get_game_data(self, date, soup):
         self.logger.info('start crawl and parse game data: {}'.format(date))
