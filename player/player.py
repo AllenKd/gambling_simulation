@@ -1,18 +1,20 @@
+import os
+
 import numpy as np
 import pandas as pd
 import yaml
-import os
+
+from config import string_constant
 from config.logger import get_logger
-from config import constant
 
 
 class Player(object):
     def __init__(self, player_id, play_times, strategy_provider, combination=1, money=5000,
-                 put_strategy='linear_response', bet_strategy=constant.random, bet_data=None):
+                 put_strategy='linear_response', bet_strategy=string_constant.random, bet_data=None):
         self.id = player_id
         self.logger = get_logger('player{}'.format(self.id))
-        with open(os.path.abspath('__file__{}'.format('/../config/configuration.yml')), 'r') as config:
-            self.config = yaml.load(config)
+        with open('config/configuration.yml', 'r') as config:
+            self.config = yaml.load(config, Loader=yaml.FullLoader)
 
         self.bet_strategy = bet_strategy
         if bet_data:
@@ -24,7 +26,7 @@ class Player(object):
         self.strategy_name = put_strategy
 
         # check if the strategy can be represent as a table
-        if self.config[constant.support_strategy][self.strategy_name]:
+        if self.config[string_constant.support_strategy][self.strategy_name]:
             self.strategy = strategy_provider.get_table_base_strategy(strategy_name=put_strategy, kind='base')
             self.strategy.columns = [column.replace('{} '.format(put_strategy), '') for column in
                                      self.strategy.columns]
@@ -32,7 +34,7 @@ class Player(object):
             self.strategy_provider = strategy_provider
 
         self.battle_statistic = pd.DataFrame(
-            columns=[constant.current_put, constant.win_result, constant.current_response, constant.subtotal])
+            columns=[string_constant.current_put, string_constant.win_result, string_constant.current_response, string_constant.subtotal])
         self.money = money
         self.final_money = money
         self.battle_result = None
@@ -42,16 +44,16 @@ class Player(object):
         self.logger.info('strategy: {}, initial money: {}'.format(put_strategy, self.money))
 
     def _init_bet_data(self, play_times, combination):
-        if self.bet_strategy == constant.random:
+        if self.bet_strategy == string_constant.random:
             self.bet_data = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
 
-        if self.bet_strategy == constant.keep_false:
+        if self.bet_strategy == string_constant.keep_false:
             self.bet_data = np.zeros((play_times, 1), dtype=int)
 
-        if self.bet_strategy == constant.keep_true:
+        if self.bet_strategy == string_constant.keep_true:
             self.bet_data = np.ones((play_times, 1), dtype=int)
 
-        if self.bet_strategy == constant.follow_last:
+        if self.bet_strategy == string_constant.follow_last:
             # the bet strategy cannot be determine at this stage
             self.bet_data = None
 
@@ -68,7 +70,7 @@ class Player(object):
         return self.battle_result
 
     def _prepare_bet_data(self, banker_result):
-        if self.bet_strategy == constant.follow_last:
+        if self.bet_strategy == string_constant.follow_last:
             self.logger.debug('generate bet data for strategy: {}'.format(self.bet_strategy))
             self.bet_data = np.roll(banker_result, 1)
 
@@ -82,8 +84,8 @@ class Player(object):
         lose_count = 0
         for run, single_result in enumerate(self.battle_result):
             single_result = single_result[0]
-            current_put = self.strategy[constant.current_put].iloc[lose_count] if \
-                self.config[constant.support_strategy][
+            current_put = self.strategy[string_constant.current_put].iloc[lose_count] if \
+                self.config[string_constant.support_strategy][
                     self.strategy_name] else self.strategy_provider.get_residual_base_strategy(self.strategy_name,
                                                                                                self.final_money)
             self.logger.info('put {} at {} run'.format(current_put, run))
@@ -96,7 +98,7 @@ class Player(object):
             if single_result:
                 self.logger.info('wins {}th game'.format(run))
                 lose_count = 0
-                current_response = current_put * self.config[constant.gambling][constant.ratio_per_game]
+                current_response = current_put * self.config[string_constant.gambling][string_constant.ratio_per_game]
             else:
                 self.logger.info('lose {}th game'.format(run))
                 lose_count += 1
@@ -105,26 +107,26 @@ class Player(object):
 
             self.final_money += current_response
             self.logger.info('subtotal of {}th run: {}'.format(run, self.final_money))
-            self.battle_statistic.loc[run] = {constant.current_put: int(current_put),
-                                              constant.win_result: single_result,
-                                              constant.current_response: int(current_response),
-                                              constant.subtotal: int(self.final_money)}
+            self.battle_statistic.loc[run] = {string_constant.current_put: int(current_put),
+                                              string_constant.win_result: single_result,
+                                              string_constant.current_response: int(current_response),
+                                              string_constant.subtotal: int(self.final_money)}
 
-        self.battle_statistic[constant.actual_win] = self.battle_statistic['subtotal'] - self.money
-        self.battle_statistic[constant.expected_win] = np.array(
-            [int((self.config[constant.gambling][constant.ratio_per_game] - 1) * self.config[constant.gambling][
-                constant.bet_base] * i) for i in
+        self.battle_statistic[string_constant.actual_win] = self.battle_statistic['subtotal'] - self.money
+        self.battle_statistic[string_constant.expected_win] = np.array(
+            [int((self.config[string_constant.gambling][string_constant.ratio_per_game] - 1) * self.config[string_constant.gambling][
+                string_constant.bet_base] * i) for i in
              range(1, len(self.battle_statistic.index) + 1)])
 
         self.summarize()
 
     def summarize(self):
         self.logger.info('summarize battle result')
-        self.battle_summarize = {constant.player_id: self.id,
-                                 constant.put_strategy: self.strategy_name,
-                                 constant.initial_money: self.money,
-                                 constant.still_survival: len(self.battle_statistic.index) == len(self.bet_data),
-                                 constant.win_ratio: (sum(self.battle_result) / len(self.battle_result))[0],
-                                 constant.max_continuous_lose_count: self.max_continuous_lost_count,
-                                 constant.final_money: self.final_money,
-                                 constant.final_result: bool(self.final_money > self.money)}
+        self.battle_summarize = {string_constant.player_id: self.id,
+                                 string_constant.put_strategy: self.strategy_name,
+                                 string_constant.initial_money: self.money,
+                                 string_constant.still_survival: len(self.battle_statistic.index) == len(self.bet_data),
+                                 string_constant.win_ratio: (sum(self.battle_result) / len(self.battle_result))[0],
+                                 string_constant.max_continuous_lose_count: self.max_continuous_lost_count,
+                                 string_constant.final_money: self.final_money,
+                                 string_constant.final_result: bool(self.final_money > self.money)}
