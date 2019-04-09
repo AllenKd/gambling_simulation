@@ -13,9 +13,10 @@ def main():
 if __name__ == '__main__':
     # main()
     from crawler.crawler import Crawler
+    from database.constructor import DbConstructor
+    b = DbConstructor()
+    b.create_schema(force=True)
+    b.create_tables()
 
-    a = Crawler(start_date='20190401', total_day=0)
+    a = Crawler(start_date='20190215', end_date='20190218')
     a.start_crawler()
-    # a.get_game_data('20190401')
-    # b = a.get_url('20190401', 0)
-    print('fwefw')
