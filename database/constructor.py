@@ -2,12 +2,14 @@ import yaml
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
 
 from config import string_constant
+from config.logger import get_logger
 from crawler import constant as crawler_constant
 from database import constant
 
 
 class DbConstructor(object):
     def __init__(self):
+        self.logger = get_logger(self.__class__.__name__)
         with open('config/configuration.yml', 'r') as config:
             self.config = yaml.load(config, Loader=yaml.FullLoader)
 
@@ -18,12 +20,15 @@ class DbConstructor(object):
         self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
 
     def create_schema(self, force=False):
+        self.logger.info('start create schema, type force: {}'.format(force))
         if force:
-            self.engine.execute("DROP DATABASE IF EXISTS {}".format(self.config[string_constant.DB][string_constant.schema]))
+            self.engine.execute(
+                "DROP DATABASE IF EXISTS {}".format(self.config[string_constant.DB][string_constant.schema]))
 
         self.engine.execute(
             "CREATE DATABASE IF NOT EXISTS {} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci".format(
                 self.config[string_constant.DB][string_constant.schema]))
+        return
 
     def create_tables(self):
         # self.engine.execute('USE {}'.format(self.config[string_constant.DB][string_constant.schema]))
@@ -78,3 +83,4 @@ class DbConstructor(object):
         template(crawler_constant.more_than_sixty).create(self.engine)
         template(crawler_constant.all_prefer).create(self.engine)
         template(crawler_constant.top_100).create(self.engine)
+        return
