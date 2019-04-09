@@ -27,18 +27,6 @@ subtotal_unit = 'subtotal_unit'
 accumulative_put = 'accumulative_put'
 win_response = 'win_response'
 
-# config
-support_strategy = 'support_strategy'
-gambling = 'gambling'
-combination = 'combination'
-ratio_per_game = 'ratio_per_game'
-bet_base = 'bet_base'
-DB = 'DB'
-user = 'user'
-password = 'password'
-host = 'host'
-schema = 'schema'
-
 # columns of table player_summarize
 player_summarize = 'player_summarize'
 player_id = 'player_id'
@@ -49,11 +37,3 @@ win_ratio = 'win_ratio'
 max_continuous_lose_count = 'max_continuous_lose_count'
 final_money = 'final_money'
 final_result = 'final_result'
-
-# columns of table gambling summarize
-gambling_summarize = 'gambling_summarize'
-win_player_ratio = 'win_player_ratio'
-average_player_win = 'average_player_win'
-survival_player_ratio = 'survival_player_ratio'
-final_banker_money = 'final_banker_money'
-all_strategy = 'all'
