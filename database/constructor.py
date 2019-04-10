@@ -40,7 +40,7 @@ class DbConstructor(object):
                           Column(constant.host, String(10)),
                           Column(constant.guest_score, Integer),
                           Column(constant.host_score, Integer),
-                          Column(constant.national_total_point, Float),
+                          Column(constant.national_total_point_threshold, Float),
                           Column(constant.national_host_point_spread, Integer),
                           Column(constant.win_if_meet_spread_point, Integer),
                           Column(constant.response_ratio_if_hit_spread_point, Float),

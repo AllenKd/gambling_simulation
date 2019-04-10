@@ -3,7 +3,6 @@ import re
 from collections import defaultdict
 
 import pandas as pd
-import pymysql
 import requests
 import yaml
 from bs4 import BeautifulSoup
@@ -264,7 +263,7 @@ class Crawler(object):
         national_total_point = row_content.find('td', {'class': 'td-universal-bet02'}).text.strip()
         threshold = re.findall(r'\d+\.\d+', national_total_point)
         national_total_point = threshold[0] if threshold else 0
-        self.game_info[db_constant.national_total_point].append(float(national_total_point))
+        self.game_info[db_constant.national_total_point_threshold].append(float(national_total_point))
         pass
 
     def append_response_ratio_info(self, row_content, guest_row):
