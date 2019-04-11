@@ -1,5 +1,1 @@
-win_original = 'host_win_original'
-host_win_point_spread_national = 'host_win_point_spread_national'
-host_win_point_spread_local = 'host_win_point_spread_local'
-over_total_point_national = 'over_total_point_national'
-over_total_point_local = 'over_total_point_local'
+

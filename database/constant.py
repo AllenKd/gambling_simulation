@@ -1,6 +1,37 @@
 # table name
 game_data = 'game_data'
 prediction_data = 'prediction_data'
+game_judgement = 'game_judgement'
+prediction_judgement = 'prediction_judgement'
+
+# game judgement
+host_win_original = 'host_win_original'
+host_win_point_spread_national = 'host_win_point_spread_national'
+host_win_point_spread_local = 'host_win_point_spread_local'
+over_total_point_national = 'over_total_point_national'
+over_total_point_local = 'over_total_point_local'
+
+
+# prediction judgement
+win_national_point_spread_result = 'win_national_point_spread_result'
+win_national_point_spread_population = 'win_national_point_spread_population'
+win_national_point_spread_percentage = 'win_national_point_spread_percentage'
+
+win_national_total_point_result = 'win_national_total_point_result'
+win_national_total_point_population = 'win_national_total_point_population'
+win_national_total_point_percentage = 'win_national_total_point_percentage'
+
+win_local_point_spread_result = 'win_local_point_spread_result'
+win_local_point_spread_population = 'win_local_point_spread_population'
+win_local_point_spread_percentage = 'win_local_point_spread_percentage'
+
+win_local_total_point_result = 'win_local_total_point_result'
+win_local_total_point_population = 'win_local_total_point_population'
+win_local_total_point_percentage = 'win_local_total_point_percentage'
+
+win_local_original_result = 'win_local_original_result'
+win_local_original_population = 'win_local_original_population'
+win_local_original_percentage = 'win_local_original_percentage'
 
 # column name
 game_id = 'game_id'

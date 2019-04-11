@@ -29,4 +29,5 @@ def test_analyzer():
 
 if __name__ == '__main__':
     pass
+    # test_crawler()
     test_analyzer()
