@@ -43,7 +43,7 @@ class CrawledResultAnalyzer(object):
             self.prediction_judge(prediction_data, group)
             self.write_to_db(self.prediction_judge_dict[group], '{}_{}'.format(db_constant.prediction_judgement,group))
 
-    def get_game_data(self, start_date=None, total_date=None, end_date=None):
+    def get_game_data(self):
         self.logger.info('start get game data')
         return pd.read_sql('SELECT * FROM {}'.format(db_constant.game_data), con=self.db, index_col=db_constant.game_id)
 
@@ -141,6 +141,9 @@ class CrawledResultAnalyzer(object):
 
         self.logger.info('finished prediction judge, {}'.format(group))
         return
+
+    def summarize_prediction_judgement(self):
+        
 
     def write_to_db(self, df, table_name):
         if not self.to_db:
