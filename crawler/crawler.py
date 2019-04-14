@@ -31,14 +31,14 @@ class Crawler(object):
                            crawler_constant.all_prefer: self.prediction_info_all_prefer,
                            crawler_constant.top_100: self.prediction_info_top_100}
 
-        self.start_date = datetime.datetime.strptime(start_date, '%Y%m%d')
+        self.start_date = datetime.datetime.strptime(start_date, self.config['crawler']['dateFormat'])
 
         if total_day:
             self.total_day = total_day
             total_day -= 1
             self.end_date = self.start_date + datetime.timedelta(total_day)
         else:
-            self.end_date = datetime.datetime.strptime(end_date, '%Y%m%d')
+            self.end_date = datetime.datetime.strptime(end_date, self.config['crawler']['dateFormat'])
             self.total_day = self.end_date - self.start_date
 
         # init db
@@ -51,7 +51,7 @@ class Crawler(object):
         total_crawled_game = 0
         # crawl for each date
         for date in pd.date_range(start=self.start_date, end=self.end_date):
-            date = datetime.datetime.strftime(date, '%Y%m%d')
+            date = datetime.datetime.strftime(date, self.config['crawler']['dateFormat'])
             # crawl for each prediction group
             for prediction_group in crawler_constant.prediction_group.keys():
                 res = requests.get(self.get_url(date, crawler_constant.prediction_group[prediction_group]))
