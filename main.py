@@ -10,14 +10,16 @@ def test_simulator():
     simulator.start_simulation()
 
 
-def test_crawler():
-    from crawler.crawler import Crawler
+def test_create_db():
     from database.constructor import DbConstructor
     b = DbConstructor()
     b.create_schema(force=True)
     b.create_tables()
 
-    a = Crawler(start_date='20180928', end_date='20190410')
+
+def test_crawler():
+    from crawler.crawler import Crawler
+    a = Crawler(start_date='20180929', end_date='20180930')
     a.start_crawler()
 
 
@@ -29,5 +31,6 @@ def test_analyzer():
 
 if __name__ == '__main__':
     pass
-    # test_crawler()
-    test_analyzer()
+    # test_create_db()
+    test_crawler()
+    # test_analyzer()
