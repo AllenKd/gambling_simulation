@@ -3,15 +3,14 @@ import re
 from collections import defaultdict
 
 import pandas as pd
-import pymysql
 import requests
 import yaml
 from bs4 import BeautifulSoup
 from sqlalchemy import create_engine
 
-from config import constant
+from config import constant as config_constant
 from config.logger import get_logger
-from crawler import constant
+from crawler import constant as crawler_constant
 from database import constant as db_constant
 
 
@@ -27,10 +26,10 @@ class Crawler(object):
         self.prediction_info_all_prefer = defaultdict(list)
         self.prediction_info_top_100 = defaultdict(list)
 
-        self.prediction = {constant.all_member: self.prediction_info_all_member,
-                           constant.more_than_sixty: self.prediction_info_more_than_sixty,
-                           constant.all_prefer: self.prediction_info_all_prefer,
-                           constant.top_100: self.prediction_info_top_100}
+        self.prediction = {crawler_constant.all_member: self.prediction_info_all_member,
+                           crawler_constant.more_than_sixty: self.prediction_info_more_than_sixty,
+                           crawler_constant.all_prefer: self.prediction_info_all_prefer,
+                           crawler_constant.top_100: self.prediction_info_top_100}
 
         self.start_date = datetime.datetime.strptime(start_date, '%Y%m%d')
 
@@ -43,9 +42,9 @@ class Crawler(object):
             self.total_day = self.end_date - self.start_date
 
         # init db
-        user = self.config[constant.DB][constant.user]
-        password = self.config[constant.DB][constant.password]
-        host = self.config[constant.DB][constant.host]
+        user = self.config[config_constant.DB][config_constant.user]
+        password = self.config[config_constant.DB][config_constant.password]
+        host = self.config[config_constant.DB][config_constant.host]
         self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
 
     def start_crawler(self):
@@ -53,10 +52,10 @@ class Crawler(object):
         # crawl for each date
         for date in pd.date_range(start=self.start_date, end=self.end_date):
             # crawl for each prediction group
-            for prediction_group in constant.prediction_group.keys():
-                res = requests.get(self.get_url(date, constant.prediction_group[prediction_group]))
+            for prediction_group in crawler_constant.prediction_group.keys():
+                res = requests.get(self.get_url(date, crawler_constant.prediction_group[prediction_group]))
                 soup = BeautifulSoup(res.text, 'html.parser')
-                if prediction_group == constant.all_member:
+                if prediction_group == crawler_constant.all_member:
                     # get game info for once
                     self.get_game_data(datetime.datetime.strftime(date, '%Y%m%d'), soup)
                     self.write_to_db(pd.DataFrame.from_dict(self.game_info), db_constant.game_data)
@@ -216,8 +215,10 @@ class Crawler(object):
         guest = row_content.find('td', {'class': 'td-teaminfo'}).find_all('tr')[0].find('a').text.strip()
         host = row_content.find('td', {'class': 'td-teaminfo'}).find_all('tr')[-1].find('a').text.strip()
 
-        guest_abbreviate = constant.team_name_mapping[guest] if guest in constant.team_name_mapping.keys() else guest
-        host_abbreviate = constant.team_name_mapping[host] if host in constant.team_name_mapping.keys() else host
+        guest_abbreviate = crawler_constant.team_name_mapping[
+            guest] if guest in crawler_constant.team_name_mapping.keys() else guest
+        host_abbreviate = crawler_constant.team_name_mapping[
+            host] if host in crawler_constant.team_name_mapping.keys() else host
 
         self.logger.debug('append guest: {}, host: {}'.format(guest, host))
         self.game_info[db_constant.guest].append(guest_abbreviate)
@@ -229,9 +230,9 @@ class Crawler(object):
         if len(spread_info) != 1:
             # get national point spread info
             self.logger.debug('the row contains national spread point info')
-            national_spread_from = constant.chinese_mapping[spread_info[0]]
+            national_spread_from = crawler_constant.chinese_mapping[spread_info[0]]
             national_spread_point, hit_percentage = re.findall(r'\d+', spread_info)
-            hit_result = constant.chinese_mapping[re.findall(r'[輸贏]', spread_info)[0]]
+            hit_result = crawler_constant.chinese_mapping[re.findall(r'[輸贏]', spread_info)[0]]
             hit_percentage = int(hit_percentage) + 100 if hit_result else int(hit_percentage)
             national_spread_point = -int(national_spread_point) if national_spread_from == db_constant.guest else int(
                 national_spread_point)
@@ -264,7 +265,7 @@ class Crawler(object):
         national_total_point = row_content.find('td', {'class': 'td-universal-bet02'}).text.strip()
         threshold = re.findall(r'\d+\.\d+', national_total_point)
         national_total_point = threshold[0] if threshold else 0
-        self.game_info[db_constant.national_total_point].append(float(national_total_point))
+        self.game_info[db_constant.national_total_point_threshold].append(float(national_total_point))
         pass
 
     def append_response_ratio_info(self, row_content, guest_row):
@@ -290,7 +291,7 @@ class Crawler(object):
                   index_label='game_id',
                   index=False,
                   if_exists='append',
-                  schema=self.config[constant.DB][constant.schema])
+                  schema=self.config[config_constant.DB][config_constant.schema])
         self.logger.info('finished write game data to db')
         return
 
