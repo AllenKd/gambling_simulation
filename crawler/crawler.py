@@ -51,20 +51,21 @@ class Crawler(object):
         total_crawled_game = 0
         # crawl for each date
         for date in pd.date_range(start=self.start_date, end=self.end_date):
+            date = datetime.datetime.strftime(date, '%Y%m%d')
             # crawl for each prediction group
             for prediction_group in crawler_constant.prediction_group.keys():
                 res = requests.get(self.get_url(date, crawler_constant.prediction_group[prediction_group]))
                 soup = BeautifulSoup(res.text, 'html.parser')
                 if prediction_group == crawler_constant.all_member:
                     # get game info for once
-                    self.get_game_data(datetime.datetime.strftime(date, '%Y%m%d'), soup)
+                    self.get_game_data(date, soup)
                     self.write_to_db(pd.DataFrame.from_dict(self.game_info), db_constant.game_data)
                     # clean cache after write to db
                     total_crawled_game += len(self.game_info[db_constant.game_id])
                     self.game_info = defaultdict(list)
 
                 # get prediction info for each prediction group
-                self.get_prediction_data(datetime.datetime.strftime(date, '%Y%m%d'), soup, prediction_group)
+                self.get_prediction_data(date, soup, prediction_group)
                 self.write_to_db(pd.DataFrame.from_dict(self.prediction[prediction_group]),
                                  '{}_{}'.format(db_constant.prediction_data, prediction_group))
                 # clean cache after write to db
@@ -124,11 +125,11 @@ class Crawler(object):
         date = re.findall(r'\d+', date)
         percentage, population = date if len(date) == 2 else (0, 0)
         if guest_row:
-            self.prediction[group][db_constant.percentage_national_total_point_guest].append(percentage)
-            self.prediction[group][db_constant.population_national_total_point_guest].append(population)
+            self.prediction[group][db_constant.percentage_national_total_point_over].append(percentage)
+            self.prediction[group][db_constant.population_national_total_point_over].append(population)
         else:
-            self.prediction[group][db_constant.percentage_national_total_point_host].append(percentage)
-            self.prediction[group][db_constant.population_national_total_point_host].append(population)
+            self.prediction[group][db_constant.percentage_national_total_point_under].append(percentage)
+            self.prediction[group][db_constant.population_national_total_point_under].append(population)
         return
 
     def append_prediction_local_point_spread(self, row_content, guest_row, group):
@@ -148,11 +149,11 @@ class Crawler(object):
         date = re.findall(r'\d+', date)
         percentage, population = date if len(date) == 2 else (0, 0)
         if guest_row:
-            self.prediction[group][db_constant.percentage_local_total_point_guest].append(percentage)
-            self.prediction[group][db_constant.population_local_total_point_guest].append(population)
+            self.prediction[group][db_constant.percentage_local_total_point_over].append(percentage)
+            self.prediction[group][db_constant.population_local_total_point_over].append(population)
         else:
-            self.prediction[group][db_constant.percentage_local_total_point_host].append(percentage)
-            self.prediction[group][db_constant.population_local_total_point_host].append(population)
+            self.prediction[group][db_constant.percentage_local_total_point_under].append(percentage)
+            self.prediction[group][db_constant.population_local_total_point_under].append(population)
         return
 
     def append_prediction_local_original(self, row_content, guest_row, group):
