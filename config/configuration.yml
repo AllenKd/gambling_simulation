@@ -14,7 +14,7 @@ support_strategy:
 
 crawler:
   urlPattern: "https://www.playsport.cc/predictgame.php?action=scale&allianceid=3&gametime={}&sid={}"
-  dateFormat: "yyyymmdd"
+  dateFormat: "%Y%m%d"
   memberType:
     all: 0
     moreThan60Percent: 1
