@@ -61,6 +61,10 @@ class DbConstructor(object):
                                Column(db_constant.over_total_point_local, Integer),
                                schema=self.config[config_constant.DB][config_constant.schema])
 
+        prediction_judgement_summarize = Table(db_constant.prediction_judgement_summarize, MetaData(),
+                                               Column(db_constant.game_id, String(12), primary_key=True),
+                                               Column(db_constant.win_lo))
+
         # prediction judge table template for each prediction group
         def prediction_judgement_template(table_name): return Table(
             '{}_{}'.format(db_constant.prediction_judgement, table_name), MetaData(),

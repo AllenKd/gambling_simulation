@@ -1,6 +1,6 @@
 
 
-def test_simulator():
+def task_simulator():
     from player import constant
     from simulator.simulator import Simulator
     game_times = 100
@@ -10,27 +10,28 @@ def test_simulator():
     simulator.start_simulation()
 
 
-def test_create_db():
+def task_create_db():
     from database.constructor import DbConstructor
     b = DbConstructor()
     b.create_schema(force=True)
     b.create_tables()
 
 
-def test_crawler():
+def task_crawler():
+    import datetime
     from crawler.crawler import Crawler
-    a = Crawler(start_date='20180929', end_date='20180930')
+    a = Crawler(start_date='20180928', end_date=datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d'))
     a.start_crawler()
 
 
-def test_analyzer():
+def task_analyzer():
     from analysis.crawled_result_analyzer import CrawledResultAnalyzer
-    a = CrawledResultAnalyzer()
+    a = CrawledResultAnalyzer(to_db=True)
     a.start_analyzer()
+    # a.summarize_prediction_judgement()
 
 
 if __name__ == '__main__':
-    pass
-    # test_create_db()
-    test_crawler()
-    # test_analyzer()
+    # task_create_db()
+    # task_crawler()
+    task_analyzer()

@@ -1,14 +1,16 @@
-import pandas as pd
+from collections import defaultdict
+from itertools import groupby
+
 import numpy as np
+import pandas as pd
 import pymysql
 import yaml
 from sqlalchemy import create_engine
 
-from analysis import constant as analysis_constant
 from config import constant as config_constant
 from config.logger import get_logger
-from database import constant as db_constant
 from crawler import constant as crawler_constant
+from database import constant as db_constant
 
 
 class CrawledResultAnalyzer(object):
@@ -31,6 +33,7 @@ class CrawledResultAnalyzer(object):
                                                     crawler_constant.all_prefer,
                                                     crawler_constant.more_than_sixty,
                                                     crawler_constant.top_100))
+        self.prediction_judgement_summarize = defaultdict(dict)
 
     def start_analyzer(self):
         self.logger.info('start analyse')
@@ -42,6 +45,12 @@ class CrawledResultAnalyzer(object):
             prediction_data = self.get_prediction_data(group)
             self.prediction_judge(prediction_data, group)
             self.write_to_db(self.prediction_judge_dict[group], '{}_{}'.format(db_constant.prediction_judgement,group))
+
+        self.summarize_prediction_judgement()
+        self.write_to_db(self.prediction_judgement_summarize, db_constant.prediction_judgement_summarize)
+
+        self.logger.info('analyse done')
+        return
 
     def get_game_data(self):
         self.logger.info('start get game data')
@@ -143,7 +152,50 @@ class CrawledResultAnalyzer(object):
         return
 
     def summarize_prediction_judgement(self):
-        
+        self.logger.info('start summarize prediction judgement')
+        gambling_classes = (db_constant.win_national_point_spread_result[:-7],
+                            db_constant.win_national_total_point_result[:-7],
+                            db_constant.win_local_point_spread_result[:-7],
+                            db_constant.win_local_total_point_result[:-7],
+                            db_constant.win_local_original_result[:-7])
+        for group in self.prediction_judge_dict.keys():
+            table_name = '{}_{}'.format(db_constant.prediction_judgement, group)
+            prediction_judgement = pd.read_sql('SELECT * FROM {}'.format(table_name),
+                                               con=self.db, index_col=db_constant.game_id)
+            for gambling_class in gambling_classes:
+                self.sub_summarize(group, gambling_class, prediction_judgement)
+
+        self.prediction_judgement_summarize = pd.DataFrame.from_dict(self.prediction_judgement_summarize).T
+        return
+
+    def sub_summarize(self, group, gambling_class, prediction_judgement):
+        # filter out gambling class and able to gambling games
+        prediction_judgement = prediction_judgement.filter(regex=('^{}'.format(gambling_class)))
+        prediction_judgement = prediction_judgement[prediction_judgement['{}_population'.format(gambling_class)] != 0]
+
+        win_ratio = sum(prediction_judgement['{}_result'.format(gambling_class)]) / len(prediction_judgement) if len(prediction_judgement) else 0
+        max_continuous_lose = self._get_max_continuous_result(prediction_judgement, 0)
+
+        # group_summarize = {'{}_{}'.format(gambling_class, db_constant.win_ratio): win_ratio,
+        #                    '{}_{}'.format(gambling_class, db_constant.max_continuous_lose): max_continuous_lose,
+        #                    '{}_{}'.format(gambling_class, db_constant.number_of_valid_game): len(prediction_judgement)}
+
+        # self.prediction_judgement_summarize.append(group_summarize, ignore_index=True)
+
+        self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.win_ratio)] = win_ratio
+        self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.max_continuous_lose)] = max_continuous_lose
+        self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.number_of_valid_game)] = len(prediction_judgement)
+
+        return
+
+    def _get_max_continuous_result(self, table, target):
+        max_continuous = 0
+        for row in table:
+            for is_target, continuous in groupby(table[row], key=lambda x: x == target):
+                if is_target:
+                    max_continuous = max(max_continuous, len(list(continuous)))
+        return max_continuous
+
 
     def write_to_db(self, df, table_name):
         if not self.to_db:
