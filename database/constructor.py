@@ -63,7 +63,22 @@ class DbConstructor(object):
 
         prediction_judgement_summarize = Table(db_constant.prediction_judgement_summarize, MetaData(),
                                                Column(db_constant.game_id, String(12), primary_key=True),
-                                               Column(db_constant.win_lo))
+                                               Column(db_constant.national_point_spread_win_ratio, Float),
+                                               Column(db_constant.national_point_spread_max_continuous_lose, Integer),
+                                               Column(db_constant.national_point_spread_number_of_valid_game, Integer),
+                                               Column(db_constant.national_total_point_win_ratio, Float),
+                                               Column(db_constant.national_total_point_max_continuous_lose, Integer),
+                                               Column(db_constant.national_total_point_number_of_valid_game),
+                                               Column(db_constant.local_point_spread_win_ratio, Float),
+                                               Column(db_constant.local_point_spread_max_continuous_lose, Integer),
+                                               Column(db_constant.local_point_spread_number_of_valid_game, Integer),
+                                               Column(db_constant.local_total_point_win_ratio, Float),
+                                               Column(db_constant.local_total_point_max_continuous_lose, Integer),
+                                               Column(db_constant.local_total_point_number_of_valid_game),
+                                               Column(db_constant.local_original_win_ratio, Float),
+                                               Column(db_constant.local_original_max_continuous_lose, Integer),
+                                               Column(db_constant.local_original_number_of_valid_game),
+                                               schema=self.config[config_constant.DB][config_constant.schema])
 
         # prediction judge table template for each prediction group
         def prediction_judgement_template(table_name): return Table(
@@ -114,6 +129,7 @@ class DbConstructor(object):
         # create each table
         game_data.create(self.engine)
         game_judgement.create(self.engine)
+        prediction_judgement_summarize.create(self.engine)
         template(crawler_constant.all_member).create(self.engine)
         template(crawler_constant.more_than_sixty).create(self.engine)
         template(crawler_constant.all_prefer).create(self.engine)

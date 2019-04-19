@@ -153,11 +153,11 @@ class CrawledResultAnalyzer(object):
 
     def summarize_prediction_judgement(self):
         self.logger.info('start summarize prediction judgement')
-        gambling_classes = (db_constant.win_national_point_spread_result[:-7],
-                            db_constant.win_national_total_point_result[:-7],
-                            db_constant.win_local_point_spread_result[:-7],
-                            db_constant.win_local_total_point_result[:-7],
-                            db_constant.win_local_original_result[:-7])
+        gambling_classes = (db_constant.win_national_point_spread_result[4:-7],
+                            db_constant.win_national_total_point_result[4:-7],
+                            db_constant.win_local_point_spread_result[4:-7],
+                            db_constant.win_local_total_point_result[4:-7],
+                            db_constant.win_local_original_result[4:-7])
         for group in self.prediction_judge_dict.keys():
             table_name = '{}_{}'.format(db_constant.prediction_judgement, group)
             prediction_judgement = pd.read_sql('SELECT * FROM {}'.format(table_name),
@@ -176,12 +176,6 @@ class CrawledResultAnalyzer(object):
         win_ratio = sum(prediction_judgement['{}_result'.format(gambling_class)]) / len(prediction_judgement) if len(prediction_judgement) else 0
         max_continuous_lose = self._get_max_continuous_result(prediction_judgement, 0)
 
-        # group_summarize = {'{}_{}'.format(gambling_class, db_constant.win_ratio): win_ratio,
-        #                    '{}_{}'.format(gambling_class, db_constant.max_continuous_lose): max_continuous_lose,
-        #                    '{}_{}'.format(gambling_class, db_constant.number_of_valid_game): len(prediction_judgement)}
-
-        # self.prediction_judgement_summarize.append(group_summarize, ignore_index=True)
-
         self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.win_ratio)] = win_ratio
         self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.max_continuous_lose)] = max_continuous_lose
         self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.number_of_valid_game)] = len(prediction_judgement)
@@ -195,7 +189,6 @@ class CrawledResultAnalyzer(object):
                 if is_target:
                     max_continuous = max(max_continuous, len(list(continuous)))
         return max_continuous
-
 
     def write_to_db(self, df, table_name):
         if not self.to_db:

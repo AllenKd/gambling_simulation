@@ -37,6 +37,23 @@ win_local_original_percentage = 'win_local_original_percentage'
 win_ratio = 'win_ratio'
 max_continuous_lose = 'max_continuous_lose'
 number_of_valid_game = 'number_of_valid_game'
+national_point_spread_win_ratio = 'national_point_spread_win_ratio'
+national_point_spread_max_continuous_lose = 'national_point_spread_max_continuous_lose'
+national_point_spread_number_of_valid_game = 'national_point_spread_number_of_valid_game'
+national_total_point_win_ratio = 'national_total_point_win_ratio'
+national_total_point_max_continuous_lose = 'national_total_point_max_continuous_lose'
+national_total_point_number_of_valid_game = 'national_total_point_number_of_valid_game'
+local_point_spread_win_ratio = 'local_point_spread_win_ratio'
+local_point_spread_max_continuous_lose = 'local_point_spread_max_continuous_lose'
+local_point_spread_number_of_valid_game = 'local_point_spread_number_of_valid_game'
+local_total_point_win_ratio = 'local_total_point_win_ratio'
+local_total_point_max_continuous_lose = 'local_total_point_max_continuous_lose'
+local_total_point_number_of_valid_game = 'local_total_point_number_of_valid_game'
+local_original_win_ratio = 'local_original_win_ratio'
+local_original_max_continuous_lose = 'local_original_max_continuous_lose'
+local_original_number_of_valid_game = 'local_original_number_of_valid_game'
+
+
 
 # column name
 game_id = 'game_id'
