@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from player import constant
 from config import constant as config_constant
 from config.logger import get_logger
+from player import constant
 
 
 class StrategyProvider(object):
