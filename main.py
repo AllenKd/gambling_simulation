@@ -28,10 +28,9 @@ def task_analyzer():
     from analysis.crawled_result_analyzer import CrawledResultAnalyzer
     a = CrawledResultAnalyzer(to_db=True)
     a.start_analyzer()
-    # a.summarize_prediction_judgement()
 
 
 if __name__ == '__main__':
-    # task_create_db()
-    # task_crawler()
+    task_create_db()
+    task_crawler()
     task_analyzer()

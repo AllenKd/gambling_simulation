@@ -14,7 +14,7 @@ from database import constant as db_constant
 
 
 class CrawledResultAnalyzer(object):
-    def __init__(self, to_db = False):
+    def __init__(self, to_db=False):
         self.logger = get_logger(self.__class__.__name__)
         with open('config/configuration.yml') as config:
             self.config = yaml.load(config, Loader=yaml.FullLoader)
@@ -36,7 +36,7 @@ class CrawledResultAnalyzer(object):
         self.prediction_judgement_summarize = defaultdict(dict)
 
     def start_analyzer(self):
-        self.logger.info('start analyse')
+        self.logger.info('start analysis')
         game_data = self.get_game_data()
         self.judge(game_data)
         self.write_to_db(self.game_judgement, db_constant.game_judgement)
@@ -44,12 +44,12 @@ class CrawledResultAnalyzer(object):
         for group in crawler_constant.prediction_group.keys():
             prediction_data = self.get_prediction_data(group)
             self.prediction_judge(prediction_data, group)
-            self.write_to_db(self.prediction_judge_dict[group], '{}_{}'.format(db_constant.prediction_judgement,group))
+            self.write_to_db(self.prediction_judge_dict[group], '{}_{}'.format(db_constant.prediction_judgement, group))
 
         self.summarize_prediction_judgement()
-        self.write_to_db(self.prediction_judgement_summarize, db_constant.prediction_judgement_summarize)
+        self.write_to_db(self.prediction_judgement_summarize, db_constant.prediction_judgement_summarize, is_summarize=True)
 
-        self.logger.info('analyse done')
+        self.logger.info('analysis done')
         return
 
     def get_game_data(self):
@@ -90,60 +90,60 @@ class CrawledResultAnalyzer(object):
 
         self.logger.debug('start judge local original')
         temp_target_prediction = prediction_data[db_constant.population_local_original_guest] < prediction_data[db_constant.population_local_original_host]
-        self.prediction_judge_dict[group][db_constant.win_local_original_result] = temp_target_prediction == self.game_judgement[db_constant.host_win_original]
-        self.prediction_judge_dict[group][db_constant.win_local_original_percentage] = np.where(
+        self.prediction_judge_dict[group][db_constant.local_original_result] = temp_target_prediction == self.game_judgement[db_constant.host_win_original]
+        self.prediction_judge_dict[group][db_constant.local_original_percentage] = np.where(
             self.game_judgement[db_constant.host_win_original],
             prediction_data[db_constant.percentage_local_original_host],
             prediction_data[db_constant.percentage_local_original_guest])
-        self.prediction_judge_dict[group][db_constant.win_local_original_population] = np.where(
+        self.prediction_judge_dict[group][db_constant.local_original_population] = np.where(
             self.game_judgement[db_constant.host_win_original],
             prediction_data[db_constant.population_local_original_host],
             prediction_data[db_constant.population_local_original_guest])
 
         self.logger.debug('start judge local total point')
         temp_target_prediction = prediction_data[db_constant.population_local_total_point_over] > prediction_data[db_constant.population_local_total_point_under]
-        self.prediction_judge_dict[group][db_constant.win_local_total_point_result] = self.game_judgement[db_constant.over_total_point_local] == temp_target_prediction
-        self.prediction_judge_dict[group][db_constant.win_local_total_point_percentage] = np.where(
+        self.prediction_judge_dict[group][db_constant.local_total_point_result] = self.game_judgement[db_constant.over_total_point_local] == temp_target_prediction
+        self.prediction_judge_dict[group][db_constant.local_total_point_percentage] = np.where(
             self.game_judgement[db_constant.over_total_point_local],
             prediction_data[db_constant.percentage_local_total_point_over],
             prediction_data[db_constant.percentage_local_total_point_under])
-        self.prediction_judge_dict[group][db_constant.win_local_total_point_population] = np.where(
+        self.prediction_judge_dict[group][db_constant.local_total_point_population] = np.where(
             self.game_judgement[db_constant.over_total_point_local],
             prediction_data[db_constant.population_local_total_point_over],
             prediction_data[db_constant.population_local_total_point_under])
 
         self.logger.debug('start judge local point spread')
         temp_target_prediction = prediction_data[db_constant.population_local_point_spread_guest] < prediction_data[db_constant.population_local_point_spread_host]
-        self.prediction_judge_dict[group][db_constant.win_local_point_spread_result] = self.game_judgement[db_constant.host_win_point_spread_local] == temp_target_prediction
-        self.prediction_judge_dict[group][db_constant.win_local_point_spread_percentage] = np.where(
+        self.prediction_judge_dict[group][db_constant.local_point_spread_result] = self.game_judgement[db_constant.host_win_point_spread_local] == temp_target_prediction
+        self.prediction_judge_dict[group][db_constant.local_point_spread_percentage] = np.where(
             self.game_judgement[db_constant.host_win_point_spread_local],
             prediction_data[db_constant.percentage_local_point_spread_host],
             prediction_data[db_constant.percentage_local_point_spread_guest])
-        self.prediction_judge_dict[group][db_constant.win_local_point_spread_population] = np.where(
+        self.prediction_judge_dict[group][db_constant.local_point_spread_population] = np.where(
             self.game_judgement[db_constant.host_win_point_spread_local],
             prediction_data[db_constant.population_local_point_spread_host],
             prediction_data[db_constant.population_local_point_spread_guest])
 
         self.logger.debug('start judge national total point')
         temp_target_prediction = prediction_data[db_constant.population_national_total_point_over] > prediction_data[db_constant.population_national_total_point_under]
-        self.prediction_judge_dict[group][db_constant.win_national_total_point_result] = self.game_judgement[db_constant.over_total_point_national] == temp_target_prediction
-        self.prediction_judge_dict[group][db_constant.win_national_total_point_percentage] = np.where(
+        self.prediction_judge_dict[group][db_constant.national_total_point_result] = self.game_judgement[db_constant.over_total_point_national] == temp_target_prediction
+        self.prediction_judge_dict[group][db_constant.national_total_point_percentage] = np.where(
             self.game_judgement[db_constant.over_total_point_national],
             prediction_data[db_constant.percentage_national_total_point_over],
             prediction_data[db_constant.percentage_national_total_point_under])
-        self.prediction_judge_dict[group][db_constant.win_national_total_point_population] = np.where(
+        self.prediction_judge_dict[group][db_constant.national_total_point_population] = np.where(
             self.game_judgement[db_constant.over_total_point_national],
             prediction_data[db_constant.population_national_total_point_over],
             prediction_data[db_constant.population_national_total_point_under])
 
         self.logger.debug('start judge national point spread')
         temp_target_prediction = prediction_data[db_constant.population_national_point_spread_guest] < prediction_data[db_constant.population_national_point_spread_host]
-        self.prediction_judge_dict[group][db_constant.win_national_point_spread_result] = self.game_judgement[db_constant.host_win_point_spread_national] == temp_target_prediction
-        self.prediction_judge_dict[group][db_constant.win_national_point_spread_percentage] = np.where(
+        self.prediction_judge_dict[group][db_constant.national_point_spread_result] = self.game_judgement[db_constant.host_win_point_spread_national] == temp_target_prediction
+        self.prediction_judge_dict[group][db_constant.national_point_spread_percentage] = np.where(
             self.game_judgement[db_constant.host_win_point_spread_national],
             prediction_data[db_constant.percentage_national_point_spread_host],
             prediction_data[db_constant.percentage_national_point_spread_guest])
-        self.prediction_judge_dict[group][db_constant.win_national_point_spread_population] = np.where(
+        self.prediction_judge_dict[group][db_constant.national_point_spread_population] = np.where(
             self.game_judgement[db_constant.host_win_point_spread_national],
             prediction_data[db_constant.population_national_point_spread_host],
             prediction_data[db_constant.population_national_point_spread_guest])
@@ -153,11 +153,11 @@ class CrawledResultAnalyzer(object):
 
     def summarize_prediction_judgement(self):
         self.logger.info('start summarize prediction judgement')
-        gambling_classes = (db_constant.win_national_point_spread_result[4:-7],
-                            db_constant.win_national_total_point_result[4:-7],
-                            db_constant.win_local_point_spread_result[4:-7],
-                            db_constant.win_local_total_point_result[4:-7],
-                            db_constant.win_local_original_result[4:-7])
+        gambling_classes = (db_constant.national_point_spread_result[:-7],
+                            db_constant.national_total_point_result[:-7],
+                            db_constant.local_point_spread_result[:-7],
+                            db_constant.local_total_point_result[:-7],
+                            db_constant.local_original_result[:-7])
         for group in self.prediction_judge_dict.keys():
             table_name = '{}_{}'.format(db_constant.prediction_judgement, group)
             prediction_judgement = pd.read_sql('SELECT * FROM {}'.format(table_name),
@@ -166,11 +166,12 @@ class CrawledResultAnalyzer(object):
                 self.sub_summarize(group, gambling_class, prediction_judgement)
 
         self.prediction_judgement_summarize = pd.DataFrame.from_dict(self.prediction_judgement_summarize).T
+        self.prediction_judgement_summarize[db_constant.member_group] = self.prediction_judgement_summarize.index
         return
 
     def sub_summarize(self, group, gambling_class, prediction_judgement):
         # filter out gambling class and able to gambling games
-        prediction_judgement = prediction_judgement.filter(regex=('^{}'.format(gambling_class)))
+        prediction_judgement = prediction_judgement.filter(regex=('{}'.format(gambling_class)))
         prediction_judgement = prediction_judgement[prediction_judgement['{}_population'.format(gambling_class)] != 0]
 
         win_ratio = sum(prediction_judgement['{}_result'.format(gambling_class)]) / len(prediction_judgement) if len(prediction_judgement) else 0
@@ -190,16 +191,18 @@ class CrawledResultAnalyzer(object):
                     max_continuous = max(max_continuous, len(list(continuous)))
         return max_continuous
 
-    def write_to_db(self, df, table_name):
+    def write_to_db(self, df, table_name, is_summarize=False):
         if not self.to_db:
             self.logger.info('no need to write to db, skip write to db progress')
             return
         self.logger.info('start write game data to db: {}'.format(table_name))
+
         df.to_sql(con=self.engine,
                   name=table_name,
-                  index_label='game_id',
-                  index=True,
+                  index_label='game_id' if not is_summarize else None,
+                  index=not is_summarize,
                   if_exists='append',
                   schema=self.config[config_constant.DB][config_constant.schema])
         self.logger.info('finished write game data to db')
+        self.db.connect()
         return
