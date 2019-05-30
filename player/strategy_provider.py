@@ -55,31 +55,31 @@ class StrategyProvider(object):
 
     def linear_response(self):
         self.logger.info('start gen linear response table')
-        expected_total_ratio = np.array([i * (self.ratio_per_game - 1) for i in range(1, self.size + 1)])
+        expected_total_ratio = np.array([i * (self.ratio_per_game - 1) for i in range(1, self.size + 2)])
         expected_total = expected_total_ratio * self.bet_base
 
-        bet_unit_list = []
-        accumulative_put_list = [0]
+        bet_unit_list = [1]
+        accumulative_put_list = [1]
         for i in range(self.size):
-            bet_unit_list.append(self._get_current_put_unit(accumulative_put_list[-1], expected_total_ratio[i]))
+            bet_unit_list.append(self._get_current_put_unit(accumulative_put_list[-1], expected_total_ratio[i+1]))
             accumulative_put_list.append(accumulative_put_list[-1] + bet_unit_list[-1])
 
         current_put_unit = np.array(bet_unit_list[:self.size])
         accumulative_put_unit = np.array(accumulative_put_list[:self.size])
         win_response_unit = current_put_unit * self.ratio_per_game
-        subtotal_unit = win_response_unit - accumulative_put_unit - current_put_unit
+        subtotal_unit = win_response_unit - accumulative_put_unit
 
         current_put = current_put_unit * self.bet_base
         accumulative_put = accumulative_put_unit * self.bet_base
         win_response = current_put * self.ratio_per_game
         subtotal = win_response - accumulative_put
 
-        strategy = pd.DataFrame({constant.expected_win_unit: expected_total_ratio,
+        strategy = pd.DataFrame({constant.expected_win_unit: expected_total_ratio[:self.size],
                                  constant.current_put_unit: current_put_unit,
                                  constant.accumulative_put_unit: accumulative_put_unit,
                                  constant.win_response_unit: win_response_unit,
                                  constant.subtotal_unit: subtotal_unit,
-                                 constant.expected_win: expected_total,
+                                 constant.expected_win: expected_total[:self.size],
                                  constant.current_put: current_put,
                                  constant.accumulative_put: accumulative_put,
                                  constant.win_response: win_response,
