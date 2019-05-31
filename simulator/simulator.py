@@ -20,7 +20,7 @@ class Simulator(object):
                  to_db=False):
 
         with open('config/configuration.yml', 'r') as config:
-            self.config = yaml.load(config)
+            self.config = yaml.load(config, Loader=yaml.Loader)
 
         self.logger = get_logger(self.__class__.__name__)
         self.player_init_money = player_init_money
