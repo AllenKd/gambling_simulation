@@ -61,7 +61,7 @@ class StrategyProvider(object):
         bet_unit_list = [1]
         accumulative_put_list = [1]
         for i in range(self.size):
-            bet_unit_list.append(self._get_current_put_unit(accumulative_put_list[-1], expected_total_ratio[i+1]))
+            bet_unit_list.append(self._get_current_put_unit(accumulative_put_list[-1], expected_total_ratio[i + 1]))
             accumulative_put_list.append(accumulative_put_list[-1] + bet_unit_list[-1])
 
         current_put_unit = np.array(bet_unit_list[:self.size])

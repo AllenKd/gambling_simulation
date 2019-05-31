@@ -1,5 +1,5 @@
 import yaml
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float, Boolean
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
 
 from config import constant as config_constant
 from config.logger import get_logger

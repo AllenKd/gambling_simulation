@@ -30,7 +30,7 @@ the volume according to strategy and the times of continuous lose.
 
 | Column name | Description |
 | :--- | :--- |
-| Continuous lose count | Number of continuously lost game. |
+| Continuous lose count | Number of lost game continuously. |
 | Expected win unit | Expected win unit. |
 | Current put unit | Recommendation unit to put when lose games for n times continuously. |
 | Accumulative put unit | Accumulative put unit (include current run). |

@@ -88,35 +88,29 @@ class Simulator(object):
         strategies = {k: defaultdict(int) for k in self.player_strategy.keys()}
         strategies['all'] = defaultdict(int)
         for player in self.players:
-            strategies[player.strategy_name][constant.win_player_ratio] += (player.battle_summarize[
-                play_constant.final_result]) / self.player_strategy[player.strategy_name]
+            strategies[player.strategy_name][constant.win_player_ratio] += \
+                (player.battle_summarize[play_constant.final_result]) / self.player_strategy[player.strategy_name]
 
-            strategies[player.strategy_name][constant.average_player_win] += (player.battle_summarize[
-                                                                                  play_constant.final_money] - self.player_init_money) / \
-                                                                             self.player_strategy[player.strategy_name]
+            strategies[player.strategy_name][constant.average_player_win] += \
+                (player.battle_summarize[play_constant.final_money] -
+                 self.player_init_money) / self.player_strategy[player.strategy_name]
 
-            strategies[player.strategy_name][constant.survival_player_ratio] += player.battle_summarize[
-                                                                                    play_constant.still_survival] / \
-                                                                                self.player_strategy[
-                                                                                    player.strategy_name]
+            strategies[player.strategy_name][constant.survival_player_ratio] += \
+                player.battle_summarize[play_constant.still_survival] / self.player_strategy[player.strategy_name]
 
-            strategies[player.strategy_name][constant.final_banker_money] += self.player_init_money - \
-                                                                             player.battle_summarize[
-                                                                                 play_constant.final_money]
+            strategies[player.strategy_name][constant.final_banker_money] += \
+                self.player_init_money - player.battle_summarize[play_constant.final_money]
 
-            strategies[constant.all_strategy][constant.win_player_ratio] += (player.battle_summarize[
-                play_constant.final_result]) / len(self.players)
+            strategies[constant.all_strategy][constant.win_player_ratio] += \
+                (player.battle_summarize[play_constant.final_result]) / len(self.players)
 
-            strategies[constant.all_strategy][constant.average_player_win] += (player.battle_summarize[
-                                                                                   play_constant.final_money] - self.player_init_money) / len(
-                self.players)
+            strategies[constant.all_strategy][constant.average_player_win] += \
+                (player.battle_summarize[play_constant.final_money] - self.player_init_money) / len(self.players)
 
-            strategies[constant.all_strategy][constant.survival_player_ratio] += player.battle_summarize[
-                                                                                     play_constant.still_survival] / len(
-                self.players)
-            strategies[constant.all_strategy][constant.final_banker_money] += self.player_init_money - \
-                                                                              player.battle_summarize[
-                                                                                  play_constant.final_money]
+            strategies[constant.all_strategy][constant.survival_player_ratio] += \
+                player.battle_summarize[play_constant.still_survival] / len(self.players)
+            strategies[constant.all_strategy][constant.final_banker_money] += \
+                self.player_init_money - player.battle_summarize[play_constant.final_money]
 
         summarize_data = pd.DataFrame.from_dict(strategies).T
         summarize_data.insert(0, play_constant.put_strategy, summarize_data.index)
