@@ -26,7 +26,7 @@ the strategy table used for Player instance to reference about
 how much of money should put at next game,
 the volume according to strategy and the times of continuous lose.
 
-## Strategy Table Description
+## Strategy Table Column Description
 
 | Column name | Description |
 | :--- | :--- |
@@ -101,3 +101,9 @@ Strategy table:
 | 8 | N/A | 256 | 511 | 448.00 | -63.00 |
 | 9 | N/A | 512 | 1023 | 896.00 | -127.00 |
 | ... | ... | ... | ... | ... | ... |
+
+### kelly
+
+Put based on [Kelly formula](https://en.wikipedia.org/wiki/Kelly_criterion), 
+there is no strategy table because of how much to put is based on current residual money, 
+and the residual money based on the result of each gambling, which is undetermined.
