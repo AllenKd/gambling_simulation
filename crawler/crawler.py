@@ -259,7 +259,7 @@ class Crawler(object):
     def append_total_point_info(self, row_content):
         # get national total point info
         national_total_point = row_content.find('td', {'class': 'td-universal-bet02'}).text.strip()
-        threshold = re.findall(r'\d+\.\d+', national_total_point)
+        threshold = re.findall(r'\d+[\.\d+]?', national_total_point)
         national_total_point = threshold[0] if threshold else 0
         self.game_info[db_constant.national_total_point_threshold].append(float(national_total_point))
         pass
