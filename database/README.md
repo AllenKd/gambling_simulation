@@ -34,7 +34,7 @@ Record original data about competition and gambling information.
 | local_origin_guest_response_ratio | float | Response ratio of guest win without point spread. | 2.7 |
 | local_origin_host_response_ratio | float | Response ratio of host win without point spread. | 1.28 |
 
-#### prediction data
+#### prediction_data
 
 Record predictions from members, those members been classified into 4 groups, 
 * all member: all members.
@@ -61,8 +61,8 @@ Record predictions from members, those members been classified into 4 groups,
 | population_local_total_point_over | int | Population of the member group vote over with total score gambling on Taiwan banker. | 411 |
 | percentage_local_total_point_under | int | Percentage of the member group vote under with total score gambling on Taiwan banker. | 56 |
 | population_local_total_point_under | int | Population of the member group vote under with total score gambling on Taiwan banker. | 526 |
-| percentage_local_original_guest | int | Percentage of the member group vote guest with point spread gambling on local banker. | 18 |
-| population_local_original_guest | int | Population of the member group vote guest with point spread gambling on local banker. | 101 |
-| percentage_local_original_host | int | Percentage of the member group vote host with point spread gambling on local banker. | 82 |
-| population_local_original_host | int | Population of the member group vote host with point spread gambling on local banker. | 451 |
+| percentage_local_original_guest | int | Percentage of the member group vote guest without point spread gambling on local banker. | 18 |
+| population_local_original_guest | int | Population of the member group vote guest without point spread gambling on local banker. | 101 |
+| percentage_local_original_host | int | Percentage of the member group vote host without point spread gambling on local banker. | 82 |
+| population_local_original_host | int | Population of the member group vote host without point spread gambling on local banker. | 451 |
    
