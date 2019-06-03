@@ -1,6 +1,6 @@
 # Database
 
-Record all competition data comes from [Crawler]
+Record all competition data comes from [Crawler]() and [Analyzer]()
 
 ## Table Description
 
@@ -65,4 +65,39 @@ Record predictions from members, those members been classified into 4 groups,
 | population_local_original_guest | int | Population of the member group vote guest without point spread gambling on local banker. | 101 |
 | percentage_local_original_host | int | Percentage of the member group vote host without point spread gambling on local banker. | 82 |
 | population_local_original_host | int | Population of the member group vote host without point spread gambling on local banker. | 451 |
+
+### Judgement Data
+
+Record judgements about the games and members predictions.
+
+#### game_judgement
+
+Record gambling result.
+
+| Column name | Type | Description | Example |
+| :--- | :---: | :--- | :--- |
+| game_id | string | Game unique id, which comes from date(YYYYmmDD) + game id of that date. | 20190526496 |
+| host_win_original | 0 or 1 | The host won the game originally. | 1 |
+| host_win_point_spread_national | 0 or 1 | The host won the game with point spread gambling on national banker. | 1 |
+| host_win_point_spread_local | 0 or 1 | The host won the game with point spread gambling on Taiwan banker. | 1 |
+| over_total_point_national | 0 or 1 | The total score was over the threshold with total score gambling on national banker. | 1 |
+| over_total_point_local | 0 or 1 | The total score was over the threshold with total score gambling on Taiwan banker. | 1 |  
    
+#### prediction_judgement
+
+Record judgements of predictions from members, those members been classified into 4 groups also, 
+* all member: all members.
+* all_prefer: all member with highly confident.
+* more_than_sixty: members with more 60% hit ratio.
+* top_100: top 100 members.
+
+If the result of the majority members prediction matching the actual game result, denote as 1 and vise versa.
+ 
+For example: if there are 51% of group members voted that host will win the point spread gambling 
+and the prediction was correct, denote the judgement result as 1.
+
+| Column name | Type | Description | Example |
+| :--- | :---: | :--- | :--- |
+| game_id | string | Game unique id, which comes from date(YYYYmmDD) + game id of that date. | 20190526496 |
+| national_point_spread_result | 0 or 1 | The prediction of the group member was correct with point spread gambling on national banker. | 1 |
+ 
