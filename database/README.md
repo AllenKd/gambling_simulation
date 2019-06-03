@@ -100,4 +100,19 @@ and the prediction was correct, denote the judgement result as 1.
 | :--- | :---: | :--- | :--- |
 | game_id | string | Game unique id, which comes from date(YYYYmmDD) + game id of that date. | 20190526496 |
 | national_point_spread_result | 0 or 1 | The prediction of the group member was correct with point spread gambling on national banker. | 1 |
+| national_point_spread_percentage | int | Percentage of win members of the group in point spread gambling with national banker. | 51 |
+| national_point_spread_population | int | Population of win members of the group in point spread gambling with national banker. | 935 |
+| national_total_point_result | 0 or 1 | The prediction of the group member was correct with total score gambling on national banker. | 0 |
+| national_total_point_percentage | int | Percentage of win members of the group in total score gambling with national banker. | 45 |
+| national_total_point_population | int | Population of win members of the group in total score gambling with national banker. | 436 |
+| local_point_spread_result | 0 or 1 | The prediction of the group member was correct with point spread gambling on local banker. | 1 |
+| local_point_spread_percentage | int | Percentage of win members of the group in point spread gambling with local banker. | 55 |
+| local_point_spread_population | int | Population of win members of the group in point spread gambling with local banker. | 919 |
+| local_total_point_result | 0 or 1 | The prediction of the group member was correct with total score gambling on local banker. | 0 |
+| local_total_point_percentage | int | Percentage of win members of the group in total score gambling with local banker. | 44 |
+| local_total_point_population | int | Population of win members of the group in total score gambling with local banker. | 411 |
+| local_original_result | 0 or 1 | The prediction of the group member was correct with original score gambling on local banker. | 1 |
+| local_original_percentage | int | Percentage of win members of the group in original score gambling with local banker. | 82 |
+| local_original_population | int | Population of win members of the group in original score gambling with local banker. | 451 |
+
  
