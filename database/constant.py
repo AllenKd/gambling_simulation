@@ -54,8 +54,6 @@ local_original_win_ratio = 'local_original_win_ratio'
 local_original_max_continuous_lose = 'local_original_max_continuous_lose'
 local_original_number_of_valid_game = 'local_original_number_of_valid_game'
 
-
-
 # column name
 game_id = 'game_id'
 play_time = 'play_time'
