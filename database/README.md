@@ -91,7 +91,7 @@ Record judgements of predictions from members, those members been classified int
 * more_than_sixty: members with more 60% hit ratio.
 * top_100: top 100 members.
 
-If the result of the majority members prediction matching the actual game result, denote as 1 and vise versa.
+If the result of the majority members' prediction matching the actual game result, denote as 1 and vise versa.
  
 For example: if there are 51% of group members voted that host will win the point spread gambling 
 and the prediction was correct, denote the judgement result as 1.
