@@ -115,4 +115,68 @@ and the prediction was correct, denote the judgement result as 1.
 | local_original_percentage | int | Percentage of win members of the group in original score gambling with local banker. | 82 |
 | local_original_population | int | Population of win members of the group in original score gambling with local banker. | 451 |
 
+### Simulated Data
+
+The simulator can simulate a banker and multiple players to battle with it, 
+and the detail would be by-player recorded.
+
+#### player_n
+
+Each player own a table to record battle detail, the table name followed by player id, 
+for example, the first player with player_id=1 would use the table "player_1".
+
+| Column name | Type | Description | Example |
+| :--- | :---: | :--- | :--- |
+| run | int | The nth time of gambling, start from 0. | 0 |
+| current_put | int | Bet of this run. | 100 |
+| win_result | 0 or 1 | Win or lose at this run. | 1 |
+| current_response | int | Money to get back, the value would be current_put times odds if win, else 0. | 175 |
+| subtotal | int | Current total money. | 10075 |
+| actual_win | int | Net profit. | 75 |
+| expected_win | int | Set to average odds times minimum bets for every day, so the value would be increasing linearly along with the number of run. | 75 | 
  
+### Summarized Data
+ 
+Summarized result of prediction judgement and simulation.
+* all member: all members.
+* all_prefer: all member with highly confident.
+* more_than_sixty: members with more 60% hit ratio.
+* top_100: top 100 members.
+ 
+#### prediction_judgement_summarize
+ 
+Record summarized data by each group.
+ 
+| Column name | Type | Description | Example |
+| :--- | :---: | :--- | :--- |
+| member_group | string | Member group, which will be one of member groups as prediction judgement. | all_member |
+| national_point_spread_win_ration | float | The win ratio on point spread gambling with national banker. | 0.498971 |
+| national_point_spread_max_continuous_lose | int | Max count of continuously lose of point spread gambling with national banker. | 5 | 
+| national_point_spread_number_of_valid_game | int | Number of record of point spread gambling with national banker. | 123 |
+| national_total_point_win_ration | float | The win ratio on total point gambling with national banker. | 0.498989 |
+| national_total_point_max_continuous_lose | int | Max count of continuously lose of total point gambling with national banker. | 6 | 
+| national_total_point_number_of_valid_game | int | Number of record of total point gambling with national banker. | 125 |
+| local_point_spread_win_ration | float | The win ratio on point spread gambling with local banker. | 0.501020 |
+| local_point_spread_max_continuous_lose | int | Max count of continuously lose of point spread gambling with local banker. | 5 | 
+| local_point_spread_number_of_valid_game | int | Number of record of point spread gambling with local banker. | 124 |
+| local_total_point_win_ration | float | The win ratio on total point gambling with local banker. | 0.501010 |
+| local_total_point_max_continuous_lose | int | Max count of continuously lose of total point gambling with local banker. | 4 | 
+| local_total_point_number_of_valid_game | int | Number of record of total point gambling with local banker. | 125 |
+| local_original_win_ration | float | The win ratio on original gambling with local banker. | 0.501010 |
+| local_original_max_continuous_lose | int | Max count of continuously lose of original gambling with local banker. | 4 | 
+| local_original_number_of_valid_game | int | Number of record of original gambling with local banker. | 125 |
+
+#### player summarize
+
+Record summarized data of each player.
+
+| Column name | Type | Description | Example |
+| :--- | :---: | :--- | :--- |
+| player_id | int | Player id, which is serial number from 1. | 1 |
+| put_strategy | string | The strategy the player used. | linear_response |
+| initial_money | int | Player total money at beginning. | 10000 |
+| still_survival | 0 or 1 | The player still have money after final gambling. | 1 |
+| win_ratio | float | Win ratio during the whole gambling. | 0.49 | 
+| max_continuous_lose_count | Max count od continuously lose. | 6 |
+| final_money | int | Total money of the player after final gambling. | 8000 |
+| final_result | 0 or 1 | Is final_money of the player more then the beginning or not. | 0 |
