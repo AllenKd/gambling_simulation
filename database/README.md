@@ -1,6 +1,6 @@
 # Database
 
-Record all competition data comes from [Crawler]() and [Analyzer]()
+Record all competition data comes from [Crawler](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/crawler) and [Analyzer](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/analysis)
 
 ## Table Description
 
