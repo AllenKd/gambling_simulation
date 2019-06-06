@@ -17,7 +17,16 @@ the player won this game and get the price equal to put_money times feedback_rat
 | bet_strategy | string | Strategy about how to determine the result of the next game. | 'random' |
 | bet_data | list | Predictions of games, the size equal to play_times | \[0, 1, 0, 1, 0, 1, 0, 1, 0, 1\] |
 
+## Put strategy
+
 currently is just some foo strategy, and the win ration technically is 1 / 2^combination, **but it will based on deep learning to improve win ratio**, and it's the key value of this project
+
+| Strategy | Description |
+| :--- | :--- |
+| random | Random generate bet data. |
+| keep_false | Generate array with all values are 0 as prediction data. |
+| keep_false | Generate array with all values are 1 as prediction data. |
+| keep_last | The current prediction will follow the last time gambling result. | 
 
 # Strategy Provider
 
