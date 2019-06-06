@@ -9,11 +9,11 @@ the player won this game and get the price equal to put_money times feedback_rat
 | Parameter | type | Description | Example |
 | :---: | :---: | :--- | :---: |
 | player_id | int | Player unique identification. | 1 |
-| play_times | int | Times of the player to gamble with the [Banker](Banker), stop earlier if the Player bankrupted. | 10 |
-| strategy_provider | [StrategyProvider](StrategyProvider) | To provide a strategy table about bet for player reference. | [StrategyProvider](StrategyProvider) |
+| play_times | int | Times of the player to gamble with the [Banker](#Banker), stop earlier if the Player bankrupted. | 10 |
+| strategy_provider | [StrategyProvider](#StrategyProvider) | To provide a strategy table about bet for player reference. | [StrategyProvider](#StrategyProvider) |
 | combination | int | Game combination, if combination is n, the win condition is all of these n games are won. <br> i.e. win_probability_of_each_game = 1/2^n | 1 |
 | money | int | Initial money of the Player. | 5000 |
-| put_strategy | string | Strategy about the volume of bet to put, which obtain from [StrategyProvider](StrategyProvider), usually a table. | 'linear_response' |
+| put_strategy | string | Strategy about the volume of bet to put, which obtain from [StrategyProvider](#StrategyProvider), usually a table. | 'linear_response' |
 | bet_strategy | string | Strategy about how to determine the result of the next game. | 'random' |
 | bet_data | list | Predictions of games, the size equal to play_times | \[0, 1, 0, 1, 0, 1, 0, 1, 0, 1\] |
 
