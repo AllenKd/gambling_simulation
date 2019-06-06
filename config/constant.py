@@ -9,3 +9,4 @@ user = 'user'
 password = 'password'
 host = 'host'
 schema = 'schema'
+# TODO: consider to use a constant folder
