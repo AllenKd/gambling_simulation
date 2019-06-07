@@ -22,7 +22,7 @@ to simulate gambling scenario.
 
 ## [Crawler](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/crawler)
 
-Crawl real sports gambling data amd store into [Database](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/database)
+Crawl real sports gambling data and store into [Database](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/database)
 
 ## [Database](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/database)
 

@@ -15,7 +15,7 @@ Obtain from web directly without additional logic.
 Record original data about competition and gambling information.
 
 | Column name | Type | Description | Example |
-| :--- | :---: | :--- | :--- |
+| :--- | :---: | :--- | :---: |
 | game_id | string | Game unique id, which comes from date(YYYYmmDD) + game id of that date. | 20190526496 |
 | play_time | string | Game start time. | 08:30 |
 | AM_PM | string | Game start on AM or PM. | AM |
@@ -43,7 +43,7 @@ Record predictions from members, those members been classified into 4 groups,
 * top_100: top 100 members.
 
 | Column name | Type | Description | Example |
-| :--- | :---: | :--- | :--- |
+| :--- | :---: | :--- | :---: |
 | game_id | string | Game unique id, which comes from date(YYYYmmDD) + game id of that date. | 20190526496 |
 | percentage_national_point_spread_guest | int | Percentage of the member group vote guest with point spread gambling on national banker. | 49 |
 | population_national_point_spread_guest | int | Population of the member group vote guest with point spread gambling on national banker. | 885 |
@@ -75,7 +75,7 @@ Record judgements about the games and members predictions, which comes from [Ana
 Record gambling result.
 
 | Column name | Type | Description | Example |
-| :--- | :---: | :--- | :--- |
+| :--- | :---: | :--- | :---: |
 | game_id | string | Game unique id, which comes from date(YYYYmmDD) + game id of that date. | 20190526496 |
 | host_win_original | 0 or 1 | The host won the game originally. | 1 |
 | host_win_point_spread_national | 0 or 1 | The host won the game with point spread gambling on national banker. | 1 |
@@ -97,7 +97,7 @@ For example: if there are 51% of group members voted that host will win the poin
 and the prediction was correct, denote the judgement result as 1.
 
 | Column name | Type | Description | Example |
-| :--- | :---: | :--- | :--- |
+| :--- | :---: | :--- | :---: |
 | game_id | string | Game unique id, which comes from date(YYYYmmDD) + game id of that date. | 20190526496 |
 | national_point_spread_result | 0 or 1 | The prediction of the group member was correct with point spread gambling on national banker. | 1 |
 | national_point_spread_percentage | int | Percentage of win members of the group in point spread gambling with national banker. | 51 |
@@ -126,7 +126,7 @@ Each player own a table to record battle detail, the table name followed by play
 for example, the first player with player_id=1 would use the table "player_1".
 
 | Column name | Type | Description | Example |
-| :--- | :---: | :--- | :--- |
+| :--- | :---: | :--- | :---: |
 | run | int | The nth time of gambling, start from 0. | 0 |
 | current_put | int | Bet of this run. | 100 |
 | win_result | 0 or 1 | Win or lose at this run. | 1 |
@@ -148,7 +148,7 @@ Summarized result of prediction judgement and simulation.
 Record summarized data by each group.
  
 | Column name | Type | Description | Example |
-| :--- | :---: | :--- | :--- |
+| :--- | :---: | :--- | :---: |
 | member_group | string | Member group, which will be one of member groups as prediction judgement. | all_member |
 | national_point_spread_win_ration | float | The win ratio on point spread gambling with national banker. | 0.498971 |
 | national_point_spread_max_continuous_lose | int | Max count of continuously lose of point spread gambling with national banker. | 5 | 
@@ -171,7 +171,7 @@ Record summarized data by each group.
 Record summarized data of each player.
 
 | Column name | Type | Description | Example |
-| :--- | :---: | :--- | :--- |
+| :--- | :---: | :--- | :---: |
 | player_id | int | Player id, which is serial number from 1. | 1 |
 | put_strategy | string | The strategy the player used. | linear_response |
 | initial_money | int | Player total money at beginning. | 10000 |
