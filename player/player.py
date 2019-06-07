@@ -124,6 +124,7 @@ class Player(object):
         self.logger.info('summarize battle result')
         self.battle_summarize = {constant.player_id: self.id,
                                  constant.put_strategy: self.strategy_name,
+                                 constant.bet_strategy: self.bet_strategy,
                                  constant.initial_money: self.money,
                                  constant.still_survival: len(self.battle_statistic.index) == len(self.bet_data),
                                  constant.win_ratio: (sum(self.battle_result) / len(self.battle_result))[0],
