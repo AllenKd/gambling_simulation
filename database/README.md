@@ -68,7 +68,7 @@ Record predictions from members, those members been classified into 4 groups,
 
 ### Judgement Data
 
-Record judgements about the games and members predictions.
+Record judgements about the games and members predictions, which comes from [Analyzer]().
 
 #### game_judgement
 
@@ -118,7 +118,7 @@ and the prediction was correct, denote the judgement result as 1.
 ### Simulated Data
 
 The simulator can simulate a banker and multiple players to battle with it, 
-and the detail would be by-player recorded.
+and the detail would be by-player recorded, these data comes from [Simulator]()
 
 #### player_n
 

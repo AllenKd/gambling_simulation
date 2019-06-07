@@ -36,7 +36,7 @@ class CrawledResultAnalyzer(object):
         self.prediction_judgement_summarize = defaultdict(dict)
 
     def start_analyzer(self):
-        self.logger.info('start analysis')
+        self.logger.info('start analyzer')
         game_data = self.get_game_data()
         self.judge(game_data)
         self.write_to_db(self.game_judgement, db_constant.game_judgement)
@@ -49,7 +49,7 @@ class CrawledResultAnalyzer(object):
         self.summarize_prediction_judgement()
         self.write_to_db(self.prediction_judgement_summarize, db_constant.prediction_judgement_summarize, is_summarize=True)
 
-        self.logger.info('analysis done')
+        self.logger.info('analyzer done')
         return
 
     def get_game_data(self):
