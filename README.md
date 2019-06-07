@@ -1,35 +1,33 @@
 # Gambling Simulation
 
-To simulate gambling behavior based on win response ratio and player strategy, 
-you can simulate players to gambling with a banker, each player have it's own strategy
-based on strategy provider.
+To simulate gambling behavior, go to each folder for detail description of each component.
 
-## Strategy Provider
+## [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player)
 
-Players can design strategies to battle with the banker, the strategy be defined as a 
-dataframe, players bet based on 'current_put' field, which gives the players how 
-much the players should bet if it lose for x runs continuously.
+An instance to gambling with the [Banker](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/banker)
 
-### linear response
+## [Strategy Provider](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player)
 
-The concept of this strategy is focus on the result of current, 
-it calculate how much of bet for this run  can cover past lost, and 
-the result will be the same as win for each run with minimum bet.
+Provide [Player]() strategies to gambling.
 
-### fibonacci base
+## [Banker](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/banker)
 
-As the name implies, the bet will increasing along with continuous lose, based on 
-fibonacci series.
+An instance for [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player) battle with.
 
-### foo double
+## [Simulator](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/simulator)
 
-Put double bet of last run if lose, otherwise put minimum bet.
+Create multiple [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player) 
+instances and a [Banker](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/banker) 
+to simulate gambling scenario.
 
-## TODO
+## [Crawler](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/crawler)
 
-- [x] Dockerize
-- [x] Add strategy based on Kelly formula
-- [ ] Make some plot to display gambling pattern
-- [X] Use crawler to get real sports game data
-- [ ] Player support different bet strategy
+Crawl real sports gambling data and store into [Database](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/database)
 
+## [Analyzer](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/analyzer)
+
+Make judgements about crawled data and summarize it.
+
+## [Database](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/database)
+
+Store all simulation and crawled data.

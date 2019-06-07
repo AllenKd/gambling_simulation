@@ -15,7 +15,7 @@ from database import constant as db_constant
 
 
 class Crawler(object):
-    def __init__(self, start_date, total_day=None, end_date=None):
+    def __init__(self, start_date, end_date):
         self.logger = get_logger(self.__class__.__name__)
         with open('config/configuration.yml') as config:
             self.config = yaml.load(config, Loader=yaml.FullLoader)
@@ -31,15 +31,10 @@ class Crawler(object):
                            crawler_constant.all_prefer: self.prediction_info_all_prefer,
                            crawler_constant.top_100: self.prediction_info_top_100}
 
+        # setup datetime object and count total days
         self.start_date = datetime.datetime.strptime(start_date, self.config['crawler']['dateFormat'])
-
-        if total_day:
-            self.total_day = total_day
-            total_day -= 1
-            self.end_date = self.start_date + datetime.timedelta(total_day)
-        else:
-            self.end_date = datetime.datetime.strptime(end_date, self.config['crawler']['dateFormat'])
-            self.total_day = self.end_date - self.start_date
+        self.end_date = datetime.datetime.strptime(end_date, self.config['crawler']['dateFormat'])
+        self.total_day = self.end_date - self.start_date
 
         # init db
         user = self.config[config_constant.DB][config_constant.user]
@@ -264,7 +259,7 @@ class Crawler(object):
     def append_total_point_info(self, row_content):
         # get national total point info
         national_total_point = row_content.find('td', {'class': 'td-universal-bet02'}).text.strip()
-        threshold = re.findall(r'\d+\.\d+', national_total_point)
+        threshold = re.findall(r'\d+[\.\d+]?', national_total_point)
         national_total_point = threshold[0] if threshold else 0
         self.game_info[db_constant.national_total_point_threshold].append(float(national_total_point))
         pass

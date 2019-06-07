@@ -10,6 +10,7 @@ from config.logger import get_logger
 class Player(object):
     def __init__(self, player_id, play_times, strategy_provider, combination=1, money=5000,
                  put_strategy='linear_response', bet_strategy=constant.random, bet_data=None):
+        # TODO: add bet strategy in player table
         self.id = player_id
         self.logger = get_logger('player{}'.format(self.id))
         with open('config/configuration.yml', 'r') as config:
