@@ -14,7 +14,7 @@ Provide [Player]() strategies to gambling.
 
 An instance for [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player) battle with.
 
-## [Simulator](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player)
+## [Simulator](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/simulator)
 
 Create multiple [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player) 
 instances and a [Banker](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/banker) 
