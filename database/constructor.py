@@ -1,10 +1,10 @@
 import yaml
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
 
-from config import constant as config_constant
+from config.constant import crawler as crawler_constant
+from config.constant import database as db_constant
+from config.constant import global_constant
 from config.logger import get_logger
-from crawler import constant as crawler_constant
-from database import constant as db_constant
 
 
 class DbConstructor(object):
@@ -14,20 +14,20 @@ class DbConstructor(object):
             self.config = yaml.load(config, Loader=yaml.FullLoader)
 
         # init db
-        user = self.config[config_constant.DB][config_constant.user]
-        password = self.config[config_constant.DB][config_constant.password]
-        host = self.config[config_constant.DB][config_constant.host]
+        user = self.config[global_constant.DB][global_constant.user]
+        password = self.config[global_constant.DB][global_constant.password]
+        host = self.config[global_constant.DB][global_constant.host]
         self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
 
     def create_schema(self, force=False):
         self.logger.info('start create schema, type force: {}'.format(force))
         if force:
             self.engine.execute(
-                "DROP DATABASE IF EXISTS {}".format(self.config[config_constant.DB][config_constant.schema]))
+                "DROP DATABASE IF EXISTS {}".format(self.config[global_constant.DB][global_constant.schema]))
 
         self.engine.execute(
             "CREATE DATABASE IF NOT EXISTS {} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci".format(
-                self.config[config_constant.DB][config_constant.schema]))
+                self.config[global_constant.DB][global_constant.schema]))
         return
 
     def create_tables(self):
@@ -50,7 +50,7 @@ class DbConstructor(object):
                           Column(db_constant.local_total_point_threshold_response_ratio, Float),
                           Column(db_constant.local_origin_guest_response_ratio, Float),
                           Column(db_constant.local_origin_host_response_ratio, Float),
-                          schema=self.config[config_constant.DB][config_constant.schema])
+                          schema=self.config[global_constant.DB][global_constant.schema])
 
         game_judgement = Table(db_constant.game_judgement, MetaData(),
                                Column(db_constant.game_id, String(12), primary_key=True),
@@ -59,7 +59,7 @@ class DbConstructor(object):
                                Column(db_constant.host_win_point_spread_local, Integer),
                                Column(db_constant.over_total_point_national, Integer),
                                Column(db_constant.over_total_point_local, Integer),
-                               schema=self.config[config_constant.DB][config_constant.schema])
+                               schema=self.config[global_constant.DB][global_constant.schema])
 
         prediction_judgement_summarize = Table(db_constant.prediction_judgement_summarize, MetaData(),
                                                Column(db_constant.member_group, String(30)),
@@ -78,7 +78,7 @@ class DbConstructor(object):
                                                Column(db_constant.local_original_win_ratio, Float),
                                                Column(db_constant.local_original_max_continuous_lose, Integer),
                                                Column(db_constant.local_original_number_of_valid_game, Integer),
-                                               schema=self.config[config_constant.DB][config_constant.schema])
+                                               schema=self.config[global_constant.DB][global_constant.schema])
 
         # prediction judge table template for each prediction group
         def prediction_judgement_template(table_name): return Table(
@@ -99,7 +99,7 @@ class DbConstructor(object):
             Column(db_constant.local_original_result, Integer),
             Column(db_constant.local_original_percentage, Integer),
             Column(db_constant.local_original_population, Integer),
-            schema=self.config[config_constant.DB][config_constant.schema])
+            schema=self.config[global_constant.DB][global_constant.schema])
 
         # prediction table template for each prediction group
         def template(table_name): return Table('{}_{}'.format(db_constant.prediction_data, table_name), MetaData(),
@@ -124,7 +124,7 @@ class DbConstructor(object):
                                                Column(db_constant.population_local_total_point_under, Integer),
                                                Column(db_constant.percentage_local_original_host, Integer),
                                                Column(db_constant.population_local_original_host, Integer),
-                                               schema=self.config[config_constant.DB][config_constant.schema])
+                                               schema=self.config[global_constant.DB][global_constant.schema])
 
         # create each table
         game_data.create(self.engine)

@@ -7,10 +7,10 @@ import pymysql
 import yaml
 from sqlalchemy import create_engine
 
-from config import constant as config_constant
+from config.constant import crawler as crawler_constant
+from config.constant import database as db_constant
+from config.constant import global_constant
 from config.logger import get_logger
-from crawler import constant as crawler_constant
-from database import constant as db_constant
 
 
 class CrawledResultAnalyzer(object):
@@ -20,12 +20,12 @@ class CrawledResultAnalyzer(object):
             self.config = yaml.load(config, Loader=yaml.FullLoader)
 
             # init db
-            user = self.config[config_constant.DB][config_constant.user]
-            password = self.config[config_constant.DB][config_constant.password]
-            host = self.config[config_constant.DB][config_constant.host]
+            user = self.config[global_constant.DB][global_constant.user]
+            password = self.config[global_constant.DB][global_constant.password]
+            host = self.config[global_constant.DB][global_constant.host]
             self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
             self.db = pymysql.connect(host=host, user=user, passwd=password,
-                                      db=self.config[config_constant.DB][config_constant.schema], charset='utf8')
+                                      db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
 
         self.to_db = to_db
         self.game_judgement = None
@@ -47,7 +47,8 @@ class CrawledResultAnalyzer(object):
             self.write_to_db(self.prediction_judge_dict[group], '{}_{}'.format(db_constant.prediction_judgement, group))
 
         self.summarize_prediction_judgement()
-        self.write_to_db(self.prediction_judgement_summarize, db_constant.prediction_judgement_summarize, is_summarize=True)
+        self.write_to_db(self.prediction_judgement_summarize, db_constant.prediction_judgement_summarize,
+                         is_summarize=True)
 
         self.logger.info('analyzer done')
         return
@@ -66,7 +67,8 @@ class CrawledResultAnalyzer(object):
 
         self.game_judgement = pd.DataFrame(index=game_data.index)
 
-        self.game_judgement[db_constant.host_win_original] = game_data[db_constant.guest_score] < game_data[db_constant.host_score]
+        self.game_judgement[db_constant.host_win_original] = game_data[db_constant.guest_score] < game_data[
+            db_constant.host_score]
 
         self.game_judgement[db_constant.host_win_point_spread_national] = game_data[db_constant.guest_score] < (
                 game_data[db_constant.host_score] - game_data[db_constant.national_host_point_spread])
@@ -89,8 +91,11 @@ class CrawledResultAnalyzer(object):
         self.prediction_judge_dict[group] = pd.DataFrame(index=prediction_data.index)
 
         self.logger.debug('start judge local original')
-        temp_target_prediction = prediction_data[db_constant.population_local_original_guest] < prediction_data[db_constant.population_local_original_host]
-        self.prediction_judge_dict[group][db_constant.local_original_result] = temp_target_prediction == self.game_judgement[db_constant.host_win_original]
+        temp_target_prediction = prediction_data[db_constant.population_local_original_guest] < prediction_data[
+            db_constant.population_local_original_host]
+        self.prediction_judge_dict[group][db_constant.local_original_result] = temp_target_prediction == \
+                                                                               self.game_judgement[
+                                                                                   db_constant.host_win_original]
         self.prediction_judge_dict[group][db_constant.local_original_percentage] = np.where(
             self.game_judgement[db_constant.host_win_original],
             prediction_data[db_constant.percentage_local_original_host],
@@ -101,8 +106,10 @@ class CrawledResultAnalyzer(object):
             prediction_data[db_constant.population_local_original_guest])
 
         self.logger.debug('start judge local total point')
-        temp_target_prediction = prediction_data[db_constant.population_local_total_point_over] > prediction_data[db_constant.population_local_total_point_under]
-        self.prediction_judge_dict[group][db_constant.local_total_point_result] = self.game_judgement[db_constant.over_total_point_local] == temp_target_prediction
+        temp_target_prediction = prediction_data[db_constant.population_local_total_point_over] > prediction_data[
+            db_constant.population_local_total_point_under]
+        self.prediction_judge_dict[group][db_constant.local_total_point_result] = self.game_judgement[
+                                                                                      db_constant.over_total_point_local] == temp_target_prediction
         self.prediction_judge_dict[group][db_constant.local_total_point_percentage] = np.where(
             self.game_judgement[db_constant.over_total_point_local],
             prediction_data[db_constant.percentage_local_total_point_over],
@@ -113,8 +120,10 @@ class CrawledResultAnalyzer(object):
             prediction_data[db_constant.population_local_total_point_under])
 
         self.logger.debug('start judge local point spread')
-        temp_target_prediction = prediction_data[db_constant.population_local_point_spread_guest] < prediction_data[db_constant.population_local_point_spread_host]
-        self.prediction_judge_dict[group][db_constant.local_point_spread_result] = self.game_judgement[db_constant.host_win_point_spread_local] == temp_target_prediction
+        temp_target_prediction = prediction_data[db_constant.population_local_point_spread_guest] < prediction_data[
+            db_constant.population_local_point_spread_host]
+        self.prediction_judge_dict[group][db_constant.local_point_spread_result] = self.game_judgement[
+                                                                                       db_constant.host_win_point_spread_local] == temp_target_prediction
         self.prediction_judge_dict[group][db_constant.local_point_spread_percentage] = np.where(
             self.game_judgement[db_constant.host_win_point_spread_local],
             prediction_data[db_constant.percentage_local_point_spread_host],
@@ -125,8 +134,10 @@ class CrawledResultAnalyzer(object):
             prediction_data[db_constant.population_local_point_spread_guest])
 
         self.logger.debug('start judge national total point')
-        temp_target_prediction = prediction_data[db_constant.population_national_total_point_over] > prediction_data[db_constant.population_national_total_point_under]
-        self.prediction_judge_dict[group][db_constant.national_total_point_result] = self.game_judgement[db_constant.over_total_point_national] == temp_target_prediction
+        temp_target_prediction = prediction_data[db_constant.population_national_total_point_over] > prediction_data[
+            db_constant.population_national_total_point_under]
+        self.prediction_judge_dict[group][db_constant.national_total_point_result] = self.game_judgement[
+                                                                                         db_constant.over_total_point_national] == temp_target_prediction
         self.prediction_judge_dict[group][db_constant.national_total_point_percentage] = np.where(
             self.game_judgement[db_constant.over_total_point_national],
             prediction_data[db_constant.percentage_national_total_point_over],
@@ -137,8 +148,10 @@ class CrawledResultAnalyzer(object):
             prediction_data[db_constant.population_national_total_point_under])
 
         self.logger.debug('start judge national point spread')
-        temp_target_prediction = prediction_data[db_constant.population_national_point_spread_guest] < prediction_data[db_constant.population_national_point_spread_host]
-        self.prediction_judge_dict[group][db_constant.national_point_spread_result] = self.game_judgement[db_constant.host_win_point_spread_national] == temp_target_prediction
+        temp_target_prediction = prediction_data[db_constant.population_national_point_spread_guest] < prediction_data[
+            db_constant.population_national_point_spread_host]
+        self.prediction_judge_dict[group][db_constant.national_point_spread_result] = self.game_judgement[
+                                                                                          db_constant.host_win_point_spread_national] == temp_target_prediction
         self.prediction_judge_dict[group][db_constant.national_point_spread_percentage] = np.where(
             self.game_judgement[db_constant.host_win_point_spread_national],
             prediction_data[db_constant.percentage_national_point_spread_host],
@@ -174,12 +187,15 @@ class CrawledResultAnalyzer(object):
         prediction_judgement = prediction_judgement.filter(regex=('{}'.format(gambling_class)))
         prediction_judgement = prediction_judgement[prediction_judgement['{}_population'.format(gambling_class)] != 0]
 
-        win_ratio = sum(prediction_judgement['{}_result'.format(gambling_class)]) / len(prediction_judgement) if len(prediction_judgement) else 0
+        win_ratio = sum(prediction_judgement['{}_result'.format(gambling_class)]) / len(prediction_judgement) if len(
+            prediction_judgement) else 0
         max_continuous_lose = self._get_max_continuous_result(prediction_judgement, 0)
 
         self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.win_ratio)] = win_ratio
-        self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.max_continuous_lose)] = max_continuous_lose
-        self.prediction_judgement_summarize[group]['{}_{}'.format(gambling_class, db_constant.number_of_valid_game)] = len(prediction_judgement)
+        self.prediction_judgement_summarize[group][
+            '{}_{}'.format(gambling_class, db_constant.max_continuous_lose)] = max_continuous_lose
+        self.prediction_judgement_summarize[group][
+            '{}_{}'.format(gambling_class, db_constant.number_of_valid_game)] = len(prediction_judgement)
 
         return
 
@@ -202,7 +218,7 @@ class CrawledResultAnalyzer(object):
                   index_label='game_id' if not is_summarize else None,
                   index=not is_summarize,
                   if_exists='append',
-                  schema=self.config[config_constant.DB][config_constant.schema])
+                  schema=self.config[global_constant.DB][global_constant.schema])
         self.logger.info('finished write game data to db')
         self.db.connect()
         return
