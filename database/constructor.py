@@ -1,3 +1,4 @@
+import pymysql
 import yaml
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
 
@@ -141,3 +142,10 @@ class DbConstructor(object):
         prediction_judgement_template(crawler_constant.top_100).create(self.engine)
 
         return
+
+    def get_connection(self):
+        user = self.config[global_constant.DB][global_constant.user]
+        password = self.config[global_constant.DB][global_constant.password]
+        host = self.config[global_constant.DB][global_constant.host]
+        return pymysql.connect(host=host, user=user, passwd=password,
+                               db=self.config[global_constant.DB][global_constant.schema], charset='utf8')

@@ -3,14 +3,13 @@ from itertools import groupby
 
 import numpy as np
 import pandas as pd
-import pymysql
 import yaml
-from sqlalchemy import create_engine
 
 from config.constant import crawler as crawler_constant
 from config.constant import database as db_constant
 from config.constant import global_constant
 from config.logger import get_logger
+from database.constructor import DbConstructor
 
 
 class CrawledResultAnalyzer(object):
@@ -19,14 +18,7 @@ class CrawledResultAnalyzer(object):
         with open('config/configuration.yml') as config:
             self.config = yaml.load(config, Loader=yaml.FullLoader)
 
-            # init db
-            user = self.config[global_constant.DB][global_constant.user]
-            password = self.config[global_constant.DB][global_constant.password]
-            host = self.config[global_constant.DB][global_constant.host]
-            self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
-            self.db = pymysql.connect(host=host, user=user, passwd=password,
-                                      db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
-
+        self.db = DbConstructor.get_connection()
         self.to_db = to_db
         self.game_judgement = None
         self.prediction_judge_dict = dict.fromkeys((crawler_constant.all_member,
@@ -71,10 +63,10 @@ class CrawledResultAnalyzer(object):
             db_constant.host_score]
 
         self.game_judgement[db_constant.host_win_point_spread_national] = game_data[db_constant.guest_score] < (
-                game_data[db_constant.host_score] - game_data[db_constant.national_host_point_spread])
+            game_data[db_constant.host_score] - game_data[db_constant.national_host_point_spread])
 
         self.game_judgement[db_constant.host_win_point_spread_local] = game_data[db_constant.guest_score] < (
-                game_data[db_constant.host_score] - game_data[db_constant.local_host_point_spread])
+            game_data[db_constant.host_score] - game_data[db_constant.local_host_point_spread])
 
         self.game_judgement[db_constant.over_total_point_national] = (game_data[db_constant.guest_score] +
                                                                       game_data[db_constant.host_score]) > game_data[
