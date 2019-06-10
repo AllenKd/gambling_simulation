@@ -8,10 +8,10 @@ import yaml
 from bs4 import BeautifulSoup
 from sqlalchemy import create_engine
 
-from config import constant as config_constant
+from config.constant import crawler as crawler_constant
+from config.constant import database as db_constant
+from config.constant import global_constant
 from config.logger import get_logger
-from crawler import constant as crawler_constant
-from database import constant as db_constant
 
 
 class Crawler(object):
@@ -37,9 +37,9 @@ class Crawler(object):
         self.total_day = self.end_date - self.start_date
 
         # init db
-        user = self.config[config_constant.DB][config_constant.user]
-        password = self.config[config_constant.DB][config_constant.password]
-        host = self.config[config_constant.DB][config_constant.host]
+        user = self.config[global_constant.DB][global_constant.user]
+        password = self.config[global_constant.DB][global_constant.password]
+        host = self.config[global_constant.DB][global_constant.host]
         self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
 
     def start_crawler(self):
@@ -287,7 +287,7 @@ class Crawler(object):
                   index_label='game_id',
                   index=False,
                   if_exists='append',
-                  schema=self.config[config_constant.DB][config_constant.schema])
+                  schema=self.config[global_constant.DB][global_constant.schema])
         self.logger.info('finished write game data to db')
         return
 

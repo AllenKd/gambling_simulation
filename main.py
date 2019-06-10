@@ -1,10 +1,11 @@
 
 
 def task_simulator(num_of_player):
-    from player import constant
+    from config.constant import player as player_constant
     from simulator.simulator import Simulator
     game_times = 100
-    strategy_list = [constant.kelly, constant.linear_response, constant.fibonacci_base, constant.foo_double] * num_of_player
+    strategy_list = [player_constant.kelly, player_constant.linear_response, player_constant.fibonacci_base,
+                     player_constant.foo_double] * num_of_player
     simulator = Simulator(play_times=game_times, number_of_player=len(strategy_list), player_init_money=300000,
                           to_db=True, player_put_strategy=strategy_list, player_bet_strategy=constant.follow_last)
     simulator.start_simulation()
@@ -31,7 +32,7 @@ def task_analyzer():
 
 
 if __name__ == '__main__':
-    # task_create_db()
-    # task_crawler()
-    # task_analyzer()
-    task_simulator(10)
+    task_create_db()
+    task_crawler()
+    task_analyzer()
+    # task_simulator(10)
