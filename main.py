@@ -6,7 +6,7 @@ from database.constructor import DbConstructor
 from simulator.simulator import Simulator
 
 
-@click.group()
+@click.group(chain=True)
 def cli():
     pass
 
