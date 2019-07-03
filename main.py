@@ -77,7 +77,3 @@ cli.add_command(task_analyzer)
 
 if __name__ == '__main__':
     cli()
-    # task_create_db()
-    # task_crawler()
-    # task_analyzer()
-    # task_simulator(1)
