@@ -1,7 +1,10 @@
+import datetime
+
 import click
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
 from config.constant import player as player_constant
+from crawler.crawler import Crawler
 from database.constructor import DbConstructor
 from simulator.simulator import Simulator
 
@@ -53,10 +56,14 @@ def task_create_db(force):
               type=str,
               required=True,
               help='Start date of sports gambling, the format must follow the pattern: YYYYmmDD, ex: 20190130.')
-def task_crawler(start_date):
-    import datetime
-    from crawler.crawler import Crawler
-    a = Crawler(start_date=start_date, end_date=datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d'))
+@click.option('--end_date', '-ed',
+              type=str,
+              required=False,
+              default=datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d'),
+              show_default=True,
+              help='End date of sports gambling, the format must follow the pattern: YYYYmmDD, ex: 20190130.')
+def task_crawler(start_date, end_date):
+    a = Crawler(start_date=start_date, end_date=end_date)
     a.start_crawler()
 
 
