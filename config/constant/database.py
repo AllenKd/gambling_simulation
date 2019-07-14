@@ -56,6 +56,7 @@ local_original_number_of_valid_game = 'local_original_number_of_valid_game'
 
 # column name of game_data
 game_id = 'game_id'
+game_type = 'game_type'
 play_time = 'play_time'
 am_pm = 'AM_PM'
 host_id = 'host_id'

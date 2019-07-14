@@ -35,6 +35,7 @@ class DbConstructor(object):
         # self.engine.execute('USE {}'.format(self.config[string_constant.DB][string_constant.schema]))
         game_data = Table(db_constant.game_data, MetaData(),
                           Column(db_constant.game_id, String(12), primary_key=True),
+                          Column(db_constant.game_type, String(16)),
                           Column(db_constant.play_time, String(10)),
                           Column(db_constant.am_pm, String(2)),
                           Column(db_constant.guest, String(10)),
@@ -55,6 +56,7 @@ class DbConstructor(object):
 
         game_judgement = Table(db_constant.game_judgement, MetaData(),
                                Column(db_constant.game_id, String(12), primary_key=True),
+                               Column(db_constant.game_type, String(16)),
                                Column(db_constant.host_win_original, Integer),
                                Column(db_constant.host_win_point_spread_national, Integer),
                                Column(db_constant.host_win_point_spread_local, Integer),
@@ -85,6 +87,7 @@ class DbConstructor(object):
         def prediction_judgement_template(table_name): return Table(
             '{}_{}'.format(db_constant.prediction_judgement, table_name), MetaData(),
             Column(db_constant.game_id, String(12), primary_key=True),
+            Column(db_constant.game_type, String(16)),
             Column(db_constant.national_point_spread_result, Integer),
             Column(db_constant.national_point_spread_percentage, Integer),
             Column(db_constant.national_point_spread_population, Integer),
@@ -105,6 +108,7 @@ class DbConstructor(object):
         # prediction table template for each prediction group
         def template(table_name): return Table('{}_{}'.format(db_constant.prediction_data, table_name), MetaData(),
                                                Column(db_constant.game_id, String(12), primary_key=True),
+                                               Column(db_constant.game_type, String(16)),
                                                Column(db_constant.percentage_national_point_spread_guest, Integer),
                                                Column(db_constant.population_national_point_spread_guest, Integer),
                                                Column(db_constant.percentage_national_total_point_over, Integer),

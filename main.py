@@ -4,6 +4,7 @@ import click
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
 from config.constant import player as player_constant
+from config.constant import global_constant
 from crawler.crawler import Crawler
 from database.constructor import DbConstructor
 from simulator.simulator import Simulator
@@ -62,8 +63,12 @@ def task_create_db(force):
               default=datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d'),
               show_default=True,
               help='End date of sports gambling, the format must follow the pattern: YYYYmmDD, ex: 20190130.')
-def task_crawler(start_date, end_date):
-    a = Crawler(start_date=start_date, end_date=end_date)
+@click.option('--game_type', '-gt',
+              type=click.Choice(global_constant.game_type_map.keys()),
+              default=global_constant.NBA,
+              help='Target game type.', show_default=True)
+def task_crawler(start_date, end_date, game_type):
+    a = Crawler(start_date=start_date, end_date=end_date, game_type=game_type)
     a.start_crawler()
 
 

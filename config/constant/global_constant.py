@@ -9,3 +9,10 @@ user = 'user'
 password = 'password'
 host = 'host'
 schema = 'schema'
+
+# game type
+NBA = 'NBA'
+MLB = 'MLB'
+
+game_type_map = {MLB: 1,
+                 NBA: 3}

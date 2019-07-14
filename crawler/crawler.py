@@ -15,11 +15,12 @@ from config.logger import get_logger
 
 
 class Crawler(object):
-    def __init__(self, start_date, end_date):
+    def __init__(self, start_date, end_date, game_type):
         self.logger = get_logger(self.__class__.__name__)
         with open('config/configuration.yml') as config:
             self.config = yaml.load(config, Loader=yaml.FullLoader)
         self.data = None
+        self.game_type = game_type
         self.game_info = defaultdict(list)
         self.prediction_info_all_member = defaultdict(list)
         self.prediction_info_more_than_sixty = defaultdict(list)
@@ -76,7 +77,7 @@ class Crawler(object):
         for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
             if custom_row:
                 assert self.check_data_consistent(self.game_info)
-                self.append_game_id(row_content, date)
+                self.append_game_id_and_type(row_content, date)
                 self.append_game_time(row_content)
                 self.append_team_name(row_content)
                 self.append_score(row_content)
@@ -93,7 +94,7 @@ class Crawler(object):
         for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
             if guest_row:
                 assert self.check_data_consistent(self.prediction[group])
-                self.append_game_id(row_content, date, group)
+                self.append_game_id_and_type(row_content, date, group)
             self.append_prediction_national_point_spread(row_content, guest_row, group)
             self.append_prediction_national_total_point(row_content, guest_row, group)
             self.append_prediction_local_point_spread(row_content, guest_row, group)
@@ -163,7 +164,7 @@ class Crawler(object):
             self.prediction[group][db_constant.population_local_original_host].append(population)
         return
 
-    def append_game_id(self, row_content, date, group=None):
+    def append_game_id_and_type(self, row_content, date, group=None):
         game_id = date + row_content.find('td', 'td-gameinfo').find('h3').text
 
         if group:
@@ -171,12 +172,14 @@ class Crawler(object):
                 'current column size of {}: {}'.format(db_constant.game_id,
                                                        len(self.prediction[group][db_constant.game_id])))
             self.prediction[group][db_constant.game_id].append(game_id)
+            self.prediction[group][db_constant.game_type].append(self.game_type)
         else:
             self.logger.debug(
                 'current column size of {}: {}'.format(db_constant.game_id, len(self.game_info[db_constant.game_id])))
             self.game_info[db_constant.game_id].append(game_id)
+            self.game_info[db_constant.game_type].append(self.game_type)
 
-        self.logger.info('append game id: {}'.format(game_id))
+        self.logger.info('append game id: {}, game type: {}'.format(game_id, self.game_type))
         return
 
     def append_game_time(self, row_content):
