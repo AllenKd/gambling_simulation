@@ -35,7 +35,7 @@ class CrawledResultAnalyzer(object):
                                   db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
         self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
 
-    def start_analyzer(self):
+    def start_analyze(self):
         self.logger.info('start analyzer')
         game_data = self.get_game_data()
         self.judge(game_data)
