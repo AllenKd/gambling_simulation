@@ -13,7 +13,7 @@ support_strategy:
   kelly: false
 
 crawler:
-  urlPattern: "https://www.playsport.cc/predictgame.php?action=scale&allianceid=3&gametime={}&sid={}"
+  urlPattern: "https://www.playsport.cc/predictgame.php?action=scale&allianceid={game_type}&gametime={game_date}&sid={group_type}"
   dateFormat: "%Y%m%d"
   memberType:
     all: 0

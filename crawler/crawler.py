@@ -299,4 +299,6 @@ class Crawler(object):
         return length_list.count(length_list[0]) == len(length_list) if length_list else True
 
     def get_url(self, date, member_type=1):
-        return self.config['crawler']['urlPattern'].format(date, member_type)
+        return self.config['crawler']['urlPattern'].format(game_type=global_constant.game_type_map[self.game_type],
+                                                           game_date=date,
+                                                           group_type=member_type)

@@ -79,7 +79,7 @@ def task_crawler(start_date, end_date, game_type):
               help='Write analyzed result to db.', show_default=True)
 def task_analyzer(to_db):
     a = CrawledResultAnalyzer(to_db=to_db)
-    a.start_analyzer()
+    a.start_analyze()
 
 
 cli.add_command(task_simulator)
