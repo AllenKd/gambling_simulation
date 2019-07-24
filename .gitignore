@@ -12,3 +12,5 @@ player/logfile
 \venv/
 
 *.log
+
+\.DS_Store

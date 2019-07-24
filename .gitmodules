@@ -2,3 +2,7 @@
 	path = pipeline
 	url = git@github.com:AllenKd/pipeline.git
     branch = develop
+[submodule "game_predictor"]
+	path = game_predictor
+	url = git@github.com:AllenKd/game_predictor.git
+	branch = develop
