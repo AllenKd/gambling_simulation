@@ -41,7 +41,8 @@ class Crawler(object):
         user = self.config[global_constant.DB][global_constant.user]
         password = self.config[global_constant.DB][global_constant.password]
         host = self.config[global_constant.DB][global_constant.host]
-        self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
+        port = self.config[global_constant.DB][global_constant.port]
+        self.engine = create_engine('mysql+pymysql://{}:{}@{}:{}'.format(user, password, host, port))
 
     def start_crawler(self):
         total_crawled_game = 0
@@ -73,18 +74,18 @@ class Crawler(object):
 
     def get_game_data(self, date, soup):
         self.logger.info('start crawl and parse game data: {}'.format(date))
-        custom_row = True
+        guest_row = True
         for row_content in soup.find('tbody').findAll('tr', {'class': 'game-set'}):
-            if custom_row:
+            if guest_row:
                 assert self.check_data_consistent(self.game_info)
                 self.append_game_id_and_type(row_content, date)
                 self.append_game_time(row_content)
                 self.append_team_name(row_content)
                 self.append_score(row_content)
                 self.append_total_point_info(row_content)
-            self.append_point_spread_info(row_content, custom_row)
-            self.append_response_ratio_info(row_content, custom_row)
-            custom_row = not custom_row
+            self.append_point_spread_info(row_content, guest_row)
+            self.append_response_ratio_info(row_content, guest_row)
+            guest_row = not guest_row
         self.logger.info('finished crawl and parse game data: {}'.format(date))
         return
 
@@ -224,9 +225,9 @@ class Crawler(object):
         self.game_info[db_constant.host].append(host_abbreviate)
         return
 
-    def append_point_spread_info(self, row_content, custom_row):
+    def append_point_spread_info(self, row_content, guest_row):
         spread_info = row_content.find('td', {'class': 'td-universal-bet01'}).text.strip()
-        if len(spread_info) != 1:
+        if len(spread_info) > 1:
             # get national point spread info
             self.logger.debug('the row contains national spread point info')
             national_spread_from = crawler_constant.chinese_mapping[spread_info[0]]
@@ -238,8 +239,14 @@ class Crawler(object):
             self.game_info[db_constant.national_host_point_spread].append(national_spread_point)
             self.game_info[db_constant.win_if_meet_spread_point].append(hit_result)
             self.game_info[db_constant.response_ratio_if_hit_spread_point].append(hit_percentage / 100)
+        elif len(spread_info) == 0 and guest_row:
+            # no this kind of gambling
+            self.logger.info('no gambling information')
+            self.game_info[db_constant.national_host_point_spread].append(None)
+            self.game_info[db_constant.win_if_meet_spread_point].append(None)
+            self.game_info[db_constant.response_ratio_if_hit_spread_point].append(None)
 
-        if custom_row:
+        if guest_row:
             # get local point spread info and response ratio
             local_host_spread_point = row_content.find('td', {'class': 'td-bank-bet01'}).text.strip()
             # filter out float
