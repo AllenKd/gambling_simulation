@@ -31,9 +31,10 @@ class CrawledResultAnalyzer(object):
         user = self.config[global_constant.DB][global_constant.user]
         password = self.config[global_constant.DB][global_constant.password]
         host = self.config[global_constant.DB][global_constant.host]
-        self.db = pymysql.connect(host=host, user=user, passwd=password,
+        port = self.config[global_constant.DB][global_constant.port]
+        self.db = pymysql.connect(host=host, user=user, passwd=password, port=port,
                                   db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
-        self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
+        self.engine = create_engine('mysql+pymysql://{}:{}@{}:{}'.format(user, password, host, port))
 
     def start_analyze(self):
         self.logger.info('start analyzer')
@@ -66,6 +67,7 @@ class CrawledResultAnalyzer(object):
         self.logger.info('start game result judge')
 
         self.game_judgement = pd.DataFrame(index=game_data.index)
+        self.game_judgement[db_constant.game_type] = game_data[db_constant.game_type]
 
         self.game_judgement[db_constant.host_win_original] = game_data[db_constant.guest_score] < game_data[
             db_constant.host_score]
@@ -89,6 +91,7 @@ class CrawledResultAnalyzer(object):
     def prediction_judge(self, prediction_data, group):
         self.logger.info('start prediction judge, {}'.format(group))
         self.prediction_judge_dict[group] = pd.DataFrame(index=prediction_data.index)
+        self.prediction_judge_dict[group][db_constant.game_type] = prediction_data[db_constant.game_type]
 
         self.logger.debug('start judge local original')
         temp_target_prediction = prediction_data[db_constant.population_local_original_guest] < prediction_data[
@@ -217,7 +220,7 @@ class CrawledResultAnalyzer(object):
                   name=table_name,
                   index_label='game_id' if not is_summarize else None,
                   index=not is_summarize,
-                  if_exists='append',
+                  if_exists='replace',
                   schema=self.config[global_constant.DB][global_constant.schema])
         self.logger.info('finished write game data to db')
         self.db.connect()

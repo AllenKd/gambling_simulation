@@ -8,6 +8,7 @@ DB = 'DB'
 user = 'user'
 password = 'password'
 host = 'host'
+port = 'port'
 schema = 'schema'
 
 # game type
