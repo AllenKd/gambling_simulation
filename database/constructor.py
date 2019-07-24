@@ -18,7 +18,8 @@ class DbConstructor(object):
         user = self.config[global_constant.DB][global_constant.user]
         password = self.config[global_constant.DB][global_constant.password]
         host = self.config[global_constant.DB][global_constant.host]
-        self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
+        port = self.config[global_constant.DB][global_constant.port]
+        self.engine = create_engine('mysql+pymysql://{}:{}@{}:{}'.format(user, password, host, port))
 
     def create_schema(self, force=False):
         self.logger.info('start create schema, type force: {}'.format(force))
@@ -132,20 +133,28 @@ class DbConstructor(object):
                                                schema=self.config[global_constant.DB][global_constant.schema])
 
         # create each table
-        game_data.create(self.engine)
-        game_judgement.create(self.engine)
-        prediction_judgement_summarize.create(self.engine)
-        template(crawler_constant.all_member).create(self.engine)
-        template(crawler_constant.more_than_sixty).create(self.engine)
-        template(crawler_constant.all_prefer).create(self.engine)
-        template(crawler_constant.top_100).create(self.engine)
+        self.create_if_not_exist(game_data)
+        self.create_if_not_exist(game_data)
+        self.create_if_not_exist(game_judgement)
+        self.create_if_not_exist(prediction_judgement_summarize)
+        self.create_if_not_exist(template(crawler_constant.all_member))
+        self.create_if_not_exist(template(crawler_constant.more_than_sixty))
+        self.create_if_not_exist(template(crawler_constant.all_prefer))
+        self.create_if_not_exist(template(crawler_constant.top_100))
 
-        prediction_judgement_template(crawler_constant.all_member).create(self.engine)
-        prediction_judgement_template(crawler_constant.more_than_sixty).create(self.engine)
-        prediction_judgement_template(crawler_constant.all_prefer).create(self.engine)
-        prediction_judgement_template(crawler_constant.top_100).create(self.engine)
+        self.create_if_not_exist(prediction_judgement_template(crawler_constant.all_member))
+        self.create_if_not_exist(prediction_judgement_template(crawler_constant.more_than_sixty))
+        self.create_if_not_exist(prediction_judgement_template(crawler_constant.all_prefer))
+        self.create_if_not_exist(prediction_judgement_template(crawler_constant.top_100))
 
         return
+
+    def create_if_not_exist(self, table):
+        if table.exists(bind=self.engine):
+            self.logger.info('table {} already exist, skip creation'.format(table.name))
+            return
+        self.logger.info('create table: {}'.format(table.name))
+        table.create(self.engine)
 
     def get_connection(self):
         user = self.config[global_constant.DB][global_constant.user]

@@ -220,7 +220,7 @@ class CrawledResultAnalyzer(object):
                   name=table_name,
                   index_label='game_id' if not is_summarize else None,
                   index=not is_summarize,
-                  if_exists='replace',
+                  if_exists='append',
                   schema=self.config[global_constant.DB][global_constant.schema])
         self.logger.info('finished write game data to db')
         self.db.connect()

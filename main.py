@@ -46,10 +46,20 @@ def task_simulator(game_times, num_of_player, bet_strategy, init_money):
               is_flag=True,
               default=False,
               help='Drop schema before create.', show_default=True)
-def task_create_db(force):
+@click.option('--create_schema', '-cs',
+              is_flag=True,
+              default=False,
+              help='Create schema.', show_default=True)
+@click.option('--create_table', '-ct',
+              is_flag=True,
+              default=True,
+              help='Create table.', show_default=True)
+def task_create_db(force, create_schema, create_table):
     b = DbConstructor()
-    b.create_schema(force=force)
-    b.create_tables()
+    if create_schema:
+        b.create_schema(force=force)
+    if create_table:
+        b.create_tables()
 
 
 @click.command('crawl_data', help='Start crawler to get sports gambling data.')
@@ -68,8 +78,7 @@ def task_create_db(force):
               default=global_constant.NBA,
               help='Target game type.', show_default=True)
 def task_crawler(start_date, end_date, game_type):
-    a = Crawler(start_date=start_date, end_date=end_date, game_type=game_type)
-    a.start_crawler()
+    Crawler(start_date=start_date, end_date=end_date, game_type=game_type).start_crawler()
 
 
 @click.command('analyze', help='Make judgement about crawled data.')
@@ -78,8 +87,7 @@ def task_crawler(start_date, end_date, game_type):
               default=False,
               help='Write analyzed result to db.', show_default=True)
 def task_analyzer(to_db):
-    a = CrawledResultAnalyzer(to_db=to_db)
-    a.start_analyze()
+    CrawledResultAnalyzer(to_db=to_db).start_analyze()
 
 
 cli.add_command(task_simulator)
