@@ -44,6 +44,7 @@ class CrawledResultAnalyzer(object):
 
         for group in crawler_constant.prediction_group.keys():
             prediction_data = self.get_prediction_data(group)
+            self.prepare_game_judgement(prediction_data, group)
             self.prediction_judge(prediction_data, group)
             self.write_to_db(self.prediction_judge_dict[group], '{}_{}'.format(db_constant.prediction_judgement, group))
 
@@ -56,12 +57,43 @@ class CrawledResultAnalyzer(object):
 
     def get_game_data(self):
         self.logger.info('start get game data')
-        return pd.read_sql('SELECT * FROM {}'.format(db_constant.game_data), con=self.db, index_col=db_constant.game_id)
+        return pd.read_sql('SELECT * FROM {} WHERE {} NOT IN (SELECT {} FROM {})'.format(db_constant.game_data,
+                                                                                         db_constant.game_id,
+                                                                                         db_constant.game_id,
+                                                                                         db_constant.game_judgement),
+                           con=self.db,
+                           index_col=db_constant.game_id)
 
     def get_prediction_data(self, group):
-        self.logger.info('start get prediction data')
-        return pd.read_sql('SELECT * FROM {}_{}'.format(db_constant.prediction_data, group), con=self.db,
-                           index_col=db_constant.game_id)
+        self.logger.info('start get prediction data of group: {}'.format(group))
+        return pd.read_sql(
+            'SELECT * FROM {}_{} WHERE {} NOT IN (SELECT {} FROM {}_{})'.format(db_constant.prediction_data,
+                                                                                group,
+                                                                                db_constant.game_id,
+                                                                                db_constant.game_id,
+                                                                                db_constant.prediction_judgement,
+                                                                                group),
+            con=self.db,
+            index_col=db_constant.game_id)
+
+    def prepare_game_judgement(self, prediction_data, group):
+        self.logger.info('start prepare game judgement')
+        if len(self.game_judgement) != len(prediction_data):
+            self.logger.warn('length of judgement data({}) and prediction data({}) are not equal'.format(
+                len(self.game_judgement), len(prediction_data)))
+            self.logger.info('get judgement data based on prediction data')
+            self.game_judgement = pd.read_sql(
+                'SELECT * FROM {} WHERE {} NOT IN (SELECT {} FROM {}_{})'.format(db_constant.game_judgement,
+                                                                                  db_constant.game_id,
+                                                                                  db_constant.game_id,
+                                                                                  db_constant.prediction_judgement,
+                                                                                  group),
+                con=self.db,
+                index_col=db_constant.game_id)
+            return
+        else:
+            self.logger.info('judgement data already ready')
+            return
 
     def judge(self, game_data):
         self.logger.info('start game result judge')
