@@ -90,6 +90,7 @@ class CrawledResultAnalyzer(object):
                                                                                   group),
                 con=self.db,
                 index_col=db_constant.game_id)
+            # TODO double check that length is fitted ?
             return
         else:
             self.logger.info('judgement data already ready')
