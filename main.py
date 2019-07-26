@@ -1,10 +1,11 @@
 import datetime
 
 import click
+from game_predictor.data_backup_scheduler import DataBackupScheduler
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
-from config.constant import player as player_constant
 from config.constant import global_constant
+from config.constant import player as player_constant
 from crawler.crawler import Crawler
 from database.constructor import DbConstructor
 from simulator.simulator import Simulator
@@ -90,10 +91,15 @@ def task_analyzer(to_db):
     CrawledResultAnalyzer(to_db=to_db).start_analyze()
 
 
-cli.add_command(task_simulator)
-cli.add_command(task_create_db)
-cli.add_command(task_crawler)
-cli.add_command(task_analyzer)
+@click.command('backup', help='Backup database.')
+def task_backup():
+    DataBackupScheduler().backup()
+
 
 if __name__ == '__main__':
+    cli.add_command(task_simulator)
+    cli.add_command(task_create_db)
+    cli.add_command(task_crawler)
+    cli.add_command(task_analyzer)
+    cli.add_command(task_backup)
     cli()
