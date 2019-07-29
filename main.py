@@ -2,6 +2,7 @@ import datetime
 
 import click
 from game_predictor.data_backup_scheduler import DataBackupScheduler
+from dateutil.relativedelta import relativedelta
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
 from config.constant import global_constant
@@ -66,7 +67,9 @@ def task_create_db(force, create_schema, create_table):
 @click.command('crawl_data', help='Start crawler to get sports gambling data.')
 @click.option('--start_date', '-sd',
               type=str,
-              required=True,
+              required=False,
+              default=datetime.datetime.strftime(datetime.datetime.now() - relativedelta(days=7), '%Y%m%d'),
+              show_default=True,
               help='Start date of sports gambling, the format must follow the pattern: YYYYmmDD, ex: 20190130.')
 @click.option('--end_date', '-ed',
               type=str,
