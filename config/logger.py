@@ -17,7 +17,7 @@ def get_logger(player_id):
                                 filename='log/{:%Y-%m-%d}.log'.format(datetime.datetime.now()))
 
         console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
+        console.setLevel(level)
 
         formatter = logging.Formatter('%(asctime)s %(filename)s %(lineno)d %(name)s: %(levelname)s %(message)s')
         console.setFormatter(formatter)

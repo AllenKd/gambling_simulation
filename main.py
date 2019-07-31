@@ -1,10 +1,12 @@
 import datetime
 
 import click
+from game_predictor.data_backup_scheduler import DataBackupScheduler
+from dateutil.relativedelta import relativedelta
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
-from config.constant import player as player_constant
 from config.constant import global_constant
+from config.constant import player as player_constant
 from crawler.crawler import Crawler
 from database.constructor import DbConstructor
 from simulator.simulator import Simulator
@@ -65,7 +67,9 @@ def task_create_db(force, create_schema, create_table):
 @click.command('crawl_data', help='Start crawler to get sports gambling data.')
 @click.option('--start_date', '-sd',
               type=str,
-              required=True,
+              required=False,
+              default=datetime.datetime.strftime(datetime.datetime.now() - relativedelta(days=7), '%Y%m%d'),
+              show_default=True,
               help='Start date of sports gambling, the format must follow the pattern: YYYYmmDD, ex: 20190130.')
 @click.option('--end_date', '-ed',
               type=str,
@@ -90,10 +94,15 @@ def task_analyzer(to_db):
     CrawledResultAnalyzer(to_db=to_db).start_analyze()
 
 
-cli.add_command(task_simulator)
-cli.add_command(task_create_db)
-cli.add_command(task_crawler)
-cli.add_command(task_analyzer)
+@click.command('backup', help='Backup database.')
+def task_backup():
+    DataBackupScheduler().backup()
+
 
 if __name__ == '__main__':
+    cli.add_command(task_simulator)
+    cli.add_command(task_create_db)
+    cli.add_command(task_crawler)
+    cli.add_command(task_analyzer)
+    cli.add_command(task_backup)
     cli()
