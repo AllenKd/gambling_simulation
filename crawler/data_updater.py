@@ -30,7 +30,12 @@ class DataUpdater(object):
                                       db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
 
     def update_db(self):
+
         pass
 
     def get_latest_record(self):
         pass
+        cursor = self.db.cursor()
+        cursor.execute('SELECT {} FROM {} ORDER BY {} DESC '.format(db_constant.game_id, db_constant.game_data,
+                                                                    db_constant.game_id))
+        a = cursor.fetchone()
