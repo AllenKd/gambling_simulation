@@ -58,7 +58,7 @@ class Crawler(object):
                     self.get_game_data(date, soup)
                     self.write_to_db(pd.DataFrame.from_dict(self.game_info), db_constant.game_data)
                     # clean cache after write to db
-                    total_crawled_game += len(self.game_info[db_constant.game_id])
+                    total_crawled_game += len(self.game_info[db_constant.gamble_id])
                     self.game_info = defaultdict(list)
 
                 # get prediction info for each prediction group
@@ -166,21 +166,25 @@ class Crawler(object):
         return
 
     def append_game_id_and_type(self, row_content, date, group=None):
-        game_id = date + row_content.find('td', 'td-gameinfo').find('h3').text
-
+        gamble_id = row_content.find('td', 'td-gameinfo').find('h3').text
+        gamble_id = gamble_id if gamble_id else None
+        # prediction-related table
         if group:
             self.logger.debug(
-                'current column size of {}: {}'.format(db_constant.game_id,
-                                                       len(self.prediction[group][db_constant.game_id])))
-            self.prediction[group][db_constant.game_id].append(game_id)
+                'current column size of {}: {}'.format(db_constant.gamble_id,
+                                                       len(self.prediction[group][db_constant.gamble_id])))
+            self.prediction[group][db_constant.game_date].append(date)
+            self.prediction[group][db_constant.gamble_id].append(gamble_id)
             self.prediction[group][db_constant.game_type].append(self.game_type)
+        # game_data table
         else:
             self.logger.debug(
-                'current column size of {}: {}'.format(db_constant.game_id, len(self.game_info[db_constant.game_id])))
-            self.game_info[db_constant.game_id].append(game_id)
+                'current column size of {}: {}'.format(db_constant.gamble_id, len(self.game_info[db_constant.gamble_id])))
+            self.game_info[db_constant.game_date].append(date)
+            self.game_info[db_constant.gamble_id].append(gamble_id)
             self.game_info[db_constant.game_type].append(self.game_type)
 
-        self.logger.info('append game id: {}, game type: {}'.format(game_id, self.game_type))
+        self.logger.info('append game id: {}, game type: {}'.format(gamble_id, self.game_type))
         return
 
     def append_game_time(self, row_content):
@@ -294,7 +298,6 @@ class Crawler(object):
         self.logger.info('start write game data to db: {}'.format(table_name))
         df.to_sql(con=self.engine,
                   name=table_name,
-                  index_label='game_id',
                   index=False,
                   if_exists='append',
                   schema=self.config[global_constant.DB][global_constant.schema])
