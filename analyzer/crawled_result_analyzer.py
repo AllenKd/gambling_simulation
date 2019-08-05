@@ -58,8 +58,8 @@ class CrawledResultAnalyzer(object):
     def get_game_data(self):
         self.logger.info('start get game data')
         return pd.read_sql('SELECT * FROM {} WHERE {} NOT IN (SELECT {} FROM {})'.format(db_constant.game_data,
-                                                                                         db_constant.game_id,
-                                                                                         db_constant.game_id,
+                                                                                         db_constant.game_date,
+                                                                                         db_constant.game_date,
                                                                                          db_constant.game_judgement),
                            con=self.db,
                            index_col=db_constant.game_id)
@@ -69,8 +69,8 @@ class CrawledResultAnalyzer(object):
         return pd.read_sql(
             'SELECT * FROM {}_{} WHERE {} NOT IN (SELECT {} FROM {}_{})'.format(db_constant.prediction_data,
                                                                                 group,
-                                                                                db_constant.game_id,
-                                                                                db_constant.game_id,
+                                                                                db_constant.game_date,
+                                                                                db_constant.game_date,
                                                                                 db_constant.prediction_judgement,
                                                                                 group),
             con=self.db,
@@ -84,8 +84,8 @@ class CrawledResultAnalyzer(object):
             self.logger.info('get judgement data based on prediction data')
             self.game_judgement = pd.read_sql(
                 'SELECT * FROM {} WHERE {} NOT IN (SELECT {} FROM {}_{})'.format(db_constant.game_judgement,
-                                                                                  db_constant.game_id,
-                                                                                  db_constant.game_id,
+                                                                                  db_constant.game_date,
+                                                                                  db_constant.game_date,
                                                                                   db_constant.prediction_judgement,
                                                                                   group),
                 con=self.db,
@@ -210,7 +210,7 @@ class CrawledResultAnalyzer(object):
         for group in self.prediction_judge_dict.keys():
             table_name = '{}_{}'.format(db_constant.prediction_judgement, group)
             prediction_judgement = pd.read_sql('SELECT * FROM {}'.format(table_name),
-                                               con=self.db, index_col=db_constant.game_id)
+                                               con=self.db, index_col=db_constant.game_date)
             for gambling_class in gambling_classes:
                 self.sub_summarize(group, gambling_class, prediction_judgement)
 

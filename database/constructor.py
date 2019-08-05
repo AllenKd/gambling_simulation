@@ -35,7 +35,9 @@ class DbConstructor(object):
     def create_tables(self):
         # self.engine.execute('USE {}'.format(self.config[string_constant.DB][string_constant.schema]))
         game_data = Table(db_constant.game_data, MetaData(),
-                          Column(db_constant.game_id, String(12), primary_key=True),
+                          Column(db_constant.row_id, Integer, primary_key=True, autoincrement='ignore_fk'),
+                          Column(db_constant.game_date, Integer),
+                          Column(db_constant.gamble_id, Integer),
                           Column(db_constant.game_type, String(16)),
                           Column(db_constant.play_time, String(10)),
                           Column(db_constant.am_pm, String(2)),
@@ -56,7 +58,9 @@ class DbConstructor(object):
                           schema=self.config[global_constant.DB][global_constant.schema])
 
         game_judgement = Table(db_constant.game_judgement, MetaData(),
-                               Column(db_constant.game_id, String(12), primary_key=True),
+                               Column(db_constant.row_id, Integer, primary_key=True, autoincrement='ignore_fk'),
+                               Column(db_constant.game_date, Integer),
+                               Column(db_constant.gamble_id, Integer),
                                Column(db_constant.game_type, String(16)),
                                Column(db_constant.host_win_original, Integer),
                                Column(db_constant.host_win_point_spread_national, Integer),
@@ -87,7 +91,9 @@ class DbConstructor(object):
         # prediction judge table template for each prediction group
         def prediction_judgement_template(table_name): return Table(
             '{}_{}'.format(db_constant.prediction_judgement, table_name), MetaData(),
-            Column(db_constant.game_id, String(12), primary_key=True),
+            Column(db_constant.row_id, Integer, primary_key=True, autoincrement='ignore_fk'),
+            Column(db_constant.game_date, Integer),
+            Column(db_constant.gamble_id, Integer),
             Column(db_constant.game_type, String(16)),
             Column(db_constant.national_point_spread_result, Integer),
             Column(db_constant.national_point_spread_percentage, Integer),
@@ -108,7 +114,10 @@ class DbConstructor(object):
 
         # prediction table template for each prediction group
         def template(table_name): return Table('{}_{}'.format(db_constant.prediction_data, table_name), MetaData(),
-                                               Column(db_constant.game_id, String(12), primary_key=True),
+                                               Column(db_constant.row_id, Integer, primary_key=True,
+                                                      autoincrement='ignore_fk'),
+                                               Column(db_constant.game_date, Integer),
+                                               Column(db_constant.gamble_id, Integer),
                                                Column(db_constant.game_type, String(16)),
                                                Column(db_constant.percentage_national_point_spread_guest, Integer),
                                                Column(db_constant.population_national_point_spread_guest, Integer),

@@ -55,7 +55,10 @@ local_original_max_continuous_lose = 'local_original_max_continuous_lose'
 local_original_number_of_valid_game = 'local_original_number_of_valid_game'
 
 # column name of game_data
-game_id = 'game_id'
+row_id = 'id'
+game_date = 'game_date'
+gamble_id = 'gamble_id'
+# game_id = 'game_id'
 game_type = 'game_type'
 play_time = 'play_time'
 am_pm = 'AM_PM'
