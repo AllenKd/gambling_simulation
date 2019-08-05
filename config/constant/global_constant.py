@@ -14,7 +14,7 @@ schema = 'schema'
 # game type
 NBA = 'NBA'
 MLB = 'MLB'
-NPB = 'NPB'
+NPB = 'NPB'  # Nippon Professional Baseball
 CPBL = 'CPBL'
 WNBA = 'WNBA'
 FOOTBALL = 'FOOTBALL'

@@ -1,7 +1,7 @@
 import logging
 import datetime
 import yaml
-
+import os
 
 init = False
 
@@ -9,6 +9,7 @@ init = False
 def get_logger(player_id):
     global init
     if not init:
+        os.makedirs('log', exist_ok=True)
         with open('config/configuration.yml', 'r') as config:
             level = logging.getLevelName(yaml.load(config, Loader=yaml.FullLoader)['logging']['level'])
             logging.basicConfig(level=level,
