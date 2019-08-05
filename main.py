@@ -8,6 +8,7 @@ from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
 from config.constant import global_constant
 from config.constant import player as player_constant
 from crawler.crawler import Crawler
+from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
 from simulator.simulator import Simulator
 
@@ -81,8 +82,15 @@ def task_create_db(force, create_schema, create_table):
               type=click.Choice(global_constant.game_type_map.keys()),
               default=global_constant.NBA,
               help='Target game type.', show_default=True)
-def task_crawler(start_date, end_date, game_type):
-    Crawler(start_date=start_date, end_date=end_date, game_type=game_type).start_crawler()
+@click.option('--update_db', '-u',
+              is_flag=True,
+              default=False,
+              help='Update game data.', show_default=True)
+def task_crawler(start_date, end_date, game_type, update_db):
+    if update_db:
+        DataUpdater().update_db()
+    else:
+        Crawler(start_date=start_date, end_date=end_date, game_type=game_type).start_crawler()
 
 
 @click.command('analyze', help='Make judgement about crawled data.')
