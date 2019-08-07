@@ -14,3 +14,4 @@ table_list = [db_constant.game_data,
 
 start = 'start'
 end = 'end'
+backup_directory = 'game_predictor/sql_backup'
