@@ -46,10 +46,10 @@ class DataUpdater(object):
         for game_type in self.game_season.keys():
             self.logger.debug('getting latest record of game type: {}'.format(game_type))
             cursor.execute('SELECT {} FROM {} where {} = \'{}\' ORDER BY {} DESC LIMIT 1'.format(db_constant.game_date,
-                                                                                          db_constant.game_data,
-                                                                                          db_constant.game_type,
-                                                                                          game_type,
-                                                                                          db_constant.row_id))
+                                                                                                 db_constant.game_data,
+                                                                                                 db_constant.game_type,
+                                                                                                 game_type,
+                                                                                                 db_constant.row_id))
             latest_record = cursor.fetchone()
             if latest_record:
                 game_latest_record[game_type] = latest_record[0]
