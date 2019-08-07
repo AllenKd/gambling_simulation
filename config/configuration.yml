@@ -1,9 +1,11 @@
 logging:
-  level: "INFO"
+  level: "DEBUG"
+
 gambling:
   ratio_per_game: 1.75
   bet_base: 100
   combination: 1
+
 stratagy_size: 20
 support_strategy:
 # true: support table strategy
@@ -20,9 +22,13 @@ crawler:
     moreThan60Percent: 1
     allPrefer: 2
     top100: 3
+
+data_updater:
+  update_period: 24 # hour
+
 DB:
-  host: "192.168.31.61"
-  port: 3306
+  host: "allenfield.ddns.net"
+  port: 7306
   user: "allen"
-  password: "password"
+  password: "aldbpw"
   schema: "gambling_simulation"
