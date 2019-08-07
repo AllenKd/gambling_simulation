@@ -107,10 +107,16 @@ def task_backup():
     DataBackupScheduler().backup()
 
 
+@click.command('restore', help='Restore data from backuped sql files.')
+def task_data_restore():
+    DataBackupScheduler().data_restore()
+
+
 if __name__ == '__main__':
     cli.add_command(task_simulator)
     cli.add_command(task_create_db)
     cli.add_command(task_crawler)
     cli.add_command(task_analyzer)
     cli.add_command(task_backup)
+    cli.add_command(task_data_restore)
     cli()
