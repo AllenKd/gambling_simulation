@@ -1,7 +1,6 @@
 import datetime
 
 import click
-from game_predictor.data_backup_scheduler import DataBackupScheduler
 from dateutil.relativedelta import relativedelta
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
@@ -10,6 +9,7 @@ from config.constant import player as player_constant
 from crawler.crawler import Crawler
 from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
+from game_predictor.data_backup_scheduler import DataBackupScheduler
 from simulator.simulator import Simulator
 
 
@@ -108,8 +108,22 @@ def task_backup():
 
 
 @click.command('restore', help='Restore data from backuped sql files.')
-def task_data_restore():
-    DataBackupScheduler().data_restore()
+@click.option('--sql_file', '-f',
+              type=str,
+              required=False,
+              default=None,
+              show_default=True,
+              help='Specific sql file. ex: ./backup_file.sql')
+def task_data_restore(sql_file):
+    if sql_file:
+        DataBackupScheduler().data_restore_worker(sql_file)
+    else:
+        DataBackupScheduler().data_restore()
+
+
+@click.command('reset_id', help='Reset table auto-increment key.')
+def task_reset_id():
+    DataBackupScheduler().reset_id()
 
 
 if __name__ == '__main__':
@@ -119,4 +133,5 @@ if __name__ == '__main__':
     cli.add_command(task_analyzer)
     cli.add_command(task_backup)
     cli.add_command(task_data_restore)
+    cli.add_command(task_reset_id)
     cli()
