@@ -45,7 +45,7 @@ class DataUpdater(object):
         cursor = self.db.cursor()
         for game_type in self.game_season.keys():
             self.logger.debug('getting latest record of game type: {}'.format(game_type))
-            cursor.execute('SELECT {} FROM {} where {} = \'{}\' ORDER BY {} DESC '.format(db_constant.game_date,
+            cursor.execute('SELECT {} FROM {} where {} = \'{}\' ORDER BY {} DESC LIMIT 1'.format(db_constant.game_date,
                                                                                           db_constant.game_data,
                                                                                           db_constant.game_type,
                                                                                           game_type,
