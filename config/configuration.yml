@@ -27,8 +27,8 @@ data_updater:
   update_period: 24 # hour
 
 DB:
-  host: "allenfield.ddns.net"
-  port: 7306
+  host: "192168.31.61"
+  port: 3306
   user: "allen"
-  password: "aldbpw"
+  password: "allen"
   schema: "gambling_simulation"
