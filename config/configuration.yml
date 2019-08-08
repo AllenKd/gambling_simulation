@@ -27,7 +27,7 @@ data_updater:
   update_period: 24 # hour
 
 DB:
-  host: "192168.31.61"
+  host: "192.168.31.61"
   port: 3306
   user: "allen"
   password: "allen"
