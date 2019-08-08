@@ -184,7 +184,7 @@ class Crawler(object):
             self.game_info[db_constant.gamble_id].append(gamble_id)
             self.game_info[db_constant.game_type].append(self.game_type)
 
-        self.logger.info('append game id: {}, game type: {}'.format(gamble_id, self.game_type))
+        self.logger.info('append gamble id: {}, game type: {}'.format(gamble_id, self.game_type))
         return
 
     def append_game_time(self, row_content):
