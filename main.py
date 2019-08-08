@@ -1,7 +1,6 @@
 import datetime
 
 import click
-from game_predictor.data_backup_scheduler import DataBackupScheduler
 from dateutil.relativedelta import relativedelta
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
@@ -10,6 +9,7 @@ from config.constant import player as player_constant
 from crawler.crawler import Crawler
 from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
+from game_predictor.data_backup_scheduler import DataBackupScheduler
 from simulator.simulator import Simulator
 
 
@@ -82,15 +82,13 @@ def task_create_db(force, create_schema, create_table):
               type=click.Choice(global_constant.game_type_map.keys()),
               default=global_constant.NBA,
               help='Target game type.', show_default=True)
-@click.option('--update_db', '-u',
-              is_flag=True,
-              default=False,
-              help='Update game data.', show_default=True)
-def task_crawler(start_date, end_date, game_type, update_db):
-    if update_db:
-        DataUpdater().update_db()
-    else:
-        Crawler(start_date=start_date, end_date=end_date, game_type=game_type).start_crawler()
+def task_crawler(start_date, end_date, game_type):
+    Crawler(start_date=start_date, end_date=end_date, game_type=game_type).start_crawler()
+
+
+@click.command('update_db', help='Update game data based on game_season.yml')
+def task_update_db():
+    DataUpdater().update_db()
 
 
 @click.command('analyze', help='Make judgement about crawled data.')
@@ -107,10 +105,31 @@ def task_backup():
     DataBackupScheduler().backup()
 
 
+@click.command('restore', help='Restore data from backuped sql files.')
+@click.option('--sql_file', '-f',
+              type=str,
+              required=False,
+              default=None,
+              show_default=True,
+              help='Specific sql file. ex: ./backup_file.sql')
+def task_data_restore(sql_file):
+    if sql_file:
+        DataBackupScheduler().data_restore_worker(sql_file)
+    else:
+        DataBackupScheduler().data_restore()
+
+
+@click.command('reset_id', help='Reset table auto-increment key.')
+def task_reset_id():
+    DataBackupScheduler().reset_id()
+
+
 if __name__ == '__main__':
     cli.add_command(task_simulator)
     cli.add_command(task_create_db)
     cli.add_command(task_crawler)
     cli.add_command(task_analyzer)
     cli.add_command(task_backup)
+    cli.add_command(task_data_restore)
+    cli.add_command(task_reset_id)
     cli()
