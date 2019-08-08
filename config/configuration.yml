@@ -30,5 +30,5 @@ DB:
   host: "192.168.31.61"
   port: 3306
   user: "allen"
-  password: "allen"
+  password: "password"
   schema: "gambling_simulation"
