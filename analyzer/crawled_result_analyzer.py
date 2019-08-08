@@ -58,23 +58,23 @@ class CrawledResultAnalyzer(object):
     def get_game_data(self):
         self.logger.info('start get game data')
         return pd.read_sql('SELECT * FROM {} WHERE {} NOT IN (SELECT {} FROM {})'.format(db_constant.game_data,
-                                                                                         db_constant.game_date,
-                                                                                         db_constant.game_date,
+                                                                                         db_constant.row_id,
+                                                                                         db_constant.row_id,
                                                                                          db_constant.game_judgement),
                            con=self.db,
-                           index_col=db_constant.game_id)
+                           index_col=db_constant.row_id)
 
     def get_prediction_data(self, group):
         self.logger.info('start get prediction data of group: {}'.format(group))
         return pd.read_sql(
             'SELECT * FROM {}_{} WHERE {} NOT IN (SELECT {} FROM {}_{})'.format(db_constant.prediction_data,
                                                                                 group,
-                                                                                db_constant.game_date,
-                                                                                db_constant.game_date,
+                                                                                db_constant.row_id,
+                                                                                db_constant.row_id,
                                                                                 db_constant.prediction_judgement,
                                                                                 group),
             con=self.db,
-            index_col=db_constant.game_id)
+            index_col=db_constant.row_id)
 
     def prepare_game_judgement(self, prediction_data, group):
         self.logger.info('start prepare game judgement')
@@ -84,12 +84,12 @@ class CrawledResultAnalyzer(object):
             self.logger.info('get judgement data based on prediction data')
             self.game_judgement = pd.read_sql(
                 'SELECT * FROM {} WHERE {} NOT IN (SELECT {} FROM {}_{})'.format(db_constant.game_judgement,
-                                                                                  db_constant.game_date,
-                                                                                  db_constant.game_date,
-                                                                                  db_constant.prediction_judgement,
-                                                                                  group),
+                                                                                 db_constant.row_id,
+                                                                                 db_constant.row_id,
+                                                                                 db_constant.prediction_judgement,
+                                                                                 group),
                 con=self.db,
-                index_col=db_constant.game_id)
+                index_col=db_constant.row_id)
             # TODO double check that length is fitted ?
             return
         else:
@@ -100,6 +100,8 @@ class CrawledResultAnalyzer(object):
         self.logger.info('start game result judge')
 
         self.game_judgement = pd.DataFrame(index=game_data.index)
+        self.game_judgement[db_constant.game_date] = game_data[db_constant.game_date]
+        self.game_judgement[db_constant.gamble_id] = game_data[db_constant.gamble_id]
         self.game_judgement[db_constant.game_type] = game_data[db_constant.game_type]
 
         self.game_judgement[db_constant.host_win_original] = game_data[db_constant.guest_score] < game_data[
@@ -124,6 +126,8 @@ class CrawledResultAnalyzer(object):
     def prediction_judge(self, prediction_data, group):
         self.logger.info('start prediction judge, {}'.format(group))
         self.prediction_judge_dict[group] = pd.DataFrame(index=prediction_data.index)
+        self.prediction_judge_dict[group][db_constant.game_date] = prediction_data[db_constant.game_date]
+        self.prediction_judge_dict[group][db_constant.gamble_id] = prediction_data[db_constant.gamble_id]
         self.prediction_judge_dict[group][db_constant.game_type] = prediction_data[db_constant.game_type]
 
         self.logger.debug('start judge local original')
@@ -251,7 +255,7 @@ class CrawledResultAnalyzer(object):
 
         df.to_sql(con=self.engine,
                   name=table_name,
-                  index_label='game_id' if not is_summarize else None,
+                  index_label=db_constant.row_id if not is_summarize else None,
                   index=not is_summarize,
                   if_exists='append',
                   schema=self.config[global_constant.DB][global_constant.schema])
