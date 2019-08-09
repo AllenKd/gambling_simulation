@@ -1,6 +1,6 @@
 import datetime
-import time
 import os
+import time
 
 import click
 import schedule
@@ -10,7 +10,6 @@ from dateutil.relativedelta import relativedelta
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
 from config.constant import global_constant
 from config.constant import player as player_constant
-from config.constant import database as db_constant
 from crawler.crawler import Crawler
 from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
@@ -143,7 +142,7 @@ def task_reset_id():
     DataBackupScheduler().reset_id()
 
 
-@click.command('auto_run', help='Update environment variable and update config file, then keep update.')
+@click.command('load_env', help='Load environment variable and overwrite config file.')
 def task_load_environment_variable():
     with open('config/configuration.yml') as config:
         config = yaml.load(config, Loader=yaml.FullLoader)
