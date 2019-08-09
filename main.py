@@ -1,5 +1,4 @@
 import datetime
-import os
 import time
 
 import click
@@ -15,6 +14,7 @@ from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
 from game_predictor.data_backup_scheduler import DataBackupScheduler
 from simulator.simulator import Simulator
+from utility.utility import Utility
 
 
 @click.group(chain=True)
@@ -99,6 +99,7 @@ def task_update_db(keep_update):
     if keep_update:
         with open('config/configuration.yml') as config:
             config = yaml.load(config, Loader=yaml.FullLoader)
+        Utility().load_environment_variable()
         schedule.every(config['data_updater']['update_period']).hours.do(DataUpdater().update_db)
         schedule.every(config['data_updater']['backup_period']).days.do(DataBackupScheduler.backup, True)
 
@@ -142,28 +143,6 @@ def task_reset_id():
     DataBackupScheduler().reset_id()
 
 
-@click.command('load_env', help='Load environment variable and overwrite config file.')
-def task_load_environment_variable():
-    with open('config/configuration.yml') as config:
-        config = yaml.load(config, Loader=yaml.FullLoader)
-
-        config[global_constant.DB][global_constant.host] = os.environ.get('DB_HOST') if \
-            os.environ.get('DB_HOST') else config[global_constant.DB][global_constant.host]
-
-        config[global_constant.DB][global_constant.port] = os.environ.get('DB_PORT') if \
-            os.environ.get('DB_PORT') else config[global_constant.DB][global_constant.port]
-
-        config[global_constant.DB][global_constant.user] = os.environ.get('DB_USERNAME') if \
-            os.environ.get('DB_USERNAME') else config[global_constant.DB][global_constant.user]
-
-        config[global_constant.DB][global_constant.password] = os.environ.get('DB_PASSWORD') if \
-            os.environ.get('DB_PASSWORD') else config[global_constant.DB][global_constant.password]
-
-    # overwrite config by environment variable
-    with open('config/configuration.yml', 'w') as new_config:
-        yaml.dump(config, new_config)
-
-
 if __name__ == '__main__':
     cli.add_command(task_simulator)
     cli.add_command(task_create_db)
@@ -173,5 +152,4 @@ if __name__ == '__main__':
     cli.add_command(task_data_restore)
     cli.add_command(task_reset_id)
     cli.add_command(task_update_db)
-    cli.add_command(task_load_environment_variable)
     cli()
