@@ -214,7 +214,7 @@ class CrawledResultAnalyzer(object):
         for group in self.prediction_judge_dict.keys():
             table_name = '{}_{}'.format(db_constant.prediction_judgement, group)
             prediction_judgement = pd.read_sql('SELECT * FROM {}'.format(table_name),
-                                               con=self.db, index_col=db_constant.game_date)
+                                               con=self.db, index_col=db_constant.row_id)
             for gambling_class in gambling_classes:
                 self.sub_summarize(group, gambling_class, prediction_judgement)
 
@@ -223,7 +223,7 @@ class CrawledResultAnalyzer(object):
         return
 
     def sub_summarize(self, group, gambling_class, prediction_judgement):
-        # filter out gambling class and able to gambling games
+        # filter out gambling class and effective games
         prediction_judgement = prediction_judgement.filter(regex=('{}'.format(gambling_class)))
         prediction_judgement = prediction_judgement[prediction_judgement['{}_population'.format(gambling_class)] != 0]
 
