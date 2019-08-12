@@ -14,6 +14,18 @@ support_strategy:
   foo_double: true
   kelly: false
 
+strategy_provider:
+  put_strategy:
+    linear_response:
+      - lose_count
+      - response_ratio
+    fibonacci_base:
+      - lose_count
+    foo_double:
+      - lose_count
+    kelly:
+      - remaining_money
+
 crawler:
   urlPattern: "https://www.playsport.cc/predictgame.php?action=scale&allianceid={game_type}&gametime={game_date}&sid={group_type}"
   dateFormat: "%Y%m%d"
@@ -28,8 +40,8 @@ data_updater:
   backup_period: 7 # day
 
 DB:
-  host: "192.168.31.61"
-  port: 3306
+  host: "allenfield.ddns.net"
+  port: 7306
   user: "allen"
-  password: "password"
+  password: "aldbpw"
   schema: "gambling_simulation"
