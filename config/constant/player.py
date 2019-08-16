@@ -1,3 +1,5 @@
+from config.constant import database
+
 # put strategy
 linear_response = 'linear_response'
 fibonacci_base = 'fibonacci_base'
@@ -17,6 +19,7 @@ current_response = 'current_response'
 subtotal = 'subtotal'
 actual_win = 'actual_win'
 expected_win = 'expected_win'
+run = 'run'
 
 # columns of strategy dataframe
 expected_win_unit = 'expected_win_unit'
@@ -38,3 +41,9 @@ win_ratio = 'win_ratio'
 max_continuous_lose_count = 'max_continuous_lose_count'
 final_money = 'final_money'
 final_result = 'final_result'
+
+battle_target = [database.host_win_original,
+                 database.host_win_point_spread_national,
+                 database.over_total_point_national,
+                 database.host_win_point_spread_local,
+                 database.over_total_point_local]
