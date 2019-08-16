@@ -1,123 +1,85 @@
+import functools
 import threading
-from collections import defaultdict, Counter
 
 import pandas as pd
+import pymysql
 import yaml
 from sqlalchemy import create_engine
 
-from banker.banker import Banker
+from config.constant import database as db_constant
 from config.constant import global_constant
 from config.constant import player as player_constant
-from config.constant import simulator as simulator_constant
+from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
 from player.player import Player
-from player.strategy_provider import StrategyProvider
+from strategy_provider.strategy import Strategy
+from strategy_provider.strategy_provider import StrategyProvider
 
 
 class Simulator(object):
-    def __init__(self, play_times, number_of_player, player_init_money, combination=1,
-                 player_put_strategy=player_constant.linear_response, player_bet_strategy=player_constant.random,
-                 to_db=False):
-
+    def __init__(self):
+        self.logger = get_logger(self.__class__.__name__)
         with open('config/configuration.yml', 'r') as config:
             self.config = yaml.load(config, Loader=yaml.Loader)
 
-        self.logger = get_logger(self.__class__.__name__)
-        self.player_init_money = player_init_money
-        self.banker = Banker(play_times=play_times)
-        strategy_provider = StrategyProvider(self.config[global_constant.gambling][global_constant.ratio_per_game])
-        self.players = self.init_players(player_put_strategy, player_bet_strategy, strategy_provider, number_of_player,
-                                         play_times, combination)
+        # init db
+        user = self.config[global_constant.DB][global_constant.user]
+        password = self.config[global_constant.DB][global_constant.password]
+        host = self.config[global_constant.DB][global_constant.host]
+        port = self.config[global_constant.DB][global_constant.port]
+        self.db = pymysql.connect(host=host, user=user, passwd=password, port=port,
+                                  db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
+        self.engine = create_engine('mysql+pymysql://{}:{}@{}:{}'.format(user, password, host, port))
 
-        self.player_strategy = Counter(player_put_strategy)
+    @functools.lru_cache(1)
+    def init_players(self, num_of_player):
+        self.logger.info('start init players')
 
-        self.to_db = to_db
-        if self.to_db:
-            user = self.config[global_constant.DB][global_constant.user]
-            password = self.config[global_constant.DB][global_constant.password]
-            host = self.config[global_constant.DB][global_constant.host]
-            self.engine = create_engine('mysql+pymysql://{}:{}@{}'.format(user, password, host))
+        sp = StrategyProvider(battle_target=player_constant.battle_target)
+        bet_strategy = [Strategy(sp_constant.keep_false, **dict()), Strategy(sp_constant.keep_true, **dict())]
+        bet_strategy += [Strategy(sp_constant.random, **dict())] * ((num_of_player - 2) // 2)
+        bet_strategy += [Strategy(sp_constant.low_of_large, **{'recency': i})
+                         for i in range(1, num_of_player - len(bet_strategy) + 1)]
 
-    def init_players(self, player_put_strategy, player_bet_strategy, strategy_provider, number_of_players, play_times,
-                     combination):
-        player_bet_strategy = [player_bet_strategy] * number_of_players if isinstance(player_bet_strategy,
-                                                                                      str) else player_bet_strategy
-        player_put_strategy = [player_put_strategy] * number_of_players if isinstance(player_put_strategy,
-                                                                                      str) else player_put_strategy
+        return [Player(player_id=i,
+                       bet_strategy=bs,
+                       strategy_provider=sp)
+                for i, bs in zip(range(1, num_of_player + 1), bet_strategy)]
 
-        return [Player(player_id=i, play_times=play_times, combination=combination, money=self.player_init_money,
-                       put_strategy=put_strategy, bet_strategy=bet_strategy, strategy_provider=strategy_provider) for
-                i, put_strategy, bet_strategy in
-                zip(range(1, number_of_players + 1), player_put_strategy, player_bet_strategy)]
-
-    def battle(self, player):
-        self.logger.info('start battle with player: {}'.format(player.id))
-        player.battle(self.banker.game_result)
-        if self.to_db:
-            self.write_to_db(player)
-
-    def write_to_db(self, battled_player):
-        self.logger.info('start write to db: {}'.format(self.config[global_constant.DB][global_constant.schema]))
-        battled_player.battle_statistic.to_sql(con=self.engine, name='player_{}'.format(battled_player.id),
-                                               if_exists='replace',
-                                               schema=self.config[global_constant.DB][global_constant.schema],
-                                               index_label='run')
-
-        summarize_row = pd.DataFrame({k: v for k, v in battled_player.battle_summarize.items()}, index=[0])
-
-        summarize_row.to_sql(con=self.engine, name=player_constant.player_summarize, if_exists='append',
-                             schema=self.config[global_constant.DB][global_constant.schema], index=False)
-
-    def start_simulation(self):
+    def start_simulation(self, num_of_player):
         self.logger.info('start simulation')
+        self.init_players(num_of_player)
+        game_judgement = pd.read_sql('SELECT id, {} FROM {}'.format(', '.join(player_constant.battle_target),
+                                                                    db_constant.game_judgement),
+                                     con=self.db,
+                                     index_col=db_constant.row_id)
         battle_threads = []
-        for player in self.players:
-            battle_thread = threading.Thread(name=player.id, target=self.battle, args=(player,))
+        for player in self.init_players(num_of_player):
+            battle_thread = threading.Thread(name=player.id, target=player.battle, args=(game_judgement,))
             battle_threads.append(battle_thread)
             battle_thread.start()
-
         for battle_thread in battle_threads:
-            self.logger.info('join thread: {}'.format(battle_thread.getName()))
+            self.logger.debug('join thread: {}'.format(battle_thread.getName()))
             battle_thread.join()
 
         self.logger.info('battle threads are finished')
-        self.summarize_gambling()
 
-    def summarize_gambling(self):
+        self.write_to_db('battle_summarize', self.summarize_gambling(self.init_players(num_of_player)))
+        for player in self.init_players(num_of_player):
+            self.write_to_db('player_{}'.format(player.id), player.battle_history)
+
+    def summarize_gambling(self, players):
         self.logger.info('start summarize gambling')
-        strategies = {k: defaultdict(int) for k in self.player_strategy.keys()}
-        strategies['all'] = defaultdict(int)
-        for player in self.players:
-            strategies[player.strategy_name][simulator_constant.win_player_ratio] += \
-                (player.battle_summarize[player_constant.final_result]) / self.player_strategy[player.strategy_name]
+        summarize_table = pd.DataFrame(columns=[sp_constant.bet_strategy] +
+                                               ['hit_ratio_{}'.format(col) for col in player_constant.battle_target])
+        for player in players:
+            summarize_table.loc[player.id] = player.summarize_battle_history()
+        return summarize_table
 
-            strategies[player.strategy_name][simulator_constant.average_player_win] += \
-                (player.battle_summarize[player_constant.final_money] -
-                 self.player_init_money) / self.player_strategy[player.strategy_name]
-
-            strategies[player.strategy_name][simulator_constant.survival_player_ratio] += \
-                player.battle_summarize[player_constant.still_survival] / self.player_strategy[player.strategy_name]
-
-            strategies[player.strategy_name][simulator_constant.final_banker_money] += \
-                self.player_init_money - player.battle_summarize[player_constant.final_money]
-
-            strategies[simulator_constant.all_strategy][simulator_constant.win_player_ratio] += \
-                (player.battle_summarize[player_constant.final_result]) / len(self.players)
-
-            strategies[simulator_constant.all_strategy][simulator_constant.average_player_win] += \
-                (player.battle_summarize[player_constant.final_money] - self.player_init_money) / len(self.players)
-
-            strategies[simulator_constant.all_strategy][simulator_constant.survival_player_ratio] += \
-                player.battle_summarize[player_constant.still_survival] / len(self.players)
-            strategies[simulator_constant.all_strategy][simulator_constant.final_banker_money] += \
-                self.player_init_money - player.battle_summarize[player_constant.final_money]
-
-        summarize_data = pd.DataFrame.from_dict(strategies).T
-        summarize_data.insert(0, player_constant.put_strategy, summarize_data.index)
-        summarize_data.reset_index(drop=True)
-
-        self.logger.info('gambling summarize: {}'.format(summarize_data))
-        if self.to_db:
-            summarize_data.to_sql(con=self.engine, name=simulator_constant.gambling_summarize, if_exists='append',
-                                  schema=self.config[global_constant.DB][global_constant.schema], index=False)
-        return summarize_data
+    def write_to_db(self, table_name, df):
+        self.logger.info('start write to db: {}'.format(table_name))
+        df.to_sql(name=table_name,
+                  if_exists='replace',
+                  schema=self.config[global_constant.DB][global_constant.schema],
+                  index_label='player_id',
+                  con=self.engine)

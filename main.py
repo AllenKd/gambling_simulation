@@ -14,6 +14,7 @@ from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
 from game_predictor.data_backup_scheduler import DataBackupScheduler
 from simulator.simulator import Simulator
+from player.player import Player
 from utility.utility import Utility
 
 
@@ -27,25 +28,10 @@ def cli():
               type=int,
               default=10,
               help='Number of player of each put strategy in the gambling', show_default=True)
-@click.option('--bet_strategy', '-bs',
-              type=click.Choice([player_constant.random, player_constant.follow_last, player_constant.keep_false,
-                                 player_constant.keep_true]),
-              default=player_constant.random,
-              help='Bet strategy of each player.', show_default=True)
-@click.option('--game_times', '-gt',
-              type=int,
-              default=100,
-              help='Gambling times.', show_default=True)
-@click.option('--init_money', '-im',
-              type=int,
-              default=10000,
-              help='Initial money of each player.', show_default=True)
-def task_simulator(game_times, num_of_player, bet_strategy, init_money):
-    strategy_list = [player_constant.kelly, player_constant.linear_response, player_constant.fibonacci_base,
-                     player_constant.foo_double] * num_of_player
-    simulator = Simulator(play_times=game_times, number_of_player=len(strategy_list), player_init_money=init_money,
-                          to_db=True, player_put_strategy=strategy_list, player_bet_strategy=bet_strategy)
-    simulator.start_simulation()
+def task_simulator(num_of_player):
+
+    simulator = Simulator()
+    simulator.start_simulation(num_of_player)
 
 
 @click.command('create_db', help='Create DB.')
