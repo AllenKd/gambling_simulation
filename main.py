@@ -24,7 +24,7 @@ def cli():
 
 
 @click.command('simulate_gambling', help='Simulate gambling.')
-@click.option('--num_of_player', '-p',
+@click.option('--num_of_player', '-n',
               type=int,
               default=10,
               help='Number of player of each put strategy in the gambling', show_default=True)
@@ -35,6 +35,7 @@ def cli():
 def task_simulator(num_of_player, player_history):
     simulator = Simulator()
     simulator.start_simulation(num_of_player)
+    simulator.write_to_db('battle_summarize', simulator.summarized_data, index_label='player_id')
     if player_history:
         simulator.write_player_history_to_db()
 
