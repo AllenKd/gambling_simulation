@@ -28,10 +28,15 @@ def cli():
               type=int,
               default=10,
               help='Number of player of each put strategy in the gambling', show_default=True)
-def task_simulator(num_of_player):
-
+@click.option('--player_history', '-p',
+              is_flag=True,
+              default=False,
+              help='Write player battle history into DB.', show_default=True)
+def task_simulator(num_of_player, player_history):
     simulator = Simulator()
     simulator.start_simulation(num_of_player)
+    if player_history:
+        simulator.write_player_history_to_db()
 
 
 @click.command('create_db', help='Create DB.')
