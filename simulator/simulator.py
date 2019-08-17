@@ -66,12 +66,12 @@ class Simulator(object):
             battle_thread.join()
 
         self.logger.info('battle threads are finished')
+        self.summarize_gambling()
+        return
 
-        self.write_to_db('battle_summarize', self.summarize_gambling(self.init_players(num_of_player)))
-
-    def summarize_gambling(self, players):
+    def summarize_gambling(self):
         self.logger.info('start summarize gambling')
-        for player in players:
+        for player in self.players:
             self.summarized_data.loc[player.id] = player.summarize_battle_history()
         return self.summarized_data
 
@@ -79,10 +79,10 @@ class Simulator(object):
         for player in self.players:
             self.write_to_db('player_{}'.format(player.id), player.battle_history)
 
-    def write_to_db(self, table_name, df):
+    def write_to_db(self, table_name, df, index_label=db_constant.row_id):
         self.logger.info('start write to db: {}'.format(table_name))
         df.to_sql(name=table_name,
                   if_exists='replace',
                   schema=self.config[global_constant.DB][global_constant.schema],
-                  index_label='player_id',
+                  index_label=index_label,
                   con=self.engine)
