@@ -30,6 +30,7 @@ class DataUpdater(object):
 
     def update_db(self):
         self.logger.info('start update db')
+        self.__init__()
         for game_type, crawl_ranges in self.get_crawl_range().items():
             self.logger.debug('start update game type: {}'.format(game_type))
             for crawl_range in crawl_ranges:
