@@ -38,4 +38,4 @@ class Player(object):
         full_strategy_name = self.bet_strategy.name if self.bet_strategy.name != sp_constant.low_of_large \
             else '{}_{}'.format(self.bet_strategy.name, self.bet_strategy.kwargs['recency'])
 
-        return pd.Series([full_strategy_name]).append(self.battle_history.mean()).values
+        return pd.Series([full_strategy_name]).append(self.battle_history.mean().round(3)).values
