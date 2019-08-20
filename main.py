@@ -8,13 +8,11 @@ from dateutil.relativedelta import relativedelta
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
 from config.constant import global_constant
-from config.constant import player as player_constant
 from crawler.crawler import Crawler
 from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
 from game_predictor.data_backup_scheduler import DataBackupScheduler
 from simulator.simulator import Simulator
-from player.player import Player
 from utility.utility import Utility
 
 
