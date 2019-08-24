@@ -14,6 +14,7 @@ from database.constructor import DbConstructor
 from game_predictor.data_backup_scheduler import DataBackupScheduler
 from simulator.simulator import Simulator
 from utility.utility import Utility
+from database.converter import NoSqlConverter
 
 
 @click.group(chain=True)
@@ -133,6 +134,11 @@ def task_reset_id():
     DataBackupScheduler().reset_id()
 
 
+@click.command('convert_data', help='Convert data from SQL to No-SQL.')
+def task_convert_data():
+    NoSqlConverter().start_convert()
+
+
 if __name__ == '__main__':
     cli.add_command(task_simulator)
     cli.add_command(task_create_db)
@@ -142,4 +148,5 @@ if __name__ == '__main__':
     cli.add_command(task_data_restore)
     cli.add_command(task_reset_id)
     cli.add_command(task_update_db)
+    cli.add_command(task_convert_data)
     cli()
