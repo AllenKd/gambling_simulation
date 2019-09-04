@@ -6,6 +6,7 @@ import yaml
 from elasticsearch import Elasticsearch
 
 from config.constant import data_backup_scheduler
+from config.constant import converter
 from config.constant import database as db_constant
 from config.constant import global_constant
 from config.logger import get_logger
@@ -30,6 +31,7 @@ class NoSqlConverter(object):
     def start_convert(self):
         self.logger.info('start converter')
         json_document = {}
+        a = self.get_joined_table()
         for table_name, data in self.iter_table_as_df():
             for index, row in data.iterrows():
                 self.add_common_info(row, json_document, index)
@@ -169,4 +171,9 @@ class NoSqlConverter(object):
 
     def get_joined_table(self):
         self.logger.info('start get joined table')
-        sql = ''
+        sql_select = 'SELECT {} FROM {} '.format(', '.join(converter.joined_columns), db_constant.game_data)
+        sql_join = ' '.join(['LEFT JOIN {} ON {}.id={}.id'.format(table_name, table_name, 'game_data')
+                             for table_name in data_backup_scheduler.table_list if table_name != db_constant.game_data])
+        sql = sql_select + sql_join
+        return pd.read_sql(sql, con=self.db, index_col=db_constant.row_id)
+

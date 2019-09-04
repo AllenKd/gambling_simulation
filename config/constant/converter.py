@@ -7,7 +7,6 @@ joined_columns = [
     'game_data.gamble_id',
     'game_data.game_type',
     'game_data.play_time',
-    'game_data.',
     'game_data.AM_PM',
     'game_data.guest',
     'game_data.host',
