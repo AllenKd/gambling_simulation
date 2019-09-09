@@ -5,8 +5,9 @@ import pymysql
 import yaml
 from elasticsearch import Elasticsearch
 
-from config.constant import data_backup_scheduler
 from config.constant import converter
+from config.constant import crawler
+from config.constant import data_backup_scheduler
 from config.constant import database as db_constant
 from config.constant import global_constant
 from config.logger import get_logger
@@ -30,37 +31,31 @@ class NoSqlConverter(object):
 
     def start_convert(self):
         self.logger.info('start converter')
-        json_document = {}
-        a = self.get_joined_table()
-        for table_name, data in self.iter_table_as_df():
-            for index, row in data.iterrows():
-                self.add_common_info(row, json_document, index)
-                if table_name == db_constant.game_data:
-                    self.add_score(row, json_document)
-                    self.add_gamble_info(row, json_document)
 
-                    # self.es.index(index=table_name, body=json_document)
+        for index, row in self.get_joined_table().iterrows():
+            self.logger.debug('wipe game id: {}'.format(index))
+            json_document = {}
+            self.add_common_info(row, json_document, index)
+            self.add_score(row, json_document)
+            self.add_gamble_info(row, json_document)
+            self.add_judgement_info(row, json_document)
+            for group in crawler.prediction_group.keys():
+                self.add_prediction_info(row, json_document, group)
+                self.add_prediction_judgement_info(row, json_document, group)
 
-                if table_name == db_constant.game_judgement:
-                    self.add_judgement_info(row, json_document)
-
-                    # self.es.index(index=table_name, body=json_document)
-
-                if table_name.startswith(db_constant.prediction_data):
-                    group = table_name[16:]
-                    self.add_prediction_info(row, json_document, group)
-
-                if table_name.startswith(db_constant.prediction_judgement):
-                    group = table_name[21:]
-                    self.add_prediction_judgement_info(row, json_document, group)
+            self.remove_nan_key(json_document)
+            self.logger.debug('wiped document: {}'.format(json_document))
+            self.es.index(index=row[db_constant.game_type].lower(), body=json_document)
 
     def add_common_info(self, row, json_document, index):
         self.logger.debug('add common info')
-        json_document['timestamp'] = str(
-            datetime.datetime.strptime('{} {}'.format(row[db_constant.game_date], row[db_constant.play_time]),
-                                       '{} {}'.format(self.config['crawler']['dateFormat'], '%I:%M')))
+        json_document['@timestamp'] = datetime.datetime.strptime('{} {}'.format(row[db_constant.game_date],
+                                                                                row[db_constant.play_time]),
+                                                                 '{} {}'.format(self.config['crawler']['dateFormat'],
+                                                                                '%I:%M'))
         json_document['game_id'] = index
         json_document[db_constant.gamble_id] = row[db_constant.gamble_id]
+
         json_document[db_constant.game_type] = row[db_constant.game_type]
         return json_document
 
@@ -110,55 +105,88 @@ class NoSqlConverter(object):
     def add_prediction_info(self, row, json_document, group):
         self.logger.debug('add prediction info')
         json_document['prediction'] = json_document.get('prediction', {})
-        json_document['prediction']['group'] = {
+        json_document['prediction'] = {
             'group': group,
-            'national': {'total_point': {'over': {'percentage': row[db_constant.percentage_national_total_point_over],
-                                                  'population': row[db_constant.population_national_total_point_over]},
-                                         'under': {'percentage': row[db_constant.percentage_national_total_point_over],
-                                                   'population': row[
-                                                       db_constant.population_national_total_point_under]}},
-                         'spread_point': {
-                             db_constant.guest: {'percentage': row[db_constant.percentage_national_point_spread_guest],
-                                                 'population': row[db_constant.population_national_point_spread_guest]},
-                             db_constant.host: {'percentage': row[db_constant.percentage_national_point_spread_host],
-                                                'population': row[db_constant.population_national_point_spread_host]}}},
-            'local': {'total_point': {'over': {'percentage': row[db_constant.percentage_local_total_point_over],
-                                               'population': row[db_constant.population_local_total_point_over]},
-                                      'under': {'percentage': row[db_constant.percentage_local_total_point_over],
-                                                'population': row[db_constant.population_local_total_point_under]}},
-                      'spread_point': {
-                          db_constant.guest: {'percentage': row[db_constant.percentage_local_point_spread_guest],
-                                              'population': row[db_constant.population_local_point_spread_guest]},
-                          db_constant.host: {'percentage': row[db_constant.percentage_local_point_spread_host],
-                                             'population': row[db_constant.population_local_point_spread_host]}},
-                      'original': {db_constant.guest: {'percentage': row[db_constant.percentage_local_original_guest],
-                                                       'population': row[db_constant.population_local_original_guest]},
-                                   db_constant.host: {'percentage': row[db_constant.percentage_local_original_host],
-                                                      'population': row[db_constant.population_local_original_host]}}}}
+            'national': {
+                'total_point': {
+                    'over': {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_national_total_point_over, group)],
+                        'population': row['{}__{}'.format(db_constant.population_national_total_point_over, group)]},
+                    'under': {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_national_total_point_over, group)],
+                        'population': row['{}__{}'.format(db_constant.population_national_total_point_under, group)]}},
+                'spread_point': {
+                    db_constant.guest: {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_national_point_spread_guest, group)],
+                        'population': row['{}__{}'.format(db_constant.population_national_point_spread_guest, group)]},
+                    db_constant.host: {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_national_point_spread_host, group)],
+                        'population': row['{}__{}'.format(db_constant.population_national_point_spread_host, group)]}}},
+            'local': {
+                'total_point': {
+                    'over': {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_local_total_point_over, group)],
+                        'population': row['{}__{}'.format(db_constant.population_local_total_point_over, group)]},
+                    'under': {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_local_total_point_over, group)],
+                        'population': row['{}__{}'.format(db_constant.population_local_total_point_under, group)]}},
+                'spread_point': {
+                    db_constant.guest: {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_local_point_spread_guest, group)],
+                        'population': row['{}__{}'.format(db_constant.population_local_point_spread_guest, group)]},
+                    db_constant.host: {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_local_point_spread_host, group)],
+                        'population': row['{}__{}'.format(db_constant.population_local_point_spread_host, group)]}},
+                'original': {
+                    db_constant.guest: {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_local_original_guest, group)],
+                        'population': row['{}__{}'.format(db_constant.population_local_original_guest, group)]},
+                    db_constant.host: {
+                        'percentage': row['{}__{}'.format(db_constant.percentage_local_original_host, group)],
+                        'population': row['{}__{}'.format(db_constant.population_local_original_host, group)]}}}}
 
     def add_prediction_judgement_info(self, row, json_document, group):
         self.logger.debug('add prediction judgement info')
-        json_document['judgement'] = {}
-        json_document['judgement']['prediction'] = {}
+        json_document['judgement'] = json_document.get('judgement', {})
+        json_document['judgement']['prediction'] = json_document['judgement'].get('prediction', {})
         json_document['judgement']['prediction'] = {
             'group': group,
             'national': {
-                'total_point': {'matched_info': {'is_major': bool(row[db_constant.national_total_point_result]),
-                                                 'percentage': row[db_constant.national_total_point_percentage],
-                                                 'population': row[db_constant.national_total_point_population]}},
-                'spread_point': {'matched_info': {'is_major': bool(row[db_constant.national_point_spread_result]),
-                                                  'percentage': row[db_constant.national_point_spread_percentage],
-                                                  'population': row[db_constant.national_point_spread_population]}}},
+                'total_point': {
+                    'matched_info': {
+                        'is_major': bool(row['{}__{}'.format(db_constant.national_total_point_result, group)]),
+                        'percentage': row['{}__{}'.format(db_constant.national_total_point_percentage, group)],
+                        'population': row['{}__{}'.format(db_constant.national_total_point_population, group)]}},
+                'spread_point': {
+                    'matched_info': {
+                        'is_major': bool(row['{}__{}'.format(db_constant.national_point_spread_result, group)]),
+                        'percentage': row['{}__{}'.format(db_constant.national_point_spread_percentage, group)],
+                        'population': row['{}__{}'.format(db_constant.national_point_spread_population, group)]}}},
             'local': {
-                'total_point': {'matched_info': {'is_major': bool(row[db_constant.local_total_point_result]),
-                                                 'percentage': row[db_constant.local_total_point_percentage],
-                                                 'population': row[db_constant.local_total_point_population]}},
-                'spread_point': {'matched_info': {'is_major': bool(row[db_constant.local_point_spread_result]),
-                                                  'percentage': row[db_constant.local_point_spread_percentage],
-                                                  'population': row[db_constant.local_point_spread_population]}},
-                'original': {'matched_info': {'is_major': bool(row[db_constant.local_original_result]),
-                                              'percentage': row[db_constant.local_original_percentage],
-                                              'population': row[db_constant.local_original_population]}}}}
+                'total_point': {
+                    'matched_info': {
+                        'is_major': bool(row['{}__{}'.format(db_constant.local_total_point_result, group)]),
+                        'percentage': row['{}__{}'.format(db_constant.local_total_point_percentage, group)],
+                        'population': row['{}__{}'.format(db_constant.local_total_point_population, group)]}},
+                'spread_point': {
+                    'matched_info': {
+                        'is_major': bool(row['{}__{}'.format(db_constant.local_point_spread_result, group)]),
+                        'percentage': row['{}__{}'.format(db_constant.local_point_spread_percentage, group)],
+                        'population': row['{}__{}'.format(db_constant.local_point_spread_population, group)]}},
+                'original': {
+                    'matched_info': {
+                        'is_major': bool(row['{}__{}'.format(db_constant.local_original_result, group)]),
+                        'percentage': row['{}__{}'.format(db_constant.local_original_percentage, group)],
+                        'population': row['{}__{}'.format(db_constant.local_original_population, group)]}}}}
+
+    def remove_nan_key(self, json_document):
+        for k, v in list(json_document.items()):
+            self.logger.debug('check: {}-{}'.format(k, v))
+            if isinstance(v, dict):
+                self.remove_nan_key(v)
+            elif not pd.notnull(v):
+                self.logger.debug('delete key-value: {}, {}'.format(k, v))
+                json_document.pop(k, None)
 
     def iter_table_as_df(self):
         self.logger.info('start iterate db')
@@ -176,4 +204,3 @@ class NoSqlConverter(object):
                              for table_name in data_backup_scheduler.table_list if table_name != db_constant.game_data])
         sql = sql_select + sql_join
         return pd.read_sql(sql, con=self.db, index_col=db_constant.row_id)
-
