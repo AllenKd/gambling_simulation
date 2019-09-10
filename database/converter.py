@@ -103,8 +103,9 @@ class NoSqlConverter(object):
 
     def add_prediction_info(self, row, json_document, group):
         self.logger.debug('add prediction info')
-        json_document['prediction'] = json_document.get('prediction', {})
-        json_document['prediction'][group] = {
+        json_document['prediction'] = json_document.get('prediction', [])
+        json_document['prediction'].append({
+            'group': group,
             'national': {
                 'total_point': {
                     'over': {
@@ -141,13 +142,14 @@ class NoSqlConverter(object):
                         'population': row['{}__{}'.format(db_constant.population_local_original_guest, group)]},
                     db_constant.host: {
                         'percentage': row['{}__{}'.format(db_constant.percentage_local_original_host, group)],
-                        'population': row['{}__{}'.format(db_constant.population_local_original_host, group)]}}}}
+                        'population': row['{}__{}'.format(db_constant.population_local_original_host, group)]}}}})
 
     def add_prediction_judgement_info(self, row, json_document, group):
         self.logger.debug('add prediction judgement info')
         json_document['judgement'] = json_document.get('judgement', {})
-        json_document['judgement']['prediction'] = json_document['judgement'].get('prediction', {})
-        json_document['judgement']['prediction'][group] = {
+        json_document['judgement']['prediction'] = json_document['judgement'].get('prediction', [])
+        json_document['judgement']['prediction'].append({
+            'group': group,
             'national': {
                 'total_point': {
                     'matched_info': {
@@ -174,13 +176,16 @@ class NoSqlConverter(object):
                     'matched_info': {
                         'is_major': bool(row['{}__{}'.format(db_constant.local_original_result, group)]),
                         'percentage': row['{}__{}'.format(db_constant.local_original_percentage, group)],
-                        'population': row['{}__{}'.format(db_constant.local_original_population, group)]}}}}
+                        'population': row['{}__{}'.format(db_constant.local_original_population, group)]}}}})
 
     def remove_nan_key(self, json_document):
         for k, v in list(json_document.items()):
             self.logger.debug('check: {}-{}'.format(k, v))
             if isinstance(v, dict):
                 self.remove_nan_key(v)
+            elif isinstance(v, list):
+                for e in v:
+                    self.remove_nan_key(e)
             elif not pd.notnull(v):
                 self.logger.debug('delete key-value: {}, {}'.format(k, v))
                 json_document.pop(k, None)

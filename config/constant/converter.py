@@ -1,6 +1,4 @@
-# from config.constant import database as db_constant
-# from config.constant import crawler
-#
+
 joined_columns = [
     'game_data.id',
     'game_data.game_date',
