@@ -42,7 +42,6 @@ class NoSqlConverter(object):
             for group in crawler.prediction_group.keys():
                 self.add_prediction_info(row, json_document, group)
                 self.add_prediction_judgement_info(row, json_document, group)
-
             self.remove_nan_key(json_document)
             self.logger.debug('wiped document: {}'.format(json_document))
             self.es.index(index=row[db_constant.game_type].lower(), body=json_document)
@@ -105,8 +104,7 @@ class NoSqlConverter(object):
     def add_prediction_info(self, row, json_document, group):
         self.logger.debug('add prediction info')
         json_document['prediction'] = json_document.get('prediction', {})
-        json_document['prediction'] = {
-            'group': group,
+        json_document['prediction'][group] = {
             'national': {
                 'total_point': {
                     'over': {
@@ -149,8 +147,7 @@ class NoSqlConverter(object):
         self.logger.debug('add prediction judgement info')
         json_document['judgement'] = json_document.get('judgement', {})
         json_document['judgement']['prediction'] = json_document['judgement'].get('prediction', {})
-        json_document['judgement']['prediction'] = {
-            'group': group,
+        json_document['judgement']['prediction'][group] = {
             'national': {
                 'total_point': {
                     'matched_info': {
