@@ -111,7 +111,7 @@ class NoSqlConverter(object):
                         'percentage': row['{}__{}'.format(db_constant.percentage_national_total_point_over, group)],
                         'population': row['{}__{}'.format(db_constant.population_national_total_point_over, group)]},
                     'under': {
-                        'percentage': row['{}__{}'.format(db_constant.percentage_national_total_point_over, group)],
+                        'percentage': row['{}__{}'.format(db_constant.percentage_national_total_point_under, group)],
                         'population': row['{}__{}'.format(db_constant.population_national_total_point_under, group)]}},
                 'spread_point': {
                     db_constant.guest: {
@@ -126,7 +126,7 @@ class NoSqlConverter(object):
                         'percentage': row['{}__{}'.format(db_constant.percentage_local_total_point_over, group)],
                         'population': row['{}__{}'.format(db_constant.population_local_total_point_over, group)]},
                     'under': {
-                        'percentage': row['{}__{}'.format(db_constant.percentage_local_total_point_over, group)],
+                        'percentage': row['{}__{}'.format(db_constant.percentage_local_total_point_under, group)],
                         'population': row['{}__{}'.format(db_constant.population_local_total_point_under, group)]}},
                 'spread_point': {
                     db_constant.guest: {
