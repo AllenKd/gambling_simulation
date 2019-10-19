@@ -7,6 +7,7 @@ import yaml
 from dateutil.relativedelta import relativedelta
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
+from analyzer.battle_result_analyzer import BattleResultAnalyzer
 from config.constant import global_constant
 from crawler.crawler import Crawler
 from crawler.data_updater import DataUpdater
@@ -139,6 +140,11 @@ def task_convert_data():
     NoSqlConverter().start_convert()
 
 
+@click.command('analyze_battle_result', help='Analyze battle result.')
+def task_analyze_battle_result():
+    BattleResultAnalyzer().start()
+
+
 if __name__ == '__main__':
     cli.add_command(task_simulator)
     cli.add_command(task_create_db)
@@ -149,4 +155,5 @@ if __name__ == '__main__':
     cli.add_command(task_reset_id)
     cli.add_command(task_update_db)
     cli.add_command(task_convert_data)
+    cli.add_command(task_analyze_battle_result)
     cli()
