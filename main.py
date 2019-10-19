@@ -7,15 +7,15 @@ import yaml
 from dateutil.relativedelta import relativedelta
 
 from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
+from analyzer.battle_result_analyzer import BattleResultAnalyzer
 from config.constant import global_constant
-from config.constant import player as player_constant
 from crawler.crawler import Crawler
 from crawler.data_updater import DataUpdater
 from database.constructor import DbConstructor
 from game_predictor.data_backup_scheduler import DataBackupScheduler
 from simulator.simulator import Simulator
-from player.player import Player
 from utility.utility import Utility
+from database.converter import NoSqlConverter
 
 
 @click.group(chain=True)
@@ -24,14 +24,20 @@ def cli():
 
 
 @click.command('simulate_gambling', help='Simulate gambling.')
-@click.option('--num_of_player', '-p',
+@click.option('--num_of_player', '-n',
               type=int,
               default=10,
               help='Number of player of each put strategy in the gambling', show_default=True)
-def task_simulator(num_of_player):
-
+@click.option('--player_history', '-p',
+              is_flag=True,
+              default=False,
+              help='Write player battle history into DB.', show_default=True)
+def task_simulator(num_of_player, player_history):
     simulator = Simulator()
     simulator.start_simulation(num_of_player)
+    simulator.write_to_db('battle_summarize', simulator.summarized_data, index_label='player_id')
+    if player_history:
+        simulator.write_player_history_to_db()
 
 
 @click.command('create_db', help='Create DB.')
@@ -129,6 +135,16 @@ def task_reset_id():
     DataBackupScheduler().reset_id()
 
 
+@click.command('convert_data', help='Convert data from SQL to No-SQL.')
+def task_convert_data():
+    NoSqlConverter().start_convert()
+
+
+@click.command('analyze_battle_result', help='Analyze battle result.')
+def task_analyze_battle_result():
+    BattleResultAnalyzer().start()
+
+
 if __name__ == '__main__':
     cli.add_command(task_simulator)
     cli.add_command(task_create_db)
@@ -138,4 +154,6 @@ if __name__ == '__main__':
     cli.add_command(task_data_restore)
     cli.add_command(task_reset_id)
     cli.add_command(task_update_db)
+    cli.add_command(task_convert_data)
+    cli.add_command(task_analyze_battle_result)
     cli()

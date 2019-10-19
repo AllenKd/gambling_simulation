@@ -164,10 +164,3 @@ class DbConstructor(object):
             return
         self.logger.info('create table: {}'.format(table.name))
         table.create(self.engine)
-
-    def get_connection(self):
-        user = self.config[global_constant.DB][global_constant.user]
-        password = self.config[global_constant.DB][global_constant.password]
-        host = self.config[global_constant.DB][global_constant.host]
-        return pymysql.connect(host=host, user=user, passwd=password,
-                               db=self.config[global_constant.DB][global_constant.schema], charset='utf8')

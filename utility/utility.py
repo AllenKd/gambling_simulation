@@ -1,6 +1,8 @@
 import os
 
+import pymysql
 import yaml
+from sqlalchemy import create_engine
 
 from config.constant import global_constant
 from config.logger import get_logger
@@ -9,6 +11,8 @@ from config.logger import get_logger
 class Utility(object):
     def __init__(self):
         self.logger = get_logger(self.__class__.__name__)
+        with open('config/configuration.yml', 'r') as config:
+            self.config = yaml.load(config, Loader=yaml.Loader)
 
     def load_environment_variable(self):
         self.logger.info('start load environment variables and overwrite config file')
@@ -33,3 +37,24 @@ class Utility(object):
 
         self.logger.debug('finish update config file')
         return
+
+    def get_config(self):
+        self.logger.info('getting config')
+        return self.config
+
+    def get_db_connection(self):
+        self.logger.info('getting db connection')
+        user = self.config[global_constant.DB][global_constant.user]
+        password = self.config[global_constant.DB][global_constant.password]
+        host = self.config[global_constant.DB][global_constant.host]
+        port = self.config[global_constant.DB][global_constant.port]
+        return pymysql.connect(host=host, user=user, passwd=password, port=port,
+                               db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
+
+    def get_db_engine(self):
+        self.logger.info('getting db engine')
+        user = self.config[global_constant.DB][global_constant.user]
+        password = self.config[global_constant.DB][global_constant.password]
+        host = self.config[global_constant.DB][global_constant.host]
+        port = self.config[global_constant.DB][global_constant.port]
+        return create_engine('mysql+pymysql://{}:{}@{}:{}'.format(user, password, host, port))
