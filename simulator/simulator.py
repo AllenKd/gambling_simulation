@@ -11,7 +11,7 @@ from config.constant import global_constant
 from config.constant import player as player_constant
 from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
-from player.player import Player
+from player.gambler import Gambler
 from strategy_provider.strategy import Strategy
 from strategy_provider.strategy_provider import StrategyProvider
 
@@ -44,9 +44,9 @@ class Simulator(object):
         bet_strategy += [Strategy(sp_constant.random, **dict())] * ((num_of_player - 2) // 2)
         bet_strategy += [Strategy(sp_constant.low_of_large, **{'recency': i})
                          for i in range(1, num_of_player - len(bet_strategy) + 1)]
-        self.players = [Player(player_id=i,
-                               bet_strategy=bs,
-                               strategy_provider=sp)
+        self.players = [Gambler(gambler_id=i,
+                                bet_strategy=bs,
+                                strategy_provider=sp)
                         for i, bs in zip(range(1, num_of_player + 1), bet_strategy)]
         return self.players
 
@@ -58,7 +58,7 @@ class Simulator(object):
                                      index_col=db_constant.row_id)
         battle_threads = []
         for player in self.init_players(num_of_player):
-            battle_thread = threading.Thread(name=player.id, target=player.battle, args=(game_judgement,))
+            battle_thread = threading.Thread(name=player.gambler_id, target=player.battle, args=(game_judgement,))
             battle_threads.append(battle_thread)
             battle_thread.start()
         for battle_thread in battle_threads:

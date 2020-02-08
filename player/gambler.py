@@ -1,24 +1,23 @@
 import pandas as pd
-import yaml
 
 from config.constant import player as player_constant
 from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
+from utility.utility import Utility
 
 
-class Player(object):
-    def __init__(self, player_id, strategy_provider, bet_strategy):
-        self.id = player_id
-        self.logger = get_logger('player{}'.format(self.id))
-        with open('config/configuration.yml', 'r') as config:
-            self.config = yaml.load(config, Loader=yaml.FullLoader)
+class Gambler(object):
+    def __init__(self, gambler_id, strategy_provider, bet_strategy):
+        self.logger = get_logger('gambler_{}'.format(self.gambler_id))
+        self.gambler_id = gambler_id
+        self.config = Utility.get_config()
 
         self.bet_strategy = bet_strategy
         self.strategy_provider = strategy_provider
         self.battle_history = pd.DataFrame(columns=player_constant.battle_target)
 
     def battle(self, game_judgement):
-        self.logger.info('start battle'.format(self.id))
+        self.logger.info('start battle'.format(self.gambler_id))
         for row_id, game_result in game_judgement.iterrows():
             kwargs = self.bet_strategy_kwargs(game_judgement, row_id)
             bet = self.strategy_provider.get_bet_decision(self.bet_strategy, **kwargs)
