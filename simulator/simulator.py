@@ -6,9 +6,7 @@ import pymysql
 import yaml
 from sqlalchemy import create_engine
 
-from config.constant import database as db_constant
 from config.constant import global_constant
-from config.constant import player as player_constant
 from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
 from player.gambler import Gambler
