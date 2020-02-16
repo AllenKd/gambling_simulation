@@ -2,17 +2,20 @@ logging:
   level: "DEBUG"
 
 gambling:
-  ratio_per_game: 1.75
+  default_ratio_per_game: 1.75
   bet_base: 100
   combination: 1
 
 stratagy_size: 20
 support_strategy:
-# true: support table strategy
+  # true: support table strategy
   linear_response: true
   fibonacci_base: true
   foo_double: true
   kelly: false
+
+banker:
+
 
 strategy_provider:
   put_strategy:
@@ -32,22 +35,13 @@ strategy_provider:
     low_of_large:
       - game_history
 
-crawler:
-  urlPattern: "https://www.playsport.cc/predictgame.php?action=scale&allianceid={game_type}&gametime={game_date}&sid={group_type}"
-  dateFormat: "%Y%m%d"
-  memberType:
-    all: 0
-    moreThan60Percent: 1
-    allPrefer: 2
-    top100: 3
-
-data_updater:
-  update_period: 24 # hour
-  backup_period: 7 # day
-
 DB:
   host: "192.168.99.31"
   port: 3306
   user: "allen"
   password: "password"
   schema: "gambling_simulation"
+
+mongoDb:
+  host: 127.0.0.1
+  port: 27017

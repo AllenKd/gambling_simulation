@@ -1,10 +1,9 @@
 import pandas as pd
 
-from config.constant import player as player_constant
+from banker.banker import Banker
 from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
 from utility.utility import Utility
-from banker.banker import Banker
 
 
 class Gambler(object):
@@ -33,8 +32,9 @@ class Gambler(object):
                     self.logger.debug('settle game: %s' % decision)
                     if bet_decision[0] == game_result[banker_side][bet_type]:
                         decision.match = True
-                        gamble_info = Banker().get_gamble_info(game_date=decision.game_date, gamble_id=decision.gamble_id)
-                        response_ratio = gamble_info[banker_side][bet_type].get('response', 1.7)
+                        gamble_info = Banker().get_gamble_info(game_date=decision.game_date,
+                                                               gamble_id=decision.gamble_id)
+                        response_ratio = gamble_info.handicap[banker_side][bet_type].get('response', 1.7)
                         self.principle += bet_decision[1] * response_ratio
                     else:
                         decision.match = False
