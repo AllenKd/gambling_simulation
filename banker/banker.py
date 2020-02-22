@@ -28,5 +28,7 @@ class Banker:
     @lru_cache(64)
     def get_gamble_result(self, game_date, gamble_id):
         game_date = str(datetime.strptime(game_date, '%Y%m%d').date())
-        query_condition = {'game_time': {'$regex': game_date}, 'gamble_id': gamble_id}
-        return [GambleResult(i) for i in self.mongo_client.find(query_condition)]
+        query_condition = {'game_time': {'$regex': game_date}, 'game_id': gamble_id}
+        query_result = self.mongo_client.find_one(query_condition)
+        self.logger.debug('query result: %s' % query_result)
+        return GambleResult(query_result)
