@@ -3,7 +3,7 @@ from datetime import datetime
 
 class GambleInfo:
     def __init__(self, gamble_info):
-        self.gamble_id = gamble_info['gamble_id']
+        self.gamble_id = gamble_info.get('gamble_id', -1)
         self.game_time = gamble_info['game_time']
         self.game_date = str(datetime.strptime(self.game_time[:10], '%Y-%m-%d').date().strftime('%Y%m%d'))
         self.game_type = gamble_info['game_type']
