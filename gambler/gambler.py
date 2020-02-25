@@ -1,11 +1,11 @@
+from datetime import datetime
+
 import pandas as pd
 
 from banker.banker import Banker
 from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
 from utility.utility import Utility
-from datetime import datetime
-import pandas as pd
 
 
 class Gambler(object):
@@ -33,27 +33,18 @@ class Gambler(object):
         for decision in decisions:
             gamble_result = Banker().get_gamble_result(decision.game_date, decision.gamble_id)
             for bet in decision.bets:
+                self.principle -= bet.unit
                 if bet.result == gamble_result.judgement[bet.banker_side][bet.type]:
                     decision.match = True
                     gamble_info = Banker().get_gamble_info(game_date=decision.game_date,
-                                                           gamble_id=decision.gamble_id)
+                                                           gamble_id=decision.gamble_id)[0]
                     response_ratio = gamble_info.handicap[bet.banker_side][bet.type].get('response', 1.7)
                     self.principle += bet.unit * response_ratio
                 else:
                     decision.match = False
-                    self.principle -= bet.unit
+
             self.logger.debug('settled decision: %s' % decision)
             self.logger.debug('current principle: %s' % self.principle)
-
-    # def battle(self, game_judgement):
-    #     self.logger.info('start battle'.format(self.gambler_id))
-    #     for row_id, game_result in game_judgement.iterrows():
-    #         kwargs = self.bet_strategy_kwargs(game_judgement, row_id)
-    #         bet = self.strategy_provider.get_bet_decision(self.bet_strategy, **kwargs)
-    #         battle_result = bet == game_result
-    #         self.battle_history.loc[row_id] = battle_result.astype(int)
-    #     self.logger.debug('finished battle, runs: {}'.format(len(self.battle_history)))
-    #     return self.battle_history
 
     def summarize_battle_history(self):
         self.logger.debug('start summarize battle history')
