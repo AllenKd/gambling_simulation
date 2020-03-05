@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from config.constant import global_constant
 from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
-from player.gambler import Gambler
+from gambler.gambler import Gambler
 from strategy_provider.strategy import Strategy
 from strategy_provider.strategy_provider import StrategyProvider
 
