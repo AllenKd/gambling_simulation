@@ -4,7 +4,7 @@ from strategy_provider.decision import Decision
 from strategy_provider.decision import Bet
 
 
-# Target: 1st game local point threshold, double bet if lose, otherwise 1
+# Target: 1st game of local point threshold, double bet if lose, otherwise 1
 class FooDouble(BaseStrategy):
     def __init__(self, game_type, name):
         self.logger = get_logger(self.__class__.__name__)

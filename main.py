@@ -1,21 +1,12 @@
-import datetime
-import time
-
 import click
-import schedule
-import yaml
-from dateutil.relativedelta import relativedelta
 
-from analyzer.crawled_result_analyzer import CrawledResultAnalyzer
-from analyzer.battle_result_analyzer import BattleResultAnalyzer
-from config.constant import global_constant
-from crawler.crawler import Crawler
-from crawler.data_updater import DataUpdater
-from database.constructor import DbConstructor
+from banker.banker import Banker
+from gambler.gambler import Gambler
 from game_predictor.data_backup_scheduler import DataBackupScheduler
-from simulator.simulator import Simulator
-from utility.utility import Utility
-from database.converter import NoSqlConverter
+from strategy_provider.foo_double import FooDouble
+
+
+# from simulator.simulator import Simulator
 
 
 @click.group(chain=True)
@@ -23,106 +14,21 @@ def cli():
     pass
 
 
-@click.command('simulate_gambling', help='Simulate gambling.')
-@click.option('--num_of_player', '-n',
-              type=int,
-              default=10,
-              help='Number of player of each put strategy in the gambling', show_default=True)
-@click.option('--player_history', '-p',
-              is_flag=True,
-              default=False,
-              help='Write player battle history into DB.', show_default=True)
-def task_simulator(num_of_player, player_history):
-    simulator = Simulator()
-    simulator.start_simulation(num_of_player)
-    simulator.write_to_db('battle_summarize', simulator.summarized_data, index_label='player_id')
-    if player_history:
-        simulator.write_player_history_to_db()
-
-
-@click.command('create_db', help='Create DB.')
-@click.option('--force', '-f',
-              is_flag=True,
-              default=False,
-              help='Drop schema before create.', show_default=True)
-@click.option('--create_schema', '-cs',
-              is_flag=True,
-              default=False,
-              help='Create schema.', show_default=True)
-@click.option('--create_table', '-ct',
-              is_flag=True,
-              default=True,
-              help='Create table.', show_default=True)
-def task_create_db(force, create_schema, create_table):
-    b = DbConstructor()
-    if create_schema:
-        b.create_schema(force=force)
-    if create_table:
-        b.create_tables()
-
-
-@click.command('crawl_data', help='Start crawler to get sports gambling data.')
-@click.option('--start_date', '-sd',
-              type=str,
-              required=False,
-              default=datetime.datetime.strftime(datetime.datetime.now() - relativedelta(days=7), '%Y%m%d'),
-              show_default=True,
-              help='Start date of sports gambling, the format must follow the pattern: YYYYmmDD, ex: 20190130.')
-@click.option('--end_date', '-ed',
-              type=str,
-              required=False,
-              default=datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d'),
-              show_default=True,
-              help='End date of sports gambling, the format must follow the pattern: YYYYmmDD, ex: 20190130.')
-@click.option('--game_type', '-gt',
-              type=click.Choice(global_constant.game_type_map.keys()),
-              default=global_constant.NBA,
-              help='Target game type.', show_default=True)
-def task_crawler(start_date, end_date, game_type):
-    Crawler(start_date=start_date, end_date=end_date, game_type=game_type).start_crawler()
-
-
-@click.command('update_db', help='Update game data based on game_season.yml')
-@click.option('--keep_update', '-k',
-              is_flag=True,
-              default=False,
-              help='Keeping update.', show_default=True)
-def task_update_db(keep_update):
-    if keep_update:
-        with open('config/configuration.yml') as config:
-            config = yaml.load(config, Loader=yaml.FullLoader)
-        Utility().load_environment_variable()
-        schedule.every(config['data_updater']['update_period']).hours.do(DataUpdater().update_db)
-        schedule.every(config['data_updater']['backup_period']).days.do(DataBackupScheduler.backup, True)
-
-        while True:
-            schedule.run_pending()
-            time.sleep(60)
-    else:
-        DataUpdater().update_db()
-
-
-@click.command('analyze', help='Make judgement about crawled data.')
-@click.option('--to_db', '-td',
-              is_flag=True,
-              default=False,
-              help='Write analyzed result to db.', show_default=True)
-def task_analyzer(to_db):
-    CrawledResultAnalyzer(to_db=to_db).start_analyze()
-
-
-@click.command('backup', help='Backup database.')
+@click.command("backup", help="Backup database.")
 def task_backup():
     DataBackupScheduler().backup()
 
 
-@click.command('restore', help='Restore data from backuped sql files.')
-@click.option('--sql_file', '-f',
-              type=str,
-              required=False,
-              default=None,
-              show_default=True,
-              help='Specific sql file. ex: ./backup_file.sql')
+@click.command("restore", help="Restore data from backuped sql files.")
+@click.option(
+    "--sql_file",
+    "-f",
+    type=str,
+    required=False,
+    default=None,
+    show_default=True,
+    help="Specific sql file. ex: ./backup_file.sql",
+)
 def task_data_restore(sql_file):
     if sql_file:
         DataBackupScheduler().data_restore_worker(sql_file)
@@ -130,30 +36,26 @@ def task_data_restore(sql_file):
         DataBackupScheduler().data_restore()
 
 
-@click.command('reset_id', help='Reset table auto-increment key.')
+@click.command("reset_id", help="Reset table auto-increment key.")
 def task_reset_id():
     DataBackupScheduler().reset_id()
 
 
-@click.command('convert_data', help='Convert data from SQL to No-SQL.')
-def task_convert_data():
-    NoSqlConverter().start_convert()
+@click.command("test")
+def test_banker():
+    # Banker().get_gamble_info('20180724', gamble_id=215)
+    Banker().get_gamble_info("20180724", game_type="MLB")
 
 
-@click.command('analyze_battle_result', help='Analyze battle result.')
-def task_analyze_battle_result():
-    BattleResultAnalyzer().start()
+@click.command("test_gambler")
+def test_gambler():
+    Gambler(1, 5000, FooDouble("NBA", "foo double")).battle(start_date="20180929")
 
 
-if __name__ == '__main__':
-    cli.add_command(task_simulator)
-    cli.add_command(task_create_db)
-    cli.add_command(task_crawler)
-    cli.add_command(task_analyzer)
+if __name__ == "__main__":
     cli.add_command(task_backup)
     cli.add_command(task_data_restore)
     cli.add_command(task_reset_id)
-    cli.add_command(task_update_db)
-    cli.add_command(task_convert_data)
-    cli.add_command(task_analyze_battle_result)
+    cli.add_command(test_banker)
+    cli.add_command(test_gambler)
     cli()
