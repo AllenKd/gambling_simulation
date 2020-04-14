@@ -1,10 +1,11 @@
 from datetime import datetime
 
 import pandas as pd
-from pymongo import MongoClient
+from gambler.gamble_record import GambleRecord
 
 from banker.banker import Banker
 from config.logger import get_logger
+import json
 from util.util import Util
 
 
@@ -17,10 +18,9 @@ class Gambler(object):
 
         self.strategy_provider = strategy_provider
         self.decision_history = []
-        self.mongo_client = MongoClient(
-            host=self.config["mongoDb"]["host"], port=self.config["mongoDb"]["port"],
-            username='allen', password='password'
-        )["gambling_simulation"]["battle_data"]
+        self.mongo_client = Util.get_mongo_client()["gambling_simulation"][
+            "battle_data"
+        ]
 
     def battle(self, start_date, end_date=datetime.today().strftime("%Y%m%d")):
         for game_date in pd.date_range(
@@ -38,10 +38,12 @@ class Gambler(object):
     def settle(self, decisions):
         self.logger.debug("start settle")
         for decision in decisions:
+            record = GambleRecord(self.gambler_id, self.strategy_provider.name)
             gamble_result = Banker().get_gamble_result(
                 decision.game_date, decision.gamble_id
             )
-            decision["principle"] = {"before": self.principle}
+            record.content["decision"] = decision
+            record.content["principle"] = {"before": self.principle}
             for bet in decision.bets:
                 self.principle -= bet.unit
                 if bet.result == gamble_result.judgement[bet.banker_side][bet.type]:
@@ -58,13 +60,13 @@ class Gambler(object):
 
             self.logger.debug("settled decision: %s" % decision)
             self.logger.debug("current principle: %s" % self.principle)
-            decision["principle"]["after"] = self.principle
-            self.write_record(decision)
+            record.content["principle"]["after"] = self.principle
+            self.write_record(record)
 
-    def write_record(self, decision):
-        self.logger.debug(f"save decision to mongodb: {decision}")
-        decision['gambler_id'] = self.gambler_id
-        self.mongo_client.insert_one(decision)
+    def write_record(self, record):
+        self.logger.debug(f"save decision to mongodb: {record}")
+        # a = json.dumps(record.content, default=lambda o: o.__dict__)
+        self.mongo_client.insert_one(json.loads(json.dumps(record.content, default=lambda o: o.__dict__)))
 
     def summarize_battle_history(self):
         self.logger.debug("start summarize battle history")
