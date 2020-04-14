@@ -49,7 +49,9 @@ def test_banker():
 
 @click.command("test_gambler")
 def test_gambler():
-    Gambler(1, 5000, FooDouble("NBA", "foo double")).battle(start_date="20180929")
+    Gambler(
+        gambler_id=1, principle=5000, strategy_provider=FooDouble("NBA", "foo double")
+    ).battle(start_date="20180929")
 
 
 if __name__ == "__main__":
