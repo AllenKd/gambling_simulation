@@ -2,20 +2,9 @@ logging:
   level: "DEBUG"
 
 gambling:
-  default_ratio_per_game: 1.75
+  default_response_ratio: 1.75
   bet_base: 100
   combination: 1
-
-stratagy_size: 20
-support_strategy:
-  # true: support table strategy
-  linear_response: true
-  fibonacci_base: true
-  foo_double: true
-  kelly: false
-
-banker:
-
 
 strategy_provider:
   put_strategy:

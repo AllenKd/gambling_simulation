@@ -8,7 +8,7 @@ from config.constant import global_constant
 from config.logger import get_logger
 
 
-class Utility(object):
+class Util(object):
     def __init__(self):
         self.logger = get_logger(self.__class__.__name__)
         with open('config/configuration.yml', 'r') as config:

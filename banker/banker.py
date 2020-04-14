@@ -5,14 +5,14 @@ from pymongo import MongoClient
 
 from banker.objects import GambleInfo, GambleResult
 from config.logger import get_logger
-from utility.utility import Utility
+from util.util import Util
 
 
 # should be singleton
 class Banker:
     def __init__(self):
         self.logger = get_logger(self.__class__.__name__)
-        self.config = Utility().get_config()
+        self.config = Util().get_config()
         # self.game_result = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
         self.mongo_client = MongoClient(host=self.config['mongoDb']['host'],
                                         port=self.config['mongoDb']['port'])['gambling_simulation']['sports_data']
@@ -29,4 +29,6 @@ class Banker:
     def get_gamble_result(self, game_date, gamble_id):
         game_date = str(datetime.strptime(game_date, '%Y%m%d').date())
         query_condition = {'game_time': {'$regex': game_date}, 'gamble_id': gamble_id}
-        return [GambleResult(i) for i in self.mongo_client.find(query_condition)]
+        query_result = self.mongo_client.find_one(query_condition)
+        self.logger.debug('query result: %s' % query_result)
+        return GambleResult(query_result)
