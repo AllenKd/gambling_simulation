@@ -7,7 +7,6 @@ from util.singleton import Singleton
 from util.util import Util
 
 
-# should be singleton
 class Banker(metaclass=Singleton):
     def __init__(self):
         self.logger = get_logger(self.__class__.__name__)

@@ -1,11 +1,11 @@
+import json
 from datetime import datetime
 
 import pandas as pd
-from gambler.gamble_record import GambleRecord
 
 from banker.banker import Banker
 from config.logger import get_logger
-import json
+from gambler.gamble_record import GambleRecord
 from util.util import Util
 
 
@@ -65,21 +65,5 @@ class Gambler(object):
 
     def write_record(self, record):
         self.logger.debug(f"save decision to mongodb: {record}")
-        # a = json.dumps(record.content, default=lambda o: o.__dict__)
-        self.mongo_client.insert_one(json.loads(json.dumps(record.content, default=lambda o: o.__dict__)))
-
-    def summarize_battle_history(self):
-        self.logger.debug("start summarize battle history")
-        # full_strategy_name = (
-        #     self.bet_strategy.name
-        #     if self.bet_strategy.name != sp_constant.low_of_large
-        #     else "{}_{}".format(
-        #         self.bet_strategy.name, self.bet_strategy.kwargs["recency"]
-        #     )
-        # )
-        #
-        # return (
-        #     pd.Series([full_strategy_name])
-        #     .append(self.decision_history.mean().round(3))
-        #     .values
-        # )
+        doc = json.loads(json.dumps(record.content, default=lambda o: o.__dict__))
+        self.mongo_client.update(doc, doc, upsert=True)
