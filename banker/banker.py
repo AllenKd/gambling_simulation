@@ -11,7 +11,6 @@ class Banker(metaclass=Singleton):
     def __init__(self):
         self.logger = get_logger(self.__class__.__name__)
         self.config = Util().get_config()
-        # self.game_result = np.random.randint(2, size=play_times * combination).reshape(play_times, combination)
         self.mongo_client = Util.get_mongo_client()["gambling_simulation"][
             "sports_data"
         ]
