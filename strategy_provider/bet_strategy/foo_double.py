@@ -1,6 +1,6 @@
-from strategy_provider.base_strategy import BaseStrategy
-from strategy_provider.decision import Bet
-from strategy_provider.decision import Decision
+from strategy_provider.common.base_bet_strategy import BaseStrategy
+from strategy_provider.common.decision import Bet
+from strategy_provider.common.decision import Decision
 
 
 # Target: 1st game of local point threshold, double bet if lose, otherwise 1
