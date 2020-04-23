@@ -4,8 +4,8 @@ from strategy_provider.decision import Decision
 
 
 class ConfidenceBase(BaseStrategy):
-    def __init__(self, game_type, name, confidence_threshold=500):
-        super().__init__(game_type, name)
+    def __init__(self, game_type, put_strategy, confidence_threshold=500):
+        super().__init__(game_type, "Confidence Base", put_strategy)
         self.threshold = confidence_threshold
         self.banker_side = ["local"]
         self.reference_group = "all_member"
@@ -34,7 +34,7 @@ class ConfidenceBase(BaseStrategy):
                                         banker_side=banker_side,
                                         bet_type=gamble_type,
                                         result=confidence.side,
-                                        unit=1,
+                                        unit=self.put_strategy.get_unit(gambler, self),
                                     ),
                                 )
                             )
