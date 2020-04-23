@@ -7,11 +7,11 @@ class ConfidenceBase(BaseStrategy):
     def __init__(self, game_type, put_strategy, confidence_threshold=500):
         super().__init__(game_type, "Confidence Base", put_strategy)
         self.threshold = confidence_threshold
+        # focus on local currently
         self.banker_side = ["local"]
         self.reference_group = "all_member"
         self.parameters = {"threshold": self.threshold, "group": self.reference_group}
 
-    # focus on local
     def get_decisions(self, gambler, gamble_info):
         decisions = []
         for info in gamble_info:
@@ -48,6 +48,8 @@ class ConfidenceBase(BaseStrategy):
         side_2 = list(side_vote)[1]
 
         c = Confidence
+
+        # TODO: can be refine
         if not side_vote[side_1]["population"] and not side_vote[side_2]["population"]:
             self.logger.warn("zero vote")
         elif side_vote[side_1]["population"] > side_vote[side_2]["population"]:

@@ -5,7 +5,8 @@ from strategy_provider.common.decision import Decision
 
 class FooDouble(BaseStrategy):
     """
-    1st game of local point threshold, double bet if lose, otherwise 1
+    Strategy Description:
+        Bet 1st game with gamble type "total point" on local banker.
     """
 
     def __init__(self, game_type, put_strategy):
