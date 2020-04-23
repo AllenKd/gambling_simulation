@@ -32,7 +32,7 @@ class Gambler(object):
             gamble_info = Banker().get_gamble_info(game_date=game_date)
 
             # [decision, decision, ...]
-            decisions = self.strategy_provider.get_decision(self, gamble_info)
+            decisions = self.strategy_provider.get_decisions(self, gamble_info)
             self.decision_history += decisions
             self.settle(decisions)
 

@@ -10,5 +10,5 @@ class BaseStrategy(ABC):
         self.put_strategy = put_strategy
         self.parameters = None
 
-    def get_decision(self, gambler, gamble_info):
+    def get_decisions(self, gambler, gamble_info):
         pass

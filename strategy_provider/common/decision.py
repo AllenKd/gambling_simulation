@@ -1,5 +1,5 @@
 class Decision:
-    def __init__(self, game_type, game_date, gamble_id, bet):
+    def __init__(self, game_type, game_date, gamble_id, bet, **kwargs):
         self.game_type = game_type
         self.game_date = game_date
         self.gamble_id = gamble_id
@@ -7,6 +7,7 @@ class Decision:
         # list fo Bet object
         self.bet = bet
         self.match = None
+        self.confidence = kwargs.get('confidence', None)
 
     def __str__(self):
         return "type: %s, date: %s, id: %s, bet: %s" % (

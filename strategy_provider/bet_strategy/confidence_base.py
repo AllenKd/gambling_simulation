@@ -12,7 +12,7 @@ class ConfidenceBase(BaseStrategy):
         self.parameters = {"threshold": self.threshold, "group": self.reference_group}
 
     # focus on local
-    def get_decision(self, gambler, gamble_info):
+    def get_decisions(self, gambler, gamble_info):
         decisions = []
         for info in gamble_info:
             if info.game_type != self.game_type:
@@ -36,6 +36,7 @@ class ConfidenceBase(BaseStrategy):
                                         result=confidence.side,
                                         unit=self.put_strategy.get_unit(gambler, self),
                                     ),
+                                    confidence=confidence.index,
                                 )
                             )
 

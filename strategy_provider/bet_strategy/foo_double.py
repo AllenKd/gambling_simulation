@@ -3,12 +3,15 @@ from strategy_provider.common.decision import Bet
 from strategy_provider.common.decision import Decision
 
 
-# Target: 1st game of local point threshold, double bet if lose, otherwise 1
 class FooDouble(BaseStrategy):
+    """
+    1st game of local point threshold, double bet if lose, otherwise 1
+    """
+
     def __init__(self, game_type, put_strategy):
         super().__init__(game_type, "Foo Double", put_strategy)
 
-    def get_decision(self, gambler, gamble_info):
+    def get_decisions(self, gambler, gamble_info):
         self.logger.debug("get decision")
         decisions = []
         for info in gamble_info:
