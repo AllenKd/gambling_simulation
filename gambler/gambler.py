@@ -22,6 +22,7 @@ class Gambler(object):
             "battle_data"
         ]
 
+    # TODO: end_date should be end of the gamble
     def battle(self, start_date, end_date=datetime.today().strftime("%Y%m%d")):
         for game_date in pd.date_range(
             datetime.strptime(start_date, "%Y%m%d"),
@@ -38,25 +39,28 @@ class Gambler(object):
     def settle(self, decisions):
         self.logger.debug("start settle")
         for decision in decisions:
-            record = GambleRecord(self.gambler_id, self.strategy_provider.name)
+            self.logger.debug(f"settling decision: {decision}")
+            record = GambleRecord(self.gambler_id, self.strategy_provider)
             gamble_result = Banker().get_gamble_result(
                 decision.game_date, decision.gamble_id
             )
             record.content["decision"] = decision
             record.content["principle"] = {"before": self.principle}
-            for bet in decision.bets:
-                self.principle -= bet.unit
-                if bet.result == gamble_result.judgement[bet.banker_side][bet.type]:
-                    decision.match = True
-                    gamble_info = Banker().get_gamble_info(
-                        game_date=decision.game_date, gamble_id=decision.gamble_id
-                    )[0]
-                    response_ratio = gamble_info.handicap[bet.banker_side][
-                        bet.type
-                    ].get("response", 1.7)
-                    self.principle += bet.unit * response_ratio
-                else:
-                    decision.match = False
+            self.principle -= decision.bet.unit
+            if (
+                decision.bet.result
+                == gamble_result.judgement[decision.bet.banker_side][decision.bet.type]
+            ):
+                decision.match = True
+                gamble_info = Banker().get_gamble_info(
+                    game_date=decision.game_date, gamble_id=decision.gamble_id
+                )[0]
+                response_ratio = gamble_info.handicap[decision.bet.banker_side][
+                    decision.bet.type
+                ]["response"][decision.bet.result]
+                self.principle += decision.bet.unit * response_ratio
+            else:
+                decision.match = False
 
             self.logger.debug("settled decision: %s" % decision)
             self.logger.debug("current principle: %s" % self.principle)

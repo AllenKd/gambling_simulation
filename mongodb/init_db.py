@@ -17,6 +17,15 @@ def init_mongo():
                 ("decision.game_type", 1),
                 ("decision.game_date", 1),
                 ("decision.gamble_id", 1),
+                ("decision.bet.banker_side", 1),
+                ("decision.bet.type", 1),
             ],
             unique=True,
+        )
+
+    if "sports_data" not in mongo_client.list_collection_names():
+        logger.debug("collection sports_data not exist, create it")
+        collection = mongo_client["sports_data"]
+        collection.create_index(
+            [("game_time", 1), ("gambler_id", 1), ("game_type", 1),], unique=True,
         )
