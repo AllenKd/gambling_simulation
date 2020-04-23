@@ -3,8 +3,9 @@ import click
 from banker.banker import Banker
 from gambler.gambler import Gambler
 from game_predictor.data_backup_scheduler import DataBackupScheduler
-from strategy_provider.foo_double import FooDouble
 from mongodb.init_db import init_mongo
+from strategy_provider.confidence_base import ConfidenceBase
+
 
 # from simulator.simulator import Simulator
 
@@ -50,9 +51,12 @@ def test_banker():
 @click.command("test_gambler")
 def test_gambler():
     init_mongo()
+    # Gambler(
+    #     gambler_id=1, principle=5000, strategy_provider=FooDouble("NBA", "foo double")
+    # ).battle(start_date="20180929")
     Gambler(
-        gambler_id=1, principle=5000, strategy_provider=FooDouble("NBA", "foo double")
-    ).battle(start_date="20180925")
+        gambler_id=1, principle=5000, strategy_provider=ConfidenceBase("NBA", "confidence base")
+    ).battle(start_date="20180929")
 
 
 if __name__ == "__main__":
