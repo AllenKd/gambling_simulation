@@ -1,4 +1,5 @@
 from abc import ABC
+
 from config.logger import get_logger
 
 

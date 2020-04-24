@@ -34,7 +34,14 @@ class ConfidenceBase(BaseStrategy):
                                         banker_side=banker_side,
                                         bet_type=gamble_type,
                                         result=confidence.side,
-                                        unit=self.put_strategy.get_unit(gambler, self),
+                                        # TODO: better to deal with kwargs?
+                                        unit=self.put_strategy.get_unit(
+                                            gambler,
+                                            self,
+                                            response=info.handicap[banker_side][
+                                                gamble_type
+                                            ]["response"][confidence.side],
+                                        ),
                                     ),
                                     confidence=confidence.index,
                                 )
