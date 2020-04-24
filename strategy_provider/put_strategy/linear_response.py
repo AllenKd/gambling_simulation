@@ -4,6 +4,15 @@ from strategy_provider.common.base_put_strategy import BasePutStrategy
 
 
 class LinearResponse(BasePutStrategy):
+    """
+    Strategy Description:
+        Calculate how much unit to put can resulting the response as linear since last time win the gamble.
+
+    Suitable Bet Strategies:
+        One bet(decision) per day.
+
+    """
+
     def __init__(self):
         super().__init__("Linear Response")
 
