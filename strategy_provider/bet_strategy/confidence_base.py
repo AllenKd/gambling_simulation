@@ -1,18 +1,18 @@
-from strategy_provider.base_strategy import BaseStrategy
-from strategy_provider.decision import Bet
-from strategy_provider.decision import Decision
+from strategy_provider.common.base_bet_strategy import BaseStrategy
+from strategy_provider.common.decision import Bet
+from strategy_provider.common.decision import Decision
 
 
 class ConfidenceBase(BaseStrategy):
     def __init__(self, game_type, put_strategy, confidence_threshold=500):
         super().__init__(game_type, "Confidence Base", put_strategy)
         self.threshold = confidence_threshold
+        # focus on local currently
         self.banker_side = ["local"]
         self.reference_group = "all_member"
         self.parameters = {"threshold": self.threshold, "group": self.reference_group}
 
-    # focus on local
-    def get_decision(self, gambler, gamble_info):
+    def get_decisions(self, gambler, gamble_info):
         decisions = []
         for info in gamble_info:
             if info.game_type != self.game_type:
@@ -34,8 +34,16 @@ class ConfidenceBase(BaseStrategy):
                                         banker_side=banker_side,
                                         bet_type=gamble_type,
                                         result=confidence.side,
-                                        unit=self.put_strategy.get_unit(gambler, self),
+                                        # TODO: better to deal with kwargs?
+                                        unit=self.put_strategy.get_unit(
+                                            gambler,
+                                            self,
+                                            response=info.handicap[banker_side][
+                                                gamble_type
+                                            ]["response"][confidence.side],
+                                        ),
                                     ),
+                                    confidence=confidence.index,
                                 )
                             )
 
@@ -47,6 +55,8 @@ class ConfidenceBase(BaseStrategy):
         side_2 = list(side_vote)[1]
 
         c = Confidence
+
+        # TODO: can be refine
         if not side_vote[side_1]["population"] and not side_vote[side_2]["population"]:
             self.logger.warn("zero vote")
         elif side_vote[side_1]["population"] > side_vote[side_2]["population"]:

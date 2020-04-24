@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from config.logger import get_logger
 
 
@@ -27,7 +28,7 @@ class GambleInfo:
                 if "response" not in gamble_types[gamble_type]:
                     self.delete_gamble(banker_side, gamble_type)
 
-                elif 0.0 in gamble_types[gamble_type]['response'].values():
+                elif 0.0 in gamble_types[gamble_type]["response"].values():
                     self.delete_gamble(banker_side, gamble_type)
 
         self.logger.debug(f"filtered handicap: {self.handicap}")
