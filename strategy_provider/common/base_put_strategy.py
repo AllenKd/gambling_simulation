@@ -1,10 +1,9 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from config.logger import get_logger
-from util.singleton import SingletonABCMeta
 
 
-class BasePutStrategy(metaclass=SingletonABCMeta):
+class BasePutStrategy(ABC):
     def __init__(self, name):
         self.logger = get_logger(self.__class__.__name__)
         self.name = name
