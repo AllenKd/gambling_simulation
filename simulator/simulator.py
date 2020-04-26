@@ -45,7 +45,6 @@ class Simulator:
             (FooDouble, [{}]),
             (LinearResponse, [{}]),
         ]
-        self.game_types = ["NBA", "MLB", "NPB"]
 
     def start_simulation(self):
         self.logger.debug("start simulation")
