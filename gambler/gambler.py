@@ -36,6 +36,8 @@ class Gambler(object):
             self.decision_history += decisions
             self.settle(decisions)
 
+        self.logger.debug(f"gambler {self.gambler_id} finished battle.")
+
     def settle(self, decisions):
         self.logger.debug("start settle")
         for decision in decisions:

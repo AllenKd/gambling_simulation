@@ -4,19 +4,18 @@ from strategy_provider.common.decision import Decision
 
 
 class ConfidenceBase(BaseStrategy):
-    def __init__(self, game_type, put_strategy, confidence_threshold=500):
-        super().__init__(game_type, "Confidence Base", put_strategy)
+    def __init__(self, put_strategy, confidence_threshold=500):
+        super().__init__("Confidence Base", put_strategy)
         self.threshold = confidence_threshold
         # focus on local currently
         self.banker_side = ["local"]
         self.reference_group = "all_member"
         self.parameters = {"threshold": self.threshold, "group": self.reference_group}
+        self.game_type_sensitive = False
 
     def get_decisions(self, gambler, gamble_info):
         decisions = []
         for info in gamble_info:
-            if info.game_type != self.game_type:
-                continue
             for prediction in info.prediction:
                 if prediction["group"] != self.reference_group:
                     continue
@@ -27,7 +26,7 @@ class ConfidenceBase(BaseStrategy):
 
                             decisions.append(
                                 Decision(
-                                    game_type=self.game_type,
+                                    game_type=info.game_type,
                                     game_date=info.game_date,
                                     gamble_id=info.gamble_id,
                                     bet=Bet(

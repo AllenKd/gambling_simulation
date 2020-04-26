@@ -1,86 +1,90 @@
-import functools
-import threading
+import multiprocessing
 
-import pandas as pd
-import pymysql
-import yaml
-from sqlalchemy import create_engine
-
-from config.constant import global_constant
-from config.constant import strategy_provider as sp_constant
 from config.logger import get_logger
 from gambler.gambler import Gambler
-from strategy_provider.strategy import Strategy
-from strategy_provider.strategy_provider import StrategyProvider
+from strategy_provider.bet_strategy.confidence_base import ConfidenceBase
+from strategy_provider.bet_strategy.constant import Constant
+from strategy_provider.bet_strategy.most_confidence import MostConfidence
+from strategy_provider.put_strategy.constant import Constant as PutStrategyConstant
+from strategy_provider.put_strategy.foo_double import FooDouble
+from strategy_provider.put_strategy.linear_response import LinearResponse
 
 
-class Simulator(object):
-    def __init__(self):
+# TODO: start to coding simulator
+class Simulator:
+    def __init__(self, principle=100, start_date="20180929"):
         self.logger = get_logger(self.__class__.__name__)
-        with open('config/configuration.yml', 'r') as config:
-            self.config = yaml.load(config, Loader=yaml.Loader)
-        self.summarized_data = pd.DataFrame(columns=[sp_constant.bet_strategy] +
-                                                    ['hit_ratio_{}'.format(col)
-                                                     for col in player_constant.battle_target])
-        self.players = None
 
-        # init db
-        user = self.config[global_constant.DB][global_constant.user]
-        password = self.config[global_constant.DB][global_constant.password]
-        host = self.config[global_constant.DB][global_constant.host]
-        port = self.config[global_constant.DB][global_constant.port]
-        self.db = pymysql.connect(host=host, user=user, passwd=password, port=port,
-                                  db=self.config[global_constant.DB][global_constant.schema], charset='utf8')
-        self.engine = create_engine('mysql+pymysql://{}:{}@{}:{}'.format(user, password, host, port))
+        self.principle = principle
+        self.start_date = start_date
 
-    @functools.lru_cache(1)
-    def init_players(self, num_of_player):
-        self.logger.info('start init players')
+        # [(strategy, [{parameter: value, ...}, ...]), ...]
+        self.bet_strategies = [
+            (Constant, [{}]),
+            (
+                ConfidenceBase,
+                [
+                    {"confidence_threshold": 100},
+                    {"confidence_threshold": 300},
+                    {"confidence_threshold": 500},
+                    {"confidence_threshold": 800},
+                ],
+            ),
+            (
+                MostConfidence,
+                [
+                    {"confidence_threshold": 100},
+                    {"confidence_threshold": 300},
+                    {"confidence_threshold": 500},
+                    {"confidence_threshold": 800},
+                ],
+            ),
+        ]
+        self.put_strategies = [
+            (PutStrategyConstant, [{}]),
+            (FooDouble, [{}]),
+            (LinearResponse, [{}]),
+        ]
 
-        sp = StrategyProvider(battle_target=player_constant.battle_target)
-        bet_strategy = [Strategy(sp_constant.keep_false, **dict()), Strategy(sp_constant.keep_true, **dict())]
-        bet_strategy += [Strategy(sp_constant.random, **dict())] * ((num_of_player - 2) // 2)
-        bet_strategy += [Strategy(sp_constant.low_of_large, **{'recency': i})
-                         for i in range(1, num_of_player - len(bet_strategy) + 1)]
-        self.players = [Gambler(gambler_id=i,
-                                bet_strategy=bs,
-                                strategy_provider=sp)
-                        for i, bs in zip(range(1, num_of_player + 1), bet_strategy)]
-        return self.players
+    def start_simulation(self):
+        self.logger.debug("start simulation")
+        processes = []
+        for g in self.init_gamblers():
+            p = multiprocessing.Process(target=g.battle, args=(self.start_date,))
+            processes.append(p)
+            p.start()
 
-    def start_simulation(self, num_of_player):
-        self.logger.info('start simulation')
-        game_judgement = pd.read_sql('SELECT id, {} FROM {}'.format(', '.join(player_constant.battle_target),
-                                                                    db_constant.game_judgement),
-                                     con=self.db,
-                                     index_col=db_constant.row_id)
-        battle_threads = []
-        for player in self.init_players(num_of_player):
-            battle_thread = threading.Thread(name=player.gambler_id, target=player.battle, args=(game_judgement,))
-            battle_threads.append(battle_thread)
-            battle_thread.start()
-        for battle_thread in battle_threads:
-            self.logger.debug('join thread: {}'.format(battle_thread.getName()))
-            battle_thread.join()
+        for p in processes:
+            p.join()
 
-        self.logger.info('battle threads are finished')
-        self.summarize_gambling()
-        return
+        self.logger.debug("finished simulation")
+
+    def init_gamblers(self):
+        self.logger.info("start init gamblers")
+        gamblers = [
+            Gambler(gambler_id=i, principle=self.principle, strategy_provider=sp)
+            for i, sp in enumerate(self.get_strategies())
+        ]
+        self.logger.debug(f"{len(gamblers)} gamblers initialized")
+        return gamblers
+
+    # Get strategies based on the combination of bet_strategy, put_strategy and each parameters
+    def get_strategies(self):
+        strategies = []
+        for bet_strategy, bet_parameters in self.bet_strategies:
+            for put_strategy, put_parameters in self.put_strategies:
+                strategies += [
+                    self.init_strategy(bet_strategy, put_strategy, bp, pp)
+                    for bp in bet_parameters
+                    for pp in put_parameters
+                ]
+        return strategies
+
+    def init_strategy(self, bet_strategy, put_strategy, bet_parameter, put_parameter):
+        ps = put_strategy(**put_parameter) if put_parameter else put_strategy()
+        bs = bet_strategy(ps, **bet_parameter) if bet_parameter else bet_strategy(ps)
+        return bs
 
     def summarize_gambling(self):
-        self.logger.info('start summarize gambling')
-        for player in self.players:
-            self.summarized_data.loc[player.id] = player.summarize_battle_history()
-        return self.summarized_data
-
-    def write_player_history_to_db(self):
-        for player in self.players:
-            self.write_to_db('player_{}'.format(player.id), player.battle_history)
-
-    def write_to_db(self, table_name, df, index_label=db_constant.row_id):
-        self.logger.info('start write to db: {}'.format(table_name))
-        df.to_sql(name=table_name,
-                  if_exists='replace',
-                  schema=self.config[global_constant.DB][global_constant.schema],
-                  index_label=index_label,
-                  con=self.engine)
+        self.logger.info("start summarize gambling")
+        pass
