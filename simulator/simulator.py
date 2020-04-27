@@ -10,7 +10,6 @@ from strategy_provider.put_strategy.foo_double import FooDouble
 from strategy_provider.put_strategy.linear_response import LinearResponse
 
 
-# TODO: start to coding simulator
 class Simulator:
     def __init__(self, principle=100, start_date="20180929"):
         self.logger = get_logger(self.__class__.__name__)
