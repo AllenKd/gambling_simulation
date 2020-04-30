@@ -27,5 +27,5 @@ def init_mongo():
         logger.debug("collection sports_data not exist, create it")
         collection = mongo_client["sports_data"]
         collection.create_index(
-            [("game_time", 1), ("gambler_id", 1), ("game_type", 1),], unique=True,
+            [("game_time", 1), ("gamble_id", 1), ("game_type", 1),], unique=True,
         )

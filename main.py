@@ -11,19 +11,9 @@ from strategy_provider.bet_strategy.constant import Constant
 from strategy_provider.put_strategy.linear_response import LinearResponse
 
 
-# from simulator.simulator import Simulator
-
-
 @click.group(chain=True)
 def cli():
     pass
-
-
-# TODO: move to uni test
-@click.command("test")
-def test_banker():
-    # Banker().get_gamble_info('20180724', gamble_id=215)
-    Banker().get_gamble_info("20180724", game_type="MLB")
 
 
 @click.command("run_simulator")

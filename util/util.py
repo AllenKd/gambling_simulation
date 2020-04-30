@@ -24,8 +24,7 @@ class Util(metaclass=Singleton):
 
             config[global_constant.DB][global_constant.host] = (
                 os.environ.get("DB_HOST")
-                if os.environ.get("DB_HOST")
-                else config[global_constant.DB][global_constant.host]
+                or config[global_constant.DB][global_constant.host]
             )
 
             config[global_constant.DB][global_constant.port] = (
@@ -36,14 +35,12 @@ class Util(metaclass=Singleton):
 
             config[global_constant.DB][global_constant.user] = (
                 os.environ.get("DB_USERNAME")
-                if os.environ.get("DB_USERNAME")
-                else config[global_constant.DB][global_constant.user]
+                or config[global_constant.DB][global_constant.user]
             )
 
             config[global_constant.DB][global_constant.password] = (
                 os.environ.get("DB_PASSWORD")
-                if os.environ.get("DB_PASSWORD")
-                else config[global_constant.DB][global_constant.password]
+                or config[global_constant.DB][global_constant.password]
             )
 
         # overwrite config by environment variable
