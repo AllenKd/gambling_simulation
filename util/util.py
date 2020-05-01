@@ -6,7 +6,6 @@ import yaml
 from pymongo import MongoClient
 from sqlalchemy import create_engine
 
-from config.constant import global_constant
 from config.logger import get_logger
 from util.singleton import Singleton
 
@@ -22,25 +21,18 @@ class Util(metaclass=Singleton):
         with open("config/configuration.yml") as config:
             config = yaml.load(config, Loader=yaml.FullLoader)
 
-            config[global_constant.DB][global_constant.host] = (
-                os.environ.get("DB_HOST")
-                or config[global_constant.DB][global_constant.host]
-            )
+            config["DB"]["host"] = os.environ.get("DB_HOST") or config["DB"]["host"]
 
-            config[global_constant.DB][global_constant.port] = (
+            config["DB"]["port"] = (
                 int(os.environ.get("DB_PORT"))
                 if os.environ.get("DB_PORT")
-                else config[global_constant.DB][global_constant.port]
+                else config["DB"]["port"]
             )
 
-            config[global_constant.DB][global_constant.user] = (
-                os.environ.get("DB_USERNAME")
-                or config[global_constant.DB][global_constant.user]
-            )
+            config["DB"]["user"] = os.environ.get("DB_USERNAME") or config["DB"]["user"]
 
-            config[global_constant.DB][global_constant.password] = (
-                os.environ.get("DB_PASSWORD")
-                or config[global_constant.DB][global_constant.password]
+            config["DB"]["password"] = (
+                os.environ.get("DB_PASSWORD") or config["DB"]["password"]
             )
 
         # overwrite config by environment variable
@@ -58,16 +50,16 @@ class Util(metaclass=Singleton):
 
     def get_db_connection(self):
         self.logger.info("getting db connection")
-        user = self.config[global_constant.DB][global_constant.user]
-        password = self.config[global_constant.DB][global_constant.password]
-        host = self.config[global_constant.DB][global_constant.host]
-        port = self.config[global_constant.DB][global_constant.port]
+        user = self.config["DB"]["user"]
+        password = self.config["DB"]["password"]
+        host = self.config["DB"]["host"]
+        port = self.config["DB"]["port"]
         return pymysql.connect(
             host=host,
             user=user,
             passwd=password,
             port=port,
-            db=self.config[global_constant.DB][global_constant.schema],
+            db=self.config["DB"]["schema"],
             charset="utf8",
         )
 
@@ -83,14 +75,16 @@ class Util(metaclass=Singleton):
 
     @classmethod
     def get_last_game(cls):
-        return Util.get_mongo_client()["gambling_simulation"]['sports_data'].find_one({}, sort=[('game_time', -1)])
+        return Util.get_mongo_client()["gambling_simulation"]["sports_data"].find_one(
+            {}, sort=[("game_time", -1)]
+        )
 
     def get_db_engine(self):
         self.logger.info("getting db engine")
-        user = self.config[global_constant.DB][global_constant.user]
-        password = self.config[global_constant.DB][global_constant.password]
-        host = self.config[global_constant.DB][global_constant.host]
-        port = self.config[global_constant.DB][global_constant.port]
+        user = self.config["DB"]["user"]
+        password = self.config["DB"]["password"]
+        host = self.config["DB"]["host"]
+        port = self.config["DB"]["port"]
         return create_engine(
             "mysql+pymysql://{}:{}@{}:{}".format(user, password, host, port)
         )
