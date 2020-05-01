@@ -81,6 +81,10 @@ class Util(metaclass=Singleton):
             authMechanism="SCRAM-SHA-1",
         )
 
+    @classmethod
+    def get_last_game(cls):
+        return Util.get_mongo_client()["gambling_simulation"]['sports_data'].find_one({}, sort=[('game_time', -1)])
+
     def get_db_engine(self):
         self.logger.info("getting db engine")
         user = self.config[global_constant.DB][global_constant.user]

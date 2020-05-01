@@ -3,12 +3,7 @@ import datetime
 import click
 from dateutil.relativedelta import relativedelta
 
-from banker.banker import Banker
-from gambler.gambler import Gambler
-from mongodb.init_db import init_mongo
 from simulator.simulator import Simulator
-from strategy_provider.bet_strategy.constant import Constant
-from strategy_provider.put_strategy.linear_response import LinearResponse
 
 
 @click.group(chain=True)
@@ -37,23 +32,10 @@ def cli():
     show_default=True,
     help="Default principle unit of each gambler.",
 )
-def run_simulator():
-    Simulator().start_simulation()
-
-
-@click.command("test_gambler")
-def test_gambler():
-    init_mongo()
-    # Gambler(
-    #     gambler_id=1, principle=5000, strategy_provider=FooDouble("NBA", "foo double", PutStrategyFooDouble('foo double'))
-    # ).battle(start_date="20180929")
-    Gambler(
-        gambler_id=1, principle=100, strategy_provider=Constant(LinearResponse()),
-    ).battle(start_date="20180929")
+def run_simulator(start_date, principle):
+    Simulator(start_date=start_date, principle=principle).start_simulation()
 
 
 if __name__ == "__main__":
-    cli.add_command(test_banker)
-    cli.add_command(test_gambler)
     cli.add_command(run_simulator)
     cli()

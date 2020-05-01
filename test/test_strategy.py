@@ -1,20 +1,16 @@
 import pytest
-import math
-from util.util import Util
-from test.common import *
-from banker.banker import Banker
-from banker.objects import GambleInfo, GambleResult
-import copy
+
+from gambler.gambler import Gambler
+from strategy_provider.common.decision import Decision, Bet
 from strategy_provider.put_strategy.constant import Constant
 from strategy_provider.put_strategy.foo_double import FooDouble
 from strategy_provider.put_strategy.linear_response import LinearResponse
-from gambler.gambler import Gambler
-from strategy_provider.common.decision import Decision, Bet
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope="class")
 def setup_test_data():
     return Gambler(gambler_id=-1, principle=-1, strategy_provider=None)
+
 
 def init_gamble_hist(match_hist, bet_list=None):
     gamble_hist = [Decision(None, None, None, None) for _ in match_hist]

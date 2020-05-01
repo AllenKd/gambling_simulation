@@ -22,11 +22,12 @@ class Gambler(object):
             "battle_data"
         ]
 
-    # TODO: end_date should be end of the gamble
-    def battle(self, start_date, end_date=datetime.today().strftime("%Y%m%d")):
+    def battle(self, start_date, end_date=None):
+        end_date = end_date or Util.get_last_game()["game_time"][:10]
+
         for game_date in pd.date_range(
             datetime.strptime(start_date, "%Y%m%d"),
-            datetime.strptime(end_date, "%Y%m%d"),
+            datetime.strptime(end_date, "%Y-%m-%d"),
         ):
             game_date = game_date.strftime("%Y%m%d")
             gamble_info = Banker().get_gamble_info(game_date=game_date)
@@ -34,12 +35,14 @@ class Gambler(object):
             # [decision, decision, ...]
             decisions = self.strategy_provider.get_decisions(self, gamble_info)
             self.decision_history += decisions
-            self.settle(decisions)
+            records = self.settle(decisions)
+            self.write_records(records)
 
         self.logger.debug(f"gambler {self.gambler_id} finished battle.")
 
     def settle(self, decisions):
         self.logger.debug("start settle")
+        records = []
         for decision in decisions:
             self.logger.debug(f"settling decision: {decision}")
             record = GambleRecord(self.gambler_id, self.strategy_provider)
@@ -67,9 +70,11 @@ class Gambler(object):
             self.logger.debug("settled decision: %s" % decision)
             self.logger.debug("current principle: %s" % self.principle)
             record.content["principle"]["after"] = self.principle
-            self.write_record(record)
+            records.append(record)
+        return records
 
-    def write_record(self, record):
-        self.logger.debug(f"save decision to mongodb: {record}")
-        doc = json.loads(json.dumps(record.content, default=lambda o: o.__dict__))
-        self.mongo_client.update(doc, doc, upsert=True)
+    def write_records(self, records):
+        self.logger.debug(f"save decision to mongodb: {records}")
+        for record in records:
+            doc = json.loads(json.dumps(record.content, default=lambda o: o.__dict__))
+            self.mongo_client.update(doc, doc, upsert=True)
