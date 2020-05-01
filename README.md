@@ -13,60 +13,63 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  analyze            Make judgement about crawled data.
-  crawl_data         Start crawler to get sports gambling data.
-  create_db          Create DB.
-  simulate_gambling  Simulate gambling.
-
+  run_simulator
 ```
 
 To describe command and it's helping message:
 
 ```bash
-$ python3 main.py simulate_gambling --help
-Usage: main.py simulate_gambling [OPTIONS]
-
-  Simulate gambling.
+$ python3 main.py run_simulator --help
+Usage: main.py run_simulator [OPTIONS]
 
 Options:
-  -p, --num_of_player INTEGER     Number of player of each put strategy in the
-                                  gambling  [default: 10]
-  -bs, --bet_strategy [random|follow_last|keep_false|keep_true]
-                                  Bet strategy of each player.  [default:
-                                  random]
-  -gt, --game_times INTEGER       Gambling times.  [default: 100]
-  -im, --init_money INTEGER       Initial money of each player.  [default:
-                                  10000]
-  --help                          Show this message and exit.
+  -sd, --start_date TEXT   Start date of gambling, the format must follow the
+                           pattern: YYYYmmDD, ex: 20190130.  [default:
+                           20200425]
+  -p, --principle INTEGER  Default principle unit of each gambler.  [default:
+                           100]
+  --help                   Show this message and exit.
 
 ```
 
-## [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player)
+## Simulator
 
-An instance to gambling with the [Banker](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/banker)
+To simulate gamblers based on each combination of *put_strategy*, *bet_strategy* and parameters, 
+every gambler have different gamble strategy.
 
-## [Strategy Provider](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player)
+## Strategy
 
-Provide [Player]() strategies to gambling.
+### Bet Strategy
 
-## [Banker](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/banker)
+A strategy to decide how to bet based on gambler's battle history and current gamble info, 
+each *bet_strategy* contains a *put_strategy* to decide how much of bet should put in for this gamble.
 
-An instance for [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player) battle with.
+#### Constant
 
-## [Simulator](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/simulator)
+Bet with first match of given gamble parameters for everyday. 
 
-Create multiple [Player](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/player) 
-instances and a [Banker](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/banker) 
-to simulate gambling scenario.
+#### Confidence Base
 
-## [Crawler](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/crawler)
+Based on confidence index, the index obtain by members' vote, 
+bet the game if the index over the given threshold.
 
-Crawl real sports gambling data and store into [Database](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/database)
+#### Most Confidence
 
-## [Analyzer](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/analyzer)
+Extend from *Confidence Base*, bet the mose confidence one only. 
 
-Make judgements about crawled data and summarize it.
+### Put Strategy
 
-## [Database](https://github.com/AllenKd/gambling_simulation/tree/feature/refine-readme/database)
+A strategy to decide how much of bet should put in for this gamble 
+based on gamble's battle history, *bet_strategy* and other optional kwargs.
 
-Store all simulation and crawled data.
+#### Constant
+
+Put constant unit for each gamble no matter parameters and *bet_strategy*.
+
+#### Foo Double
+
+Double bet if lose, otherwise back to 1.
+
+#### Linear Response
+
+Calculate how much unit to put can resulting the response as linear since last time win the gamble.
