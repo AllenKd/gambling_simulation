@@ -13,7 +13,7 @@ class FooDouble(BasePutStrategy):
     def __init__(self):
         super().__init__("Foo Double")
 
-    def get_unit(self, gambler, base_strategy, **kwargs):
+    def get_unit(self, gamble_info, decision, gambler, base_strategy, **kwargs):
         unit = 1
         for r in gambler.decision_history[::-1]:
             if r.match:

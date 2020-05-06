@@ -7,6 +7,7 @@ from strategy_provider.bet_strategy.constant import Constant
 from strategy_provider.bet_strategy.most_confidence import MostConfidence
 from strategy_provider.put_strategy.constant import Constant as PutStrategyConstant
 from strategy_provider.put_strategy.foo_double import FooDouble
+from strategy_provider.put_strategy.kelly import Kelly
 from strategy_provider.put_strategy.linear_response import LinearResponse
 
 
@@ -43,6 +44,7 @@ class Simulator:
             (PutStrategyConstant, [{}]),
             (FooDouble, [{}]),
             (LinearResponse, [{}]),
+            (Kelly, [{}]),
         ]
 
     def start_simulation(self):

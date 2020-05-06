@@ -28,25 +28,19 @@ class Constant(BaseStrategy):
         decisions = []
         for info in gamble_info:
             if info.game_type == self.game_type:
-                decisions.append(
-                    Decision(
-                        game_type=self.game_type,
-                        game_date=info.game_date,
-                        gamble_id=info.gamble_id,
-                        # TODO: better to deal with kwargs?
-                        bet=Bet(
-                            banker_side=self.banker_side,
-                            bet_type=self.bet_type,
-                            result=self.result,
-                            unit=self.put_strategy.get_unit(
-                                gambler,
-                                self,
-                                response=info.handicap[self.banker_side][self.bet_type][
-                                    "response"
-                                ][self.result],
-                            ),
-                        ),
-                    )
+                decision = Decision(
+                    game_type=info.game_type,
+                    game_date=info.game_date,
+                    gamble_id=info.gamble_id,
+                    bet=Bet(
+                        banker_side=self.banker_side,
+                        bet_type=self.bet_type,
+                        result=self.result,
+                        unit=None,
+                    ),
+                )
+                decision.bet.unit = self.put_strategy.get_unit(
+                    info, decision, gambler, self
                 )
                 break
         return decisions

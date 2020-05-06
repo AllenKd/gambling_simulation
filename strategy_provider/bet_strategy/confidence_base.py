@@ -1,6 +1,5 @@
 from strategy_provider.common.base_bet_strategy import BaseStrategy
-from strategy_provider.common.decision import Bet
-from strategy_provider.common.decision import Decision
+from strategy_provider.common.decision import Bet, Decision
 
 
 class ConfidenceBase(BaseStrategy):
@@ -23,28 +22,22 @@ class ConfidenceBase(BaseStrategy):
                     for gamble_type, side_vote in prediction[banker_side].items():
                         confidence = self.confidence_index(side_vote)
                         if confidence.index > self.threshold:
-
-                            decisions.append(
-                                Decision(
-                                    game_type=info.game_type,
-                                    game_date=info.game_date,
-                                    gamble_id=info.gamble_id,
-                                    bet=Bet(
-                                        banker_side=banker_side,
-                                        bet_type=gamble_type,
-                                        result=confidence.side,
-                                        # TODO: better to deal with kwargs?
-                                        unit=self.put_strategy.get_unit(
-                                            gambler,
-                                            self,
-                                            response=info.handicap[banker_side][
-                                                gamble_type
-                                            ]["response"][confidence.side],
-                                        ),
-                                    ),
-                                    confidence=confidence.index,
-                                )
+                            decision = Decision(
+                                game_type=info.game_type,
+                                game_date=info.game_date,
+                                gamble_id=info.gamble_id,
+                                bet=Bet(
+                                    banker_side=banker_side,
+                                    bet_type=gamble_type,
+                                    result=confidence.side,
+                                    unit=None,
+                                ),
+                                confidence=confidence.index,
                             )
+                            decision.bet.unit = self.put_strategy.get_unit(
+                                info, decision, gambler, self
+                            )
+                            decisions.append(decision)
 
         return decisions
 
