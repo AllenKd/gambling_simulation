@@ -18,35 +18,6 @@ class Simulator:
         self.principle = principle
         self.start_date = start_date
 
-        # [(strategy, [{parameter: value, ...}, ...]), ...]
-        self.bet_strategies = [
-            (Constant, [{}]),
-            (
-                ConfidenceBase,
-                [
-                    {"confidence_threshold": 100},
-                    {"confidence_threshold": 300},
-                    {"confidence_threshold": 500},
-                    {"confidence_threshold": 800},
-                ],
-            ),
-            (
-                MostConfidence,
-                [
-                    {"confidence_threshold": 100},
-                    {"confidence_threshold": 300},
-                    {"confidence_threshold": 500},
-                    {"confidence_threshold": 800},
-                ],
-            ),
-        ]
-        self.put_strategies = [
-            (PutStrategyConstant, [{}]),
-            (FooDouble, [{}]),
-            (LinearResponse, [{}]),
-            (Kelly, [{}]),
-        ]
-
     def start_simulation(self):
         self.logger.debug("start simulation")
         processes = []
@@ -69,22 +40,61 @@ class Simulator:
         self.logger.debug(f"{len(gamblers)} gamblers initialized")
         return gamblers
 
-    # Get strategies based on the combination of bet_strategy, put_strategy and each parameters
+    # Customize each strategies and parameters due to feature conflict between bet and put strategies.
     def get_strategies(self):
-        strategies = []
-        for bet_strategy, bet_parameters in self.bet_strategies:
-            for put_strategy, put_parameters in self.put_strategies:
-                strategies += [
-                    self.init_strategy(bet_strategy, put_strategy, bp, pp)
-                    for bp in bet_parameters
-                    for pp in put_parameters
-                ]
-        return strategies
-
-    def init_strategy(self, bet_strategy, put_strategy, bet_parameter, put_parameter):
-        ps = put_strategy(**put_parameter) if put_parameter else put_strategy()
-        bs = bet_strategy(ps, **bet_parameter) if bet_parameter else bet_strategy(ps)
-        return bs
+        return [
+            Constant(put_strategy=PutStrategyConstant()),
+            Constant(put_strategy=FooDouble()),
+            Constant(put_strategy=LinearResponse()),
+            ConfidenceBase(
+                put_strategy=PutStrategyConstant(), confidence_threshold=100
+            ),
+            ConfidenceBase(
+                put_strategy=PutStrategyConstant(), confidence_threshold=300
+            ),
+            ConfidenceBase(
+                put_strategy=PutStrategyConstant(), confidence_threshold=500
+            ),
+            ConfidenceBase(
+                put_strategy=PutStrategyConstant(), confidence_threshold=800
+            ),
+            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=100),
+            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=300),
+            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=500),
+            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=800),
+            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=100),
+            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=300),
+            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=500),
+            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=800),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=100),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=300),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=500),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=800),
+            MostConfidence(
+                put_strategy=PutStrategyConstant(), confidence_threshold=100
+            ),
+            MostConfidence(
+                put_strategy=PutStrategyConstant(), confidence_threshold=300
+            ),
+            MostConfidence(
+                put_strategy=PutStrategyConstant(), confidence_threshold=500
+            ),
+            MostConfidence(
+                put_strategy=PutStrategyConstant(), confidence_threshold=800
+            ),
+            MostConfidence(put_strategy=FooDouble(), confidence_threshold=100),
+            MostConfidence(put_strategy=FooDouble(), confidence_threshold=300),
+            MostConfidence(put_strategy=FooDouble(), confidence_threshold=500),
+            MostConfidence(put_strategy=FooDouble(), confidence_threshold=800),
+            MostConfidence(put_strategy=LinearResponse(), confidence_threshold=100),
+            MostConfidence(put_strategy=LinearResponse(), confidence_threshold=300),
+            MostConfidence(put_strategy=LinearResponse(), confidence_threshold=500),
+            MostConfidence(put_strategy=LinearResponse(), confidence_threshold=800),
+            MostConfidence(put_strategy=Kelly(), confidence_threshold=100),
+            MostConfidence(put_strategy=Kelly(), confidence_threshold=300),
+            MostConfidence(put_strategy=Kelly(), confidence_threshold=500),
+            MostConfidence(put_strategy=Kelly(), confidence_threshold=800),
+        ]
 
     def summarize_gambling(self):
         self.logger.info("start summarize gambling")
