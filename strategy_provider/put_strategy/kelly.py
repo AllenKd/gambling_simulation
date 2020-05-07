@@ -8,7 +8,7 @@ class Kelly(BasePutStrategy):
         Bet according to Kelly Formula
 
     Suitable Bet Strategies:
-        One bet(decision) per day.
+        One bet(decision) per day and with confidence.
     """
 
     def __init__(self):
@@ -18,11 +18,14 @@ class Kelly(BasePutStrategy):
         response = gamble_info.handicap[decision.bet.banker_side][decision.bet.type][
             "response"
         ][decision.bet.result]
-        # TODO: calculate win_prob by confidence and response ratio
-        win_prob = Util.confidence_to_prob(decision.confidence)
-        bet_ratio = (win_prob * (response + 1) - 1) / response
+        if hasattr(decision, 'confidence'):
+            win_prob = Util.confidence_to_prob(decision.confidence)
+            bet_ratio = (win_prob * (response + 1) - 1) / response
 
-        # do not bet if the ratio less than 0
-        bet_ratio = max(bet_ratio, 0)
-        self.logger.debug(f"bet ratio: {bet_ratio}")
-        return int(gambler.principle * bet_ratio)
+            # do not bet if the ratio less than 0
+            bet_ratio = max(bet_ratio, 0)
+            self.logger.debug(f"bet ratio: {bet_ratio}")
+            return int(gambler.principle * bet_ratio)
+        else:
+            self.logger.warn("no confidence for reference, return 1")
+            return 1
