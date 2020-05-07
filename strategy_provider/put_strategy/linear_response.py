@@ -16,10 +16,12 @@ class LinearResponse(BasePutStrategy):
     def __init__(self):
         super().__init__("Linear Response")
 
-    def get_unit(self, gambler, bet_strategy, **kwargs):
-        assert kwargs["response"]
+    def get_unit(self, gamble_info, decision, gambler, bet_strategy, **kwargs):
+        response = gamble_info.handicap[decision.bet.banker_side][decision.bet.type][
+            "response"
+        ][decision.bet.result]
+
         unit = 1
-        response = kwargs["response"]
         daily_expect_response = response - unit
         total_expect_response = daily_expect_response
         put_accumulation = 0

@@ -88,3 +88,8 @@ class Util(metaclass=Singleton):
         return create_engine(
             "mysql+pymysql://{}:{}@{}:{}".format(user, password, host, port)
         )
+
+    @classmethod
+    def confidence_to_prob(cls, confidence):
+        # confidence index with 95% less than 6000
+        return min(confidence / 6000, 1)

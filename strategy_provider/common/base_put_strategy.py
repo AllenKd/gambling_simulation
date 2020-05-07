@@ -10,5 +10,5 @@ class BasePutStrategy(ABC):
         self.parameters = None
 
     @abstractmethod
-    def get_unit(self, gambler, base_strategy, **kwargs):
+    def get_unit(self, gamble_info, decision, gambler, base_strategy, **kwargs):
         return NotImplementedError
