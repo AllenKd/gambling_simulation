@@ -21,7 +21,8 @@ class Simulator:
     def start_simulation(self):
         self.logger.debug("start simulation")
         processes = []
-        for g in self.init_gamblers():
+        gamblers = self.init_gamblers()
+        for g in gamblers:
             p = multiprocessing.Process(target=g.battle, args=(self.start_date,))
             processes.append(p)
             p.start()
@@ -29,7 +30,7 @@ class Simulator:
         for p in processes:
             p.join()
 
-        self.logger.debug("finished simulation")
+        self.logger.debug(f"finished simulation, total gamblers: {len(gamblers)}")
 
     def init_gamblers(self):
         self.logger.info("start init gamblers")
@@ -58,14 +59,6 @@ class Simulator:
             ConfidenceBase(
                 put_strategy=PutStrategyConstant(), confidence_threshold=800
             ),
-            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=100),
-            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=300),
-            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=500),
-            ConfidenceBase(put_strategy=FooDouble(), confidence_threshold=800),
-            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=100),
-            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=300),
-            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=500),
-            ConfidenceBase(put_strategy=LinearResponse(), confidence_threshold=800),
             ConfidenceBase(put_strategy=Kelly(), confidence_threshold=100),
             ConfidenceBase(put_strategy=Kelly(), confidence_threshold=300),
             ConfidenceBase(put_strategy=Kelly(), confidence_threshold=500),
