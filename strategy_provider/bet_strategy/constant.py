@@ -42,6 +42,7 @@ class Constant(BaseStrategy):
                 decision.bet.unit = self.put_strategy.get_unit(
                     info, decision, gambler, self
                 )
-                decisions.append(decision)
+                if decision.bet.unit:
+                    decisions.append(decision)
                 break
         return decisions
