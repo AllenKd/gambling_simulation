@@ -2,6 +2,8 @@ import datetime
 
 import click
 from dateutil.relativedelta import relativedelta
+from game_predictor.traninig_data.generator import TrainingDataGenerator
+from mongodb.init_db import init_mongo
 
 from simulator.simulator import Simulator
 
@@ -36,6 +38,18 @@ def run_simulator(start_date, principle):
     Simulator(start_date=start_date, principle=principle).start_simulation()
 
 
+@click.command("init_mongo")
+def init_mg():
+    init_mongo()
+
+
+@click.command("init_training_data")
+def init_training_data():
+    TrainingDataGenerator().gen_confidence_data()
+
+
 if __name__ == "__main__":
     cli.add_command(run_simulator)
+    cli.add_command(init_training_data)
+    cli.add_command(init_mg)
     cli()
