@@ -20,7 +20,14 @@ class ConfidenceBase(BaseStrategy):
                     continue
                 for banker_side in self.banker_side:
                     for gamble_type, side_vote in prediction[banker_side].items():
-                        confidence = confidence_index(side_vote)
+                        try:
+                            confidence = confidence_index(side_vote)
+                        except AssertionError:
+                            self.logger.warn(
+                                f"unable to get confidence index, banker side: {banker_side}, gamble type: {gamble_type}, info: {info}"
+                            )
+
+                            continue
                         if confidence.index > self.threshold:
                             decision = Decision(
                                 game_type=info.game_type,
