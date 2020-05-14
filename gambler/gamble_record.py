@@ -8,3 +8,6 @@ class GambleRecord:
                 "put_strategy": strategy.put_strategy.name,
             },
         }
+
+    def __str__(self):
+        return self.content
