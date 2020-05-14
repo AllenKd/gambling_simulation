@@ -45,6 +45,7 @@ def init_mongo():
                 ("vote_group", 1),
                 ("bet_side", 1),
                 ("confidence", 1),
+                ("match", 1),
             ],
             unique=True,
         )
