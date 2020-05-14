@@ -48,8 +48,15 @@ def init_training_data():
     TrainingDataGenerator().gen_confidence_data()
 
 
+from game_predictor.models.train.confidence_to_prob import confidence_to_prob
+@click.command("test")
+def testing():
+    confidence_to_prob('all')
+
+
 if __name__ == "__main__":
     cli.add_command(run_simulator)
     cli.add_command(init_training_data)
     cli.add_command(init_mg)
+    cli.add_command(testing)
     cli()
