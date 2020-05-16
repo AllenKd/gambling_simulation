@@ -25,6 +25,7 @@ class Kelly(BasePutStrategy):
         if hasattr(decision, 'confidence'):
             win_prob = self.model.predict(np.array([decision.confidence]).reshape(-1, 1))[0][0]
             self.logger.debug(f"win prob from model: {win_prob}")
+            # avoid all in
             win_prob = min(win_prob, 0.8)
             bet_ratio = (win_prob * (response + 1) - 1) / response
 
