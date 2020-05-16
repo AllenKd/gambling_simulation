@@ -10,6 +10,13 @@ from util.util import Util
 
 
 class Gambler(object):
+    """
+    Gambling instance
+
+    Args:
+        target (dict): filter to get gamble info from banker, leave blank for all.
+    """
+
     def __init__(self, gambler_id, principle, strategy_provider):
         self.logger = get_logger("gambler_{}".format(gambler_id))
         self.gambler_id = gambler_id
@@ -22,7 +29,7 @@ class Gambler(object):
             "battle_data"
         ]
 
-    def battle(self, start_date, end_date=None):
+    def battle(self, start_date, end_date=None, **target):
         end_date = end_date or Util.get_last_game()["game_time"][:10]
         self.logger.debug(f"gambler_{self.gambler_id} start battle, {start_date} to {end_date}")
 
@@ -31,7 +38,7 @@ class Gambler(object):
             datetime.strptime(end_date, "%Y-%m-%d"),
         ):
             game_date = game_date.strftime("%Y%m%d")
-            gamble_info = Banker().get_gamble_info(game_date=game_date)
+            gamble_info = Banker().get_gamble_info(game_date=game_date, **target)
 
             # [decision, decision, ...]
             decisions = self.strategy_provider.get_decisions(self, gamble_info)
