@@ -31,7 +31,9 @@ class Gambler(object):
 
     def battle(self, start_date, end_date=None, **target):
         end_date = end_date or Util.get_last_game()["game_time"][:10]
-        self.logger.debug(f"gambler_{self.gambler_id} start battle, {start_date} to {end_date}")
+        self.logger.debug(
+            f"gambler_{self.gambler_id} start battle, {start_date} to {end_date}"
+        )
 
         for game_date in pd.date_range(
             datetime.strptime(start_date, "%Y%m%d"),

@@ -1,9 +1,13 @@
-import multiprocessing
+import threading
 
 from config.logger import get_logger
 from gambler.gambler import Gambler
+from strategy_provider.bet_strategy.anti_previous import AntiPrevious
 from strategy_provider.bet_strategy.confidence_base import ConfidenceBase
 from strategy_provider.bet_strategy.constant import Constant
+from strategy_provider.bet_strategy.follow_previous import FollowPrevious
+from strategy_provider.bet_strategy.low_response import LowResponse
+from strategy_provider.bet_strategy.lowest_response import LowestResponse
 from strategy_provider.bet_strategy.most_confidence import MostConfidence
 from strategy_provider.put_strategy.constant import Constant as PutStrategyConstant
 from strategy_provider.put_strategy.foo_double import FooDouble
@@ -20,15 +24,15 @@ class Simulator:
 
     def start_simulation(self):
         self.logger.debug("start simulation")
-        processes = []
+        threads = []
         gamblers = self.init_gamblers()
         for g in gamblers:
-            p = multiprocessing.Process(target=g.battle, args=(self.start_date,))
-            processes.append(p)
-            p.start()
+            t = threading.Thread(target=g.battle, args=(self.start_date,))
+            threads.append(t)
+            t.start()
 
-        for p in processes:
-            p.join()
+        for t in threads:
+            t.join()
 
         self.logger.debug(f"finished simulation, total gamblers: {len(gamblers)}")
 
@@ -87,6 +91,20 @@ class Simulator:
             MostConfidence(put_strategy=Kelly(), confidence_threshold=300),
             MostConfidence(put_strategy=Kelly(), confidence_threshold=500),
             MostConfidence(put_strategy=Kelly(), confidence_threshold=800),
+            LowResponse(put_strategy=PutStrategyConstant()),
+            LowResponse(put_strategy=Kelly()),
+            LowestResponse(put_strategy=PutStrategyConstant()),
+            LowestResponse(put_strategy=FooDouble()),
+            LowestResponse(put_strategy=LinearResponse()),
+            LowestResponse(put_strategy=Kelly()),
+            FollowPrevious(put_strategy=PutStrategyConstant()),
+            FollowPrevious(put_strategy=FooDouble()),
+            FollowPrevious(put_strategy=LinearResponse()),
+            FollowPrevious(put_strategy=Kelly()),
+            AntiPrevious(put_strategy=PutStrategyConstant()),
+            AntiPrevious(put_strategy=FooDouble()),
+            AntiPrevious(put_strategy=LinearResponse()),
+            AntiPrevious(put_strategy=Kelly()),
         ]
 
     def summarize_gambling(self):

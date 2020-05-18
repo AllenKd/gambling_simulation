@@ -1,7 +1,5 @@
-from strategy_provider.common.base_bet_strategy import BaseStrategy
-from strategy_provider.common.decision import Bet
-from strategy_provider.common.decision import Decision
 from strategy_provider.bet_strategy.follow_previous import FollowPrevious
+from strategy_provider.common.base_bet_strategy import BaseStrategy
 
 
 class AntiPrevious(BaseStrategy):
@@ -38,31 +36,3 @@ class AntiPrevious(BaseStrategy):
         if len(decisions) == 1:
             decisions[0].bet.result = self.anti_map[decisions[0].bet.result]
         return decisions
-        # if gambler.decision_history:
-        #     last_bet = gambler.decision_history[-1].bet
-        # else:
-        #     self.logger.debug("gambler has no decision history, make default decision")
-        #     last_bet = Bet(
-        #         banker_side=self.banker_side,
-        #         bet_type=self.bet_type,
-        #         result=self.result,
-        #         unit=1,
-        #     )
-        #
-        # decisions = []
-        # for info in gamble_info:
-        #     if info.game_type == self.game_type:
-        #         last_bet.result = self.anti_map[last_bet.result]
-        #         decision = Decision(
-        #             game_type=self.game_type,
-        #             game_date=info.game_date,
-        #             gamble_id=info.gamble_id,
-        #             bet=last_bet,
-        #         )
-        #         decision.bet.unit = self.put_strategy.get_unit(
-        #             info, decision, gambler, self
-        #         )
-        #         if decision.bet.unit:
-        #             decisions.append(decision)
-        #             break
-        # return decisions
