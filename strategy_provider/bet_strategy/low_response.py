@@ -1,5 +1,5 @@
 from strategy_provider.common.base_bet_strategy import BaseStrategy
-from strategy_provider.common.decision import Bet, Decision
+from strategy_provider.common.decision import Bet, Decision, confidence_index
 
 
 class LowResponse(BaseStrategy):
@@ -10,6 +10,7 @@ class LowResponse(BaseStrategy):
     def __init__(self, put_strategy):
         super().__init__("Low Response", put_strategy)
         self.game_type_sensitive = False
+        self.reference_group = "all_member"
 
         self.side_type = [
             # ("national", "total_point"),
@@ -25,9 +26,19 @@ class LowResponse(BaseStrategy):
             for banker_side, gamble_type in self.side_type:
                 try:
                     resp_info = info.handicap[banker_side][gamble_type]["response"]
+
+                    p = [
+                        p for p in info.prediction if p["group"] == self.reference_group
+                    ][0]
+                    confidence = confidence_index(p[banker_side][gamble_type])
                 except KeyError:
                     self.logger.warn(
                         f"cannot get response info, skip it, info: {info}, banker side: {banker_side}, gamble type: {gamble_type}"
+                    )
+                    continue
+                except AssertionError:
+                    self.logger.warn(
+                        f"unable to get confidence index, banker side: {banker_side}, gamble type: {gamble_type}, info: {info}"
                     )
                     continue
                 side = min(resp_info, key=resp_info.get,)
@@ -41,6 +52,7 @@ class LowResponse(BaseStrategy):
                         result=side,
                         unit=None,
                     ),
+                    confidence=confidence.index,
                 )
                 decision.bet.unit = self.put_strategy.get_unit(
                     info, decision, gambler, self

@@ -4,7 +4,6 @@ class Decision:
         self.game_date = game_date
         self.gamble_id = gamble_id
 
-        # list fo Bet object
         self.bet = bet
         self.match = None
         self.confidence = kwargs.get('confidence', None)
