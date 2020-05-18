@@ -52,6 +52,9 @@ from game_predictor.models.train.confidence_to_prob import confidence_to_prob
 @click.command("test")
 def testing():
     confidence_to_prob('all')
+    confidence_to_prob('nba', game_filter={'game_type': "NBA"})
+    confidence_to_prob('mlb', game_filter={'game_type': "MLB"})
+    confidence_to_prob('npb', game_filter={'game_type': "NPB"})
 
 
 if __name__ == "__main__":
