@@ -10,7 +10,7 @@ class MostConfidence(BaseStrategy):
     def __init__(self, put_strategy, confidence_threshold=500):
         super().__init__("Most Confidence", put_strategy)
         self.threshold = confidence_threshold
-        self.reference_group = "top_100"
+        self.reference_group = "all_member"
         self.parameters = {"threshold": self.threshold, "group": self.reference_group}
         self.confidence_base = ConfidenceBase(put_strategy, self.threshold)
         self.game_type_sensitive = False

@@ -26,7 +26,6 @@ class ConfidenceBase(BaseStrategy):
                             self.logger.warn(
                                 f"unable to get confidence index, banker side: {banker_side}, gamble type: {gamble_type}, info: {info}"
                             )
-
                             continue
                         if confidence.index > self.threshold:
                             decision = Decision(
