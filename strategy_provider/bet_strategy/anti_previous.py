@@ -35,8 +35,8 @@ class AntiPrevious(BaseStrategy):
     def get_decisions(self, gambler, gamble_info):
         self.logger.debug("get decision")
         decisions = self.follow_previous.get_decisions(gambler, gamble_info)
-        assert len(decisions) == 1
-        decisions[0].bet.result = self.anti_map[decisions[0].bet.result]
+        if len(decisions) == 1:
+            decisions[0].bet.result = self.anti_map[decisions[0].bet.result]
         return decisions
         # if gambler.decision_history:
         #     last_bet = gambler.decision_history[-1].bet

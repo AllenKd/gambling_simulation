@@ -59,7 +59,7 @@ class LowestResponse(BaseStrategy):
                             result=side,
                             unit=None,
                         ),
-                        confidence=confidence,
+                        confidence=confidence.index,
                     )
                     decision.bet.unit = self.put_strategy.get_unit(
                         info, decision, gambler, self
