@@ -17,9 +17,15 @@ class LinearResponse(BasePutStrategy):
         super().__init__("Linear Response")
 
     def get_unit(self, gamble_info, decision, gambler, bet_strategy, **kwargs):
-        response = gamble_info.handicap[decision.bet.banker_side][decision.bet.type][
-            "response"
-        ][decision.bet.result]
+        try:
+            response = gamble_info.handicap[decision.bet.banker_side][
+                decision.bet.type
+            ]["response"][decision.bet.result]
+        except KeyError:
+            self.logger.error(
+                f"unable to get response ratio from handicap, gamble info: {gamble_info}, decision: {decision}, do not bet"
+            )
+            return 0
 
         unit = 1
         daily_expect_response = response - unit
