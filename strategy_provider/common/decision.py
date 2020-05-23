@@ -6,14 +6,15 @@ class Decision:
 
         self.bet = bet
         self.match = None
-        self.confidence = kwargs.get('confidence', None)
+        self.confidence = kwargs.get("confidence", None)
 
     def __str__(self):
-        return "type: %s, date: %s, id: %s, bet: %s" % (
+        return "type: %s, date: %s, id: %s, bet: %s, confidence: %s" % (
             self.game_type,
             self.game_date,
             self.gamble_id,
             self.bet,
+            self.confidence,
         )
 
 
@@ -51,7 +52,11 @@ def confidence_index(side_vote):
     assert side_vote[side_1]["population"] or side_vote[side_2]["population"]
 
     c = Confidence
-    c.side = side_1 if side_vote[side_1]["population"] > side_vote[side_2]["population"] else side_2
+    c.side = (
+        side_1
+        if side_vote[side_1]["population"] > side_vote[side_2]["population"]
+        else side_2
+    )
 
     major = max(side_vote[side_1]["population"], side_vote[side_2]["population"])
     minor = min(side_vote[side_1]["population"], side_vote[side_2]["population"]) or 0.1
