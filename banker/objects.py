@@ -39,6 +39,15 @@ class GambleInfo:
         for p in self.prediction:
             del p[banker_side][gamble_type]
 
+    def is_valid(self, banker_side, game_type):
+        self.logger.debug(f"check game validation, banker side: {banker_side}, game type: {game_type}")
+        try:
+            response_info = self.handicap[banker_side][game_type]['response']
+            return len(response_info) == 2 and 0 not in response_info.values()
+        except KeyError:
+            self.logger.info(f"invalid game, banker side: {banker_side}, game type: {game_type}, gamble info: {self}")
+            return False
+
 
 class GambleResult:
     def __init__(self, gamble_info):
