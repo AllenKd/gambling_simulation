@@ -70,9 +70,13 @@ class Gambler(object):
                 gamble_info = Banker().get_gamble_info(
                     game_date=decision.game_date, gamble_id=decision.gamble_id
                 )[0]
-                response_ratio = gamble_info.handicap[decision.bet.banker_side][
-                    decision.bet.type
-                ]["response"][decision.bet.result]
+                try:
+                    response_ratio = gamble_info.handicap[decision.bet.banker_side][
+                        decision.bet.type
+                    ]["response"][decision.bet.result]
+                except KeyError as e:
+                    self.logger.error(f"unable to get response ratio: {e}")
+                    raise e
                 self.principle += decision.bet.unit * response_ratio
             else:
                 decision.match = False
