@@ -39,7 +39,9 @@ class FollowPrevious(BaseStrategy):
 
         decisions = []
         for info in gamble_info:
-            if info.game_type == self.game_type:
+            if info.game_type == self.game_type and info.is_valid(
+                self.banker_side, self.bet_type
+            ):
                 try:
                     p = [
                         p for p in info.prediction if p["group"] == self.reference_group

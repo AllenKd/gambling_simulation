@@ -6,7 +6,7 @@ from strategy_provider.common.decision import Decision
 class Constant(BaseStrategy):
     """
     Strategy Description:
-        Bet 1st game with specified banker and game type.
+        Bet 1st valid game with specified banker and game type.
     """
 
     def __init__(
@@ -27,7 +27,9 @@ class Constant(BaseStrategy):
         self.logger.debug("get decision")
         decisions = []
         for info in gamble_info:
-            if info.game_type == self.game_type:
+            if info.game_type == self.game_type and info.is_valid(
+                self.banker_side, self.bet_type
+            ):
                 decision = Decision(
                     game_type=info.game_type,
                     game_date=info.game_date,

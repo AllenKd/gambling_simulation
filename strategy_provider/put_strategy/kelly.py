@@ -22,9 +22,16 @@ class Kelly(BasePutStrategy):
             self.model = pickle.load(model)
 
     def get_unit(self, gamble_info, decision, gambler, base_strategy, **kwargs):
-        response = gamble_info.handicap[decision.bet.banker_side][decision.bet.type][
-            "response"
-        ][decision.bet.result]
+        try:
+            response = gamble_info.handicap[decision.bet.banker_side][
+                decision.bet.type
+            ]["response"][decision.bet.result]
+        except KeyError:
+            self.logger.error(
+                f"unable to get response ratio from handicap, gamble info: {gamble_info}, decision: {decision}, do not bet"
+            )
+            return 0
+
         if hasattr(decision, "confidence"):
             win_prob = self.model.predict(
                 np.array([decision.confidence]).reshape(-1, 1)
