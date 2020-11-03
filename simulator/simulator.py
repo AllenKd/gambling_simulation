@@ -27,7 +27,7 @@ class Simulator:
         threads = []
         gamblers = self.init_gamblers()
         for g in gamblers:
-            t = threading.Thread(target=g.battle, args=(self.start_date,))
+            t = threading.Thread(target=g.n_battle, args=(self.start_date,))
             threads.append(t)
             t.start()
 
@@ -39,7 +39,7 @@ class Simulator:
     def init_gamblers(self):
         self.logger.info("start init gamblers")
         gamblers = [
-            Gambler(gambler_id=i, principle=self.principle, strategy_provider=sp)
+            Gambler(name=i, capital=self.principle, strategy_provider=sp)
             for i, sp in enumerate(self.get_strategies())
         ]
         self.logger.debug(f"{len(gamblers)} gamblers initialized")

@@ -5,7 +5,6 @@ from config.logger import get_logger
 
 class GambleInfo:
     def __init__(self, gamble_info):
-        self.logger = get_logger(self.__class__.__name__)
         self.gamble_id = gamble_info.get("gamble_id", -1)
         self.game_time = gamble_info["game_time"]
         self.game_date = str(
