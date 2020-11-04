@@ -44,7 +44,7 @@ class Kelly(BasePutStrategy):
             # do not bet if the ratio less than 0
             bet_ratio = max(bet_ratio, 0)
             self.logger.debug(f"bet ratio: {bet_ratio}")
-            return int(gambler.principle * bet_ratio)
+            return int(gambler.capital * bet_ratio)
         else:
             self.logger.warn("no confidence for reference, return 1")
             return 1

@@ -12,18 +12,20 @@ from util.util import Util
 
 
 class Gambler(object):
-    def __init__(self, name, capital, strategy_provider):
+    def __init__(self, name, capital, strategy):
         self.name = name
-        self.principle = capital
+        self.capital = capital
         self.config = Util().get_config()
 
-        self.strategy_provider = strategy_provider
+        self.strategy = strategy
         self.decision_history = []
+
+        logging.debug(f"gambler initialized: ", name)
 
     def n_battle(self, gamble_info: List[GambleInfo]):
         logging.debug(f"[{self.name}] start battle: {gamble_info[0].game_date}")
 
-        decisions = self.strategy_provider.get_decisions(self, gamble_info)
+        decisions = self.strategy.bet.get_decisions(self, gamble_info)
         self.decision_history += decisions
         records = self.settle(decisions)
         self.write_records(records)
@@ -40,7 +42,7 @@ class Gambler(object):
             gamble_info = Banker().get_gamble_info(game_date=game_date, **target)
 
             # [decision, decision, ...]
-            decisions = self.strategy_provider.get_decisions(self, gamble_info)
+            decisions = self.strategy.get_decisions(self, gamble_info)
             self.decision_history += decisions
             records = self.settle(decisions)
             self.write_records(records)
@@ -52,13 +54,13 @@ class Gambler(object):
         records = []
         for decision in decisions:
             logging.debug(f"settling decision: {decision}")
-            record = GambleRecord(self.name, self.strategy_provider)
+            record = GambleRecord(self.name, self.strategy)
             gamble_result = Banker().get_gamble_result(
                 decision.game_date, decision.gamble_id
             )
             record.content["decision"] = decision
-            record.content["principle"] = {"before": self.principle}
-            self.principle -= decision.bet.unit
+            record.content["principle"] = {"before": self.capital}
+            self.capital -= decision.bet.unit
             if (
                 decision.bet.result
                 == gamble_result.judgement[decision.bet.banker_side][decision.bet.type]
@@ -74,13 +76,13 @@ class Gambler(object):
                 except KeyError as e:
                     logging.error(f"unable to get response ratio: {e}")
                     raise e
-                self.principle += decision.bet.unit * response_ratio
+                self.capital += decision.bet.unit * response_ratio
             else:
                 decision.match = False
 
             logging.debug("settled decision: %s" % decision)
-            logging.debug("current principle: %s" % self.principle)
-            record.content["principle"]["after"] = self.principle
+            logging.debug("current principle: %s" % self.capital)
+            record.content["principle"]["after"] = self.capital
             records.append(record)
         return records
 

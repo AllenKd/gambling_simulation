@@ -1,8 +1,8 @@
-from strategy_provider.common.base_bet_strategy import BaseStrategy
+from strategy_provider.common.base_bet_strategy import BaseBetStrategy
 from strategy_provider.common.decision import Bet, Decision, confidence_index
 
 
-class LowResponse(BaseStrategy):
+class LowResponse(BaseBetStrategy):
     """
     Bet lower response side.
     """

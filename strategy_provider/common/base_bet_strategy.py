@@ -2,15 +2,11 @@ import logging
 from abc import abstractmethod, ABC
 
 
-class BaseStrategy(ABC):
-    def __init__(self, name, put_strategy):
+class BaseBetStrategy(ABC):
+    def __init__(self, name: str):
         self.name = name
-        self.put_strategy = put_strategy
-        self.parameters = None
-        logging.debug(
-            f"strategy initialized: {self.name}, put strategy: {self.put_strategy.name}"
-        )
+        logging.debug(f"bet strategy initialized: {self.name}")
 
     @abstractmethod
-    def get_decisions(self, gambler, gamble_info):
+    def get_decisions(self, *args, **kwargs):
         return NotImplementedError

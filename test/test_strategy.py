@@ -9,7 +9,7 @@ from strategy_provider.put_strategy.linear_response import LinearResponse
 
 @pytest.fixture(scope="class")
 def setup_test_data():
-    return Gambler(name=-1, capital=-1, strategy_provider=None)
+    return Gambler(name=-1, capital=-1, strategy=None)
 
 
 def init_gamble_hist(match_hist, bet_list=None):
@@ -25,7 +25,7 @@ def init_gamble_hist(match_hist, bet_list=None):
 
 class TestPutStrategy:
     def test_constant(self):
-        g = Gambler(name=-1, capital=-1, strategy_provider=None)
+        g = Gambler(name=-1, capital=-1, strategy=None)
         c = Constant()
         assert c.get_unit(g, None) == 1
 
@@ -33,7 +33,7 @@ class TestPutStrategy:
             assert c.get_unit(g, None, unit=i) == i
 
     def test_foo_double(self):
-        g = Gambler(name=-1, capital=-1, strategy_provider=None)
+        g = Gambler(name=-1, capital=-1, strategy=None)
 
         for i in range(1, 8):
             match_hist = [False] * i
@@ -45,7 +45,7 @@ class TestPutStrategy:
             assert FooDouble().get_unit(g, None) == 1
 
     def test_linear_response(self):
-        g = Gambler(name=-1, capital=-1, strategy_provider=None)
+        g = Gambler(name=-1, capital=-1, strategy=None)
         u = 1
         bet_list = [Bet(None, None, None, 1)]
         for i in range(1, 15):

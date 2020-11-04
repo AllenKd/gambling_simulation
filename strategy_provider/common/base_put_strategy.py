@@ -1,14 +1,12 @@
+import logging
 from abc import abstractmethod, ABC
-
-from config.logger import get_logger
 
 
 class BasePutStrategy(ABC):
-    def __init__(self, name):
-        self.logger = get_logger(self.__class__.__name__)
+    def __init__(self, name: str):
         self.name = name
-        self.parameters = None
+        logging.debug(f"put strategy initialized: {self.name}")
 
     @abstractmethod
-    def get_unit(self, gamble_info, decision, gambler, base_strategy, **kwargs):
+    def get_unit(self, *args, **kwargs):
         return NotImplementedError

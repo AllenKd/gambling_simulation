@@ -3,7 +3,7 @@ import threading
 from config.logger import get_logger
 from gambler.gambler import Gambler
 from strategy_provider.bet_strategy.anti_previous import AntiPrevious
-from strategy_provider.bet_strategy.confidence_base import ConfidenceBase
+from strategy_provider.bet_strategy.confidence_base import ConfidenceBaseBet
 from strategy_provider.bet_strategy.constant import Constant
 from strategy_provider.bet_strategy.follow_previous import FollowPrevious
 from strategy_provider.bet_strategy.low_response import LowResponse
@@ -14,18 +14,18 @@ from strategy_provider.put_strategy.foo_double import FooDouble
 from strategy_provider.put_strategy.kelly import Kelly
 from strategy_provider.put_strategy.linear_response import LinearResponse
 
+from simulator.init_gambler import init_gamblers
+import logging
+
 
 class Simulator:
-    def __init__(self, principle=100, start_date="20180929"):
-        self.logger = get_logger(self.__class__.__name__)
-
-        self.principle = principle
-        self.start_date = start_date
-
+    def __init__(self):
+        pass
+    
     def start_simulation(self):
-        self.logger.debug("start simulation")
+        logging.debug("start simulation")
         threads = []
-        gamblers = self.init_gamblers()
+        gamblers = init_gamblers()
         for g in gamblers:
             t = threading.Thread(target=g.n_battle, args=(self.start_date,))
             threads.append(t)
@@ -34,16 +34,16 @@ class Simulator:
         for t in threads:
             t.join()
 
-        self.logger.debug(f"finished simulation, total gamblers: {len(gamblers)}")
+        logging.debug(f"finished simulation, total gamblers: {len(gamblers)}")
 
-    def init_gamblers(self):
-        self.logger.info("start init gamblers")
-        gamblers = [
-            Gambler(name=i, capital=self.principle, strategy_provider=sp)
-            for i, sp in enumerate(self.get_strategies())
-        ]
-        self.logger.debug(f"{len(gamblers)} gamblers initialized")
-        return gamblers
+    # def init_gamblers(self):
+    #     logging.info("start init gamblers")
+    #     gamblers = [
+    #         Gambler(name=i, capital=self.principle, strategy=sp)
+    #         for i, sp in enumerate(self.get_strategies())
+    #     ]
+    #     logging.debug(f"{len(gamblers)} gamblers initialized")
+    #     return gamblers
 
     # Customize each strategies and parameters due to feature conflict between bet and put strategies.
     def get_strategies(self):
@@ -51,22 +51,22 @@ class Simulator:
             Constant(put_strategy=PutStrategyConstant()),
             Constant(put_strategy=FooDouble()),
             Constant(put_strategy=LinearResponse()),
-            ConfidenceBase(
+            ConfidenceBaseBet(
                 put_strategy=PutStrategyConstant(), confidence_threshold=100
             ),
-            ConfidenceBase(
+            ConfidenceBaseBet(
                 put_strategy=PutStrategyConstant(), confidence_threshold=300
             ),
-            ConfidenceBase(
+            ConfidenceBaseBet(
                 put_strategy=PutStrategyConstant(), confidence_threshold=500
             ),
-            ConfidenceBase(
+            ConfidenceBaseBet(
                 put_strategy=PutStrategyConstant(), confidence_threshold=800
             ),
-            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=100),
-            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=300),
-            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=500),
-            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=800),
+            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=100),
+            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=300),
+            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=500),
+            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=800),
             MostConfidence(
                 put_strategy=PutStrategyConstant(), confidence_threshold=100
             ),
@@ -108,5 +108,5 @@ class Simulator:
         ]
 
     def summarize_gambling(self):
-        self.logger.info("start summarize gambling")
+        logging.info("start summarize gambling")
         pass

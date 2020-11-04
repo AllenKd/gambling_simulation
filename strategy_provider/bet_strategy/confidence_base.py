@@ -1,10 +1,11 @@
-from strategy_provider.common.base_bet_strategy import BaseStrategy
+from strategy_provider.common.base_bet_strategy import BaseBetStrategy
 from strategy_provider.common.decision import Bet, Decision, confidence_index
+import logging
 
 
-class ConfidenceBase(BaseStrategy):
-    def __init__(self, put_strategy, confidence_threshold=500):
-        super().__init__("Confidence Base", put_strategy)
+class ConfidenceBaseBet(BaseBetStrategy):
+    def __init__(self, confidence_threshold=500):
+        super().__init__("Confidence Base")
         self.threshold = confidence_threshold
         # focus on local currently
         self.banker_side = ["local"]
@@ -23,7 +24,7 @@ class ConfidenceBase(BaseStrategy):
                         try:
                             confidence = confidence_index(side_vote)
                         except AssertionError:
-                            self.logger.warn(
+                            logging.warning(
                                 f"unable to get confidence index, banker side: {banker_side}, gamble type: {gamble_type}, info: {info}"
                             )
                             continue
@@ -36,16 +37,9 @@ class ConfidenceBase(BaseStrategy):
                                     banker_side=banker_side,
                                     bet_type=gamble_type,
                                     result=confidence.side,
-                                    unit=None,
                                 ),
                                 confidence=confidence.index,
                             )
-                            decision.bet.unit = self.put_strategy.get_unit(
-                                info, decision, gambler, self
-                            )
-
-                            if decision.bet.unit:
-                                self.logger.debug(f"append decision: {decision}")
-                                decisions.append(decision)
+                            decisions.append(decision)
 
         return decisions

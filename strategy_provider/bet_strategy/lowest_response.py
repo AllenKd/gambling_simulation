@@ -1,15 +1,15 @@
 from strategy_provider.bet_strategy.low_response import LowResponse
-from strategy_provider.common.base_bet_strategy import BaseStrategy
+from strategy_provider.common.base_bet_strategy import BaseBetStrategy
 from strategy_provider.common.decision import Bet, Decision, confidence_index
 
 
-class LowestResponse(BaseStrategy):
+class LowestResponse(BaseBetStrategy):
     """
     Bet the lowest response side.
     """
 
     def __init__(self, put_strategy, confidence_threshold=500):
-        super().__init__("Lowest Response", put_strategy)
+        super().__init__("Lowest Response")
         self.threshold = confidence_threshold
         self.game_type_sensitive = False
         self.low_response = LowResponse(put_strategy)
