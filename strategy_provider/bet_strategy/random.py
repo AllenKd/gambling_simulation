@@ -2,7 +2,7 @@ import logging
 
 from strategy_provider.common.base_bet_strategy import BaseBetStrategy
 from strategy_provider.common.decision import Bet
-from strategy_provider.common.decision import Decision, confidence_index
+from strategy_provider.common.decision import Decision, get_confidence
 import random
 from util.singleton import Singleton
 
@@ -28,11 +28,11 @@ class Random(BaseBetStrategy, metaclass=Singleton):
         logging.debug("get decision")
         decisions = []
 
-        # TODO: add maximum try
-        while True:
+        while kwargs["gamble_info"]:
             gamble_info = random.choice(kwargs["gamble_info"])
             if not gamble_info.is_valid():
-                logging.info(f"invalid game: {gamble_info}")
+                logging.info(f"invalid game: {gamble_info}, remove from gamble_info")
+                kwargs["gamble_info"].remove(gamble_info)
                 continue
 
             decision = Decision(
@@ -42,4 +42,6 @@ class Random(BaseBetStrategy, metaclass=Singleton):
                 bet=random.choice(self.candidate),
             )
             decisions.append(decision)
-            return decisions
+            break
+
+        return decisions

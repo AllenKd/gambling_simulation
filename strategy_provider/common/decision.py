@@ -19,7 +19,7 @@ class Decision:
 
 
 class Bet:
-    def __init__(self, banker_side, bet_type, result, unit):
+    def __init__(self, banker_side, bet_type, result, unit=1):
         self.banker_side = banker_side
         self.type = bet_type
         self.result = result
@@ -34,17 +34,14 @@ class Bet:
 
 
 class Confidence:
-    gamble_type = None
     side = None
     index = 0
 
     def __str__(self):
-        return (
-            f"gamble_type: {self.gamble_type}, side: {self.side}, index: {self.index}"
-        )
+        return f"side: {self.side}, index: {self.index}"
 
 
-def confidence_index(side_vote):
+def get_confidence(side_vote):
     side_1 = list(side_vote)[0]
     side_2 = list(side_vote)[1]
 

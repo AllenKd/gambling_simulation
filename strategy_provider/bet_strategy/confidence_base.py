@@ -1,9 +1,10 @@
 from strategy_provider.common.base_bet_strategy import BaseBetStrategy
-from strategy_provider.common.decision import Bet, Decision, confidence_index
+from strategy_provider.common.decision import Bet, Decision, get_confidence
 import logging
+from util.singleton import Singleton
 
 
-class ConfidenceBaseBet(BaseBetStrategy):
+class ConfidenceBaseBet(BaseBetStrategy, metaclass=Singleton):
     def __init__(self, confidence_threshold=500):
         super().__init__("Confidence Base")
         self.threshold = confidence_threshold
@@ -22,7 +23,7 @@ class ConfidenceBaseBet(BaseBetStrategy):
                 for banker_side in self.banker_side:
                     for gamble_type, side_vote in prediction[banker_side].items():
                         try:
-                            confidence = confidence_index(side_vote)
+                            confidence = get_confidence(side_vote)
                         except AssertionError:
                             logging.warning(
                                 f"unable to get confidence index, banker side: {banker_side}, gamble type: {gamble_type}, info: {info}"

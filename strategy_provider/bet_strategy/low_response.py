@@ -1,5 +1,5 @@
 from strategy_provider.common.base_bet_strategy import BaseBetStrategy
-from strategy_provider.common.decision import Bet, Decision, confidence_index
+from strategy_provider.common.decision import Bet, Decision, get_confidence
 
 
 class LowResponse(BaseBetStrategy):
@@ -30,7 +30,7 @@ class LowResponse(BaseBetStrategy):
                     p = [
                         p for p in info.prediction if p["group"] == self.reference_group
                     ][0]
-                    confidence = confidence_index(p[banker_side][gamble_type])
+                    confidence = get_confidence(p[banker_side][gamble_type])
                 except KeyError:
                     self.logger.warn(
                         f"cannot get response info, skip it, info: {info}, banker side: {banker_side}, gamble type: {gamble_type}"

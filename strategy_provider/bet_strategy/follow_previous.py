@@ -1,27 +1,19 @@
 from strategy_provider.common.base_bet_strategy import BaseBetStrategy
 from strategy_provider.common.decision import Bet
-from strategy_provider.common.decision import Decision, confidence_index
+from strategy_provider.common.decision import Decision, get_confidence
+from strategy_provider.bet_strategy.random import Random
 import logging
+from util.singleton import Singleton
 
 
-class FollowPrevious(BaseBetStrategy):
+class FollowPrevious(BaseBetStrategy, metaclass=Singleton):
     """
     Strategy Description:
         Follow the previous gamble result.
     """
 
-    def __init__(
-        self,
-        banker_side="local",
-        game_type="NBA",
-        bet_type="total_point",
-        result="over",
-    ):
+    def __init__(self):
         super().__init__("Follow Previous")
-        self.banker_side = banker_side
-        self.game_type = game_type
-        self.bet_type = bet_type
-        self.result = result
         self.reference_group = "all_member"
 
     def get_decisions(self, gambler, gamble_info):
@@ -29,13 +21,8 @@ class FollowPrevious(BaseBetStrategy):
         if gambler.decision_history:
             last_bet = gambler.decision_history[-1].bet
         else:
-            logging.debug("gambler has no decision history, make default decision")
-            last_bet = Bet(
-                banker_side=self.banker_side,
-                bet_type=self.bet_type,
-                result=self.result,
-                unit=1,
-            )
+            logging.debug("gambler has no decision history, make random decision")
+            return Random().get_decisions()
 
         decisions = []
         for info in gamble_info:
@@ -46,7 +33,7 @@ class FollowPrevious(BaseBetStrategy):
                     p = [
                         p for p in info.prediction if p["group"] == self.reference_group
                     ][0]
-                    confidence = confidence_index(p[self.banker_side][self.bet_type])
+                    confidence = get_confidence(p[self.banker_side][self.bet_type])
                 except KeyError:
                     logging.warning(
                         f"cannot get response info, skip it, info: {info}, banker side: {self.banker_side}, gamble type: {self.bet_type}"

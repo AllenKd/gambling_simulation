@@ -1,6 +1,6 @@
 from datetime import datetime
-
-from config.logger import get_logger
+import logging
+from strategy_provider.common.decision import get_confidence
 
 
 class GambleInfo:
@@ -13,38 +13,37 @@ class GambleInfo:
         self.game_type = gamble_info["game_type"]
         self.guest = gamble_info["guest"]["name"]
         self.host = gamble_info["host"]["name"]
-        self.handicap = gamble_info["gamble_info"]
-        self.prediction = gamble_info["prediction"]
-        self.filter_out_invalid_gamble()
+
+        self.gamble_info = {
+            "total_point": self._parse_gamble_info(
+                gamble_info["gamble_info"]["total_point"]
+            ),
+            "spread_point": self._parse_gamble_info(
+                gamble_info["gamble_info"]["spread_point"]
+            ),
+            "original": self._parse_gamble_info(gamble_info["gamble_info"]["original"]),
+        }
 
     def __str__(self):
         return f"gamble_id: {self.gamble_id}, type: {self.game_type}, date: {self.game_date}"
 
-    def filter_out_invalid_gamble(self):
-        self.logger.debug(f"filtering invalid gamble: {self.handicap}")
-        for banker_side, gamble_types in self.handicap.items():
-            for gamble_type in list(gamble_types):
-                if "response" not in gamble_types[gamble_type]:
-                    self.delete_gamble(banker_side, gamble_type)
+    def _parse_gamble_info(self, gamble_info):
+        if self._is_valid(gamble_info):
+            gamble_info["prediction"].pop("major")
+            gamble_info["confidence"] = get_confidence(gamble_info["prediction"])
+            return gamble_info
+        return None
 
-                elif 0.0 in gamble_types[gamble_type]["response"].values():
-                    self.delete_gamble(banker_side, gamble_type)
-
-        self.logger.debug(f"filtered handicap: {self.handicap}")
-
-    def delete_gamble(self, banker_side, gamble_type):
-        self.logger.debug(f"invalid gamble type: {gamble_type}, delete it")
-        del self.handicap[banker_side][gamble_type]
-        for p in self.prediction:
-            del p[banker_side][gamble_type]
-
-    def is_valid(self, banker_side, game_type):
-        self.logger.debug(f"check game validation, banker side: {banker_side}, game type: {game_type}")
+    @staticmethod
+    def _is_valid(game):
         try:
-            response_info = self.handicap[banker_side][game_type]['response']
-            return len(response_info) == 2 and 0 not in response_info.values()
+            response_info = game["response"]
+            return (
+                len(response_info) == 2
+                and all(response_info.values())
+            )
         except KeyError:
-            self.logger.info(f"invalid game, banker side: {banker_side}, game type: {game_type}, gamble info: {self}")
+            logging.info(f"no response info, invalid game: {game}")
             return False
 
 
