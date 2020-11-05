@@ -1,5 +1,8 @@
+import logging
 import math
 
+from banker.banker import Banker
+from gambler.gambler import Gambler
 from strategy_provider.common.base_put_strategy import BasePutStrategy
 
 
@@ -16,15 +19,19 @@ class LinearResponse(BasePutStrategy):
     def __init__(self):
         super().__init__("Linear Response")
 
-    def get_unit(self, gamble_info, decision, gambler, bet_strategy, **kwargs):
+    def get_unit(self, gambler: Gambler):
+        if not gambler.decision_history:
+            logging.info("empty decision history")
+            return 1
+
         try:
-            response = gamble_info.handicap[decision.bet.banker_side][
-                decision.bet.type
-            ]["response"][decision.bet.result]
-        except KeyError:
-            self.logger.error(
-                f"unable to get response ratio from handicap, gamble info: {gamble_info}, decision: {decision}, do not bet"
-            )
+            last_decision = gambler.decision_history[-1]
+            response = last_decision.get_response()
+        except KeyError as e:
+            logging.error(f"fail to get response from decision: {e}")
+            return 0
+        except Exception as e:
+            logging.error(f"unknown error: {e}")
             return 0
 
         unit = 1
@@ -41,5 +48,5 @@ class LinearResponse(BasePutStrategy):
                 unit = math.ceil(
                     (total_expect_response + put_accumulation) / daily_expect_response
                 )
-        self.logger.debug(f"linear response put unit: {unit}")
+        logging.debug(f"linear response put unit: {unit}")
         return unit

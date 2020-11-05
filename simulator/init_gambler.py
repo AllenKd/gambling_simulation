@@ -2,12 +2,11 @@ import logging
 
 from db.collection.gambler import Gambler as GamblerCollection
 from gambler.gambler import Gambler
-from strategy_provider.bet_strategy.anti_previous import AntiPrevious
-from strategy_provider.bet_strategy.confidence_base import ConfidenceBaseBet
-from strategy_provider.bet_strategy.constant import Constant
-from strategy_provider.bet_strategy.follow_previous import FollowPrevious
+from strategy_provider.bet_strategy.confidence_base import ConfidenceBase
+from strategy_provider.bet_strategy.lower_response import LowerResponse
 from strategy_provider.bet_strategy.lowest_response import LowestResponse
 from strategy_provider.bet_strategy.most_confidence import MostConfidence
+from strategy_provider.bet_strategy.random import Random
 from strategy_provider.common.base_strategy import Strategy
 from strategy_provider.put_strategy.constant import Constant as PutStrategyConstant
 from strategy_provider.put_strategy.foo_double import FooDouble
@@ -30,12 +29,11 @@ def init_gamblers() -> [Gambler]:
 
 
 bet_strategy_map = {
-    "anti_previous": AntiPrevious,
-    "confidence_base": ConfidenceBaseBet,
-    "constant": Constant,
-    "follow_previous": FollowPrevious,
+    "confidence_base": ConfidenceBase,
+    "lower_response": LowerResponse,
     "lowest_response": LowestResponse,
     "most_confidence": MostConfidence,
+    "random": Random,
 }
 put_strategy_map = {
     "constant": PutStrategyConstant,

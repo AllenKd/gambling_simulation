@@ -1,3 +1,6 @@
+from banker.banker import Banker
+
+
 class Decision:
     def __init__(self, game_type, game_date, gamble_id, bet, **kwargs):
         self.game_type = game_type
@@ -16,6 +19,15 @@ class Decision:
             self.bet,
             self.confidence,
         )
+
+    def get_response(self):
+        gamble_info = Banker().get_gamble_info(
+            self.game_date, game_type=self.game_type, gamble_id=self.gamble_id,
+        )
+        if len(gamble_info) != 1:
+            raise Exception(f"unexpected gamble info result: {gamble_info}")
+
+        return gamble_info[0].gamble_info[self.bet.type]["response"][self.bet.result]
 
 
 class Bet:
@@ -41,7 +53,7 @@ class Confidence:
         return f"side: {self.side}, index: {self.index}"
 
 
-def get_confidence(side_vote):
+def get_confidence(side_vote) -> Confidence:
     side_1 = list(side_vote)[0]
     side_2 = list(side_vote)[1]
 

@@ -1,10 +1,11 @@
 import logging
+import random
 
 from strategy_provider.common.base_bet_strategy import BaseBetStrategy
 from strategy_provider.common.decision import Bet
-from strategy_provider.common.decision import Decision, get_confidence
-import random
+from strategy_provider.common.decision import Decision
 from util.singleton import Singleton
+from banker.objects import GambleInfo
 
 
 class Random(BaseBetStrategy, metaclass=Singleton):
@@ -24,17 +25,12 @@ class Random(BaseBetStrategy, metaclass=Singleton):
             Bet(banker_side="local", bet_type="original", result="host"),
         ]
 
-    def get_decisions(self, *args, **kwargs):
+    def get_decisions(self, gamble_info_list: [GambleInfo]):
         logging.debug("get decision")
         decisions = []
 
-        while kwargs["gamble_info"]:
-            gamble_info = random.choice(kwargs["gamble_info"])
-            if not gamble_info.is_valid():
-                logging.info(f"invalid game: {gamble_info}, remove from gamble_info")
-                kwargs["gamble_info"].remove(gamble_info)
-                continue
-
+        while gamble_info_list:
+            gamble_info = random.choice(gamble_info_list)
             decision = Decision(
                 game_type=gamble_info.game_type,
                 game_date=gamble_info.game_date,

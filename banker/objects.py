@@ -1,5 +1,6 @@
-from datetime import datetime
 import logging
+from datetime import datetime
+
 from strategy_provider.common.decision import get_confidence
 
 
@@ -38,10 +39,7 @@ class GambleInfo:
     def _is_valid(game):
         try:
             response_info = game["response"]
-            return (
-                len(response_info) == 2
-                and all(response_info.values())
-            )
+            return len(response_info) == 2 and all(response_info.values())
         except KeyError:
             logging.info(f"no response info, invalid game: {game}")
             return False

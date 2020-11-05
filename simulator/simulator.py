@@ -3,10 +3,10 @@ import threading
 from config.logger import get_logger
 from gambler.gambler import Gambler
 from strategy_provider.bet_strategy.anti_previous import AntiPrevious
-from strategy_provider.bet_strategy.confidence_base import ConfidenceBaseBet
+from strategy_provider.bet_strategy.confidence_base import ConfidenceBase
 from strategy_provider.bet_strategy.constant import Constant
 from strategy_provider.bet_strategy.follow_previous import FollowPrevious
-from strategy_provider.bet_strategy.low_response import LowResponse
+from strategy_provider.bet_strategy.lower_response import LowerResponse
 from strategy_provider.bet_strategy.lowest_response import LowestResponse
 from strategy_provider.bet_strategy.most_confidence import MostConfidence
 from strategy_provider.put_strategy.constant import Constant as PutStrategyConstant
@@ -51,22 +51,22 @@ class Simulator:
             Constant(put_strategy=PutStrategyConstant()),
             Constant(put_strategy=FooDouble()),
             Constant(put_strategy=LinearResponse()),
-            ConfidenceBaseBet(
+            ConfidenceBase(
                 put_strategy=PutStrategyConstant(), confidence_threshold=100
             ),
-            ConfidenceBaseBet(
+            ConfidenceBase(
                 put_strategy=PutStrategyConstant(), confidence_threshold=300
             ),
-            ConfidenceBaseBet(
+            ConfidenceBase(
                 put_strategy=PutStrategyConstant(), confidence_threshold=500
             ),
-            ConfidenceBaseBet(
+            ConfidenceBase(
                 put_strategy=PutStrategyConstant(), confidence_threshold=800
             ),
-            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=100),
-            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=300),
-            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=500),
-            ConfidenceBaseBet(put_strategy=Kelly(), confidence_threshold=800),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=100),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=300),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=500),
+            ConfidenceBase(put_strategy=Kelly(), confidence_threshold=800),
             MostConfidence(
                 put_strategy=PutStrategyConstant(), confidence_threshold=100
             ),
@@ -91,8 +91,8 @@ class Simulator:
             MostConfidence(put_strategy=Kelly(), confidence_threshold=300),
             MostConfidence(put_strategy=Kelly(), confidence_threshold=500),
             MostConfidence(put_strategy=Kelly(), confidence_threshold=800),
-            LowResponse(put_strategy=PutStrategyConstant()),
-            LowResponse(put_strategy=Kelly()),
+            LowerResponse(put_strategy=PutStrategyConstant()),
+            LowerResponse(put_strategy=Kelly()),
             LowestResponse(put_strategy=PutStrategyConstant()),
             LowestResponse(put_strategy=FooDouble()),
             LowestResponse(put_strategy=LinearResponse()),

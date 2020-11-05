@@ -1,73 +1,54 @@
-from strategy_provider.bet_strategy.low_response import LowResponse
+import logging
+import random
+
+from banker.objects import GambleInfo
 from strategy_provider.common.base_bet_strategy import BaseBetStrategy
-from strategy_provider.common.decision import Bet, Decision, get_confidence
+from strategy_provider.common.decision import Bet, Decision
+from util.singleton import Singleton
 
 
-class LowestResponse(BaseBetStrategy):
+class LowestResponse(BaseBetStrategy, metaclass=Singleton):
     """
     Bet the lowest response side.
     """
 
-    def __init__(self, put_strategy, confidence_threshold=500):
+    def __init__(self):
         super().__init__("Lowest Response")
-        self.threshold = confidence_threshold
-        self.game_type_sensitive = False
-        self.low_response = LowResponse(put_strategy)
-        self.reference_group = "all_member"
 
-        self.side_type = [
-            # ("national", "total_point"),
-            # ("national", "spread_point"),
-            ("local", "total_point"),
-            ("local", "spread_point"),
-            ("local", "original"),
-        ]
+        logging.debug("lowest response initialized")
 
-    def get_decisions(self, gambler, gamble_info):
-        decisions = []
+    def get_decisions(self, gamble_info_list: [GambleInfo]):
         lowest_response = 2
-        for info in gamble_info:
-            for banker_side, gamble_type in self.side_type:
-                try:
-                    resp_info = info.handicap[banker_side][gamble_type]["response"]
-
-                    p = [
-                        p for p in info.prediction if p["group"] == self.reference_group
-                    ][0]
-                    confidence = get_confidence(p[banker_side][gamble_type])
-                except KeyError:
-                    self.logger.warn(
-                        f"cannot get response info, skip it, info: {info}, banker side: {banker_side}, gamble type: {gamble_type}"
-                    )
-                    continue
-                except AssertionError:
-                    self.logger.warn(
-                        f"unable to get confidence index, banker side: {banker_side}, gamble type: {gamble_type}, info: {info}"
-                    )
-                    continue
-                temp_min = int(min(resp_info.values()))
+        lowest_response_decisions = []
+        for gamble_info in gamble_info_list:
+            for game_type, info in gamble_info.gamble_info.items():
+                temp_min = min(info["response"].valies())
                 if temp_min < lowest_response:
+                    logging.debug(f"update lowest response: {temp_min}")
                     lowest_response = temp_min
-                    side = min(resp_info, key=resp_info.get,)
-                    decision = Decision(
-                        game_type=info.game_type,
-                        game_date=info.game_date,
-                        gamble_id=info.gamble_id,
-                        bet=Bet(
-                            banker_side=banker_side,
-                            bet_type=gamble_type,
-                            result=side,
-                            unit=None,
-                        ),
-                        confidence=confidence.index,
-                    )
-                    decision.bet.unit = self.put_strategy.get_unit(
-                        info, decision, gambler, self
+                    side = min(info["response"], key=info["response"].get)
+                    lowest_response_decisions = [
+                        Decision(
+                            game_type=info.game_type,
+                            game_date=info.game_date,
+                            gamble_id=info.gamble_id,
+                            bet=Bet(
+                                banker_side="local", bet_type=game_type, result=side,
+                            ),
+                        )
+                    ]
+                if temp_min == lowest_response:
+                    side = min(info["response"], key=info["response"].get)
+                    lowest_response_decisions.append(
+                        Decision(
+                            game_type=info.game_type,
+                            game_date=info.game_date,
+                            gamble_id=info.gamble_id,
+                            bet=Bet(
+                                banker_side="local", bet_type=game_type, result=side,
+                            ),
+                        )
                     )
 
-                    if decision.bet.unit:
-                        self.logger.debug(
-                            f"update decision with lowest response: {decision}"
-                        )
-                        decisions = [decision]
+        decisions = [random.choice(lowest_response_decisions)]
         return decisions
