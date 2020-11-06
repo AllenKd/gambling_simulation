@@ -20,7 +20,7 @@ class ConfidenceBase(BaseBetStrategy, metaclass=Singleton):
                 if info.confidence.index > self.threshold:
                     decision = Decision(
                         game_type=info.game_type,
-                        game_date=info.game_date,
+                        game_time=info.game_time,
                         gamble_id=info.gamble_id,
                         bet=Bet(
                             banker_side="local",

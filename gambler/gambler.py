@@ -9,9 +9,11 @@ from banker.banker import Banker
 from banker.objects import GambleInfo
 from gambler.gamble_record import GambleRecord
 from util.util import Util
+from strategy_provider.common.decision import Decision
+from mongoengine.errors import DoesNotExist
 
 
-class Gambler(object):
+class Gambler:
     def __init__(self, name, capital, strategy):
         self.name = name
         self.capital = capital
@@ -22,41 +24,59 @@ class Gambler(object):
 
         logging.debug(f"gambler initialized: ", name)
 
-    def n_battle(self, gamble_info: List[GambleInfo]):
-        logging.debug(f"[{self.name}] start battle: {gamble_info[0].game_date}")
+    def play(self, gamble_info: [GambleInfo]):
+        logging.debug(f"[{self.name}] start battle: {gamble_info[0].game_time}")
 
         decisions = self.strategy.bet.get_decisions(self, gamble_info)
         self.decision_history += decisions
+
+
         records = self.settle(decisions)
         self.write_records(records)
-        logging.debug(f"[{self.name}] finish battle: {gamble_info[0].game_date}")
+        logging.debug(f"[{self.name}] finish battle: {gamble_info[0].game_time}")
 
-    def battle(self, start_date, end_date=None, **target):
-        logging.debug(f"gambler_{self.name} start battle, {start_date} to {end_date}")
+    # def battle(self, start_date, end_date=None, **target):
+    #     logging.debug(f"gambler_{self.name} start battle, {start_date} to {end_date}")
+    #
+    #     for game_date in pd.date_range(
+    #         datetime.strptime(start_date, "%Y%m%d"),
+    #         datetime.strptime(end_date, "%Y-%m-%d"),
+    #     ):
+    #         game_date = game_date.strftime("%Y%m%d")
+    #         gamble_info = Banker().get_gamble_info(game_date=game_date, **target)
+    #
+    #         # [decision, decision, ...]
+    #         decisions = self.strategy.get_decisions(self, gamble_info)
+    #         self.decision_history += decisions
+    #         records = self.settle(decisions)
+    #         self.write_records(records)
+    #
+    #     logging.debug(f"gambler {self.name} finished battle.")
 
-        for game_date in pd.date_range(
-            datetime.strptime(start_date, "%Y%m%d"),
-            datetime.strptime(end_date, "%Y-%m-%d"),
-        ):
-            game_date = game_date.strftime("%Y%m%d")
-            gamble_info = Banker().get_gamble_info(game_date=game_date, **target)
+    def bettle(self, decision: Decision) -> Decision:
+        try:
+            decision.match = Banker().check(decision)
+            decision.ca
+        except DoesNotExist as e:
+            logging.error(f"fail to check decision: {e}")
 
-            # [decision, decision, ...]
-            decisions = self.strategy.get_decisions(self, gamble_info)
-            self.decision_history += decisions
-            records = self.settle(decisions)
-            self.write_records(records)
 
-        logging.debug(f"gambler {self.name} finished battle.")
+        if Banker().check(decision):
+            logging.debug(f"gambler {self.name} make a correct decision: {decision}")
+
+            pass
+        else:
+            pass
 
     def settle(self, decisions):
         logging.debug("start settle")
         records = []
         for decision in decisions:
             logging.debug(f"settling decision: {decision}")
+
             record = GambleRecord(self.name, self.strategy)
-            gamble_result = Banker().get_gamble_result(
-                decision.game_date, decision.gamble_id
+            gamble_result = Banker()._get_gamble_result(
+                decision.game_time, decision.gamble_id
             )
             record.content["decision"] = decision
             record.content["principle"] = {"before": self.capital}
@@ -67,7 +87,7 @@ class Gambler(object):
             ):
                 decision.match = True
                 gamble_info = Banker().get_gamble_info(
-                    game_date=decision.game_date, gamble_id=decision.gamble_id
+                    game_date=decision.game_time, gamble_id=decision.gamble_id
                 )[0]
                 try:
                     response_ratio = gamble_info.handicap[decision.bet.banker_side][

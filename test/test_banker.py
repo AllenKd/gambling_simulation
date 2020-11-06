@@ -25,5 +25,5 @@ class TestBanker:
         )
 
     def test_get_gamble_result(self, setup_test_data):
-        result = Banker().get_gamble_result(game_date="20181020", gamble_id=-1)
+        result = Banker()._get_gamble_result(game_date="20181020", gamble_id=-1)
         assert result.__dict__ == GambleResult(copy.deepcopy(test_gamble_data)).__dict__

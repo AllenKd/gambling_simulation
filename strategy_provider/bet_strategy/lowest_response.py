@@ -30,7 +30,7 @@ class LowestResponse(BaseBetStrategy, metaclass=Singleton):
                     lowest_response_decisions = [
                         Decision(
                             game_type=info.game_type,
-                            game_date=info.game_date,
+                            game_time=info.game_time,
                             gamble_id=info.gamble_id,
                             bet=Bet(
                                 banker_side="local", bet_type=game_type, result=side,
@@ -42,7 +42,7 @@ class LowestResponse(BaseBetStrategy, metaclass=Singleton):
                     lowest_response_decisions.append(
                         Decision(
                             game_type=info.game_type,
-                            game_date=info.game_date,
+                            game_time=info.game_time,
                             gamble_id=info.gamble_id,
                             bet=Bet(
                                 banker_side="local", bet_type=game_type, result=side,

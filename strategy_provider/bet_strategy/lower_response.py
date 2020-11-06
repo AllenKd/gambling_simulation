@@ -24,7 +24,7 @@ class LowerResponse(BaseBetStrategy, metaclass=Singleton):
                 side = min(resp_info, key=resp_info.get,)
                 decision = Decision(
                     game_type=info.game_type,
-                    game_date=info.game_date,
+                    game_time=info.game_time,
                     gamble_id=info.gamble_id,
                     bet=Bet(banker_side="local", bet_type=game_type, result=side),
                 )

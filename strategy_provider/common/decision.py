@@ -2,9 +2,9 @@ from banker.banker import Banker
 
 
 class Decision:
-    def __init__(self, game_type, game_date, gamble_id, bet, **kwargs):
+    def __init__(self, game_type, game_time, gamble_id, bet, **kwargs):
         self.game_type = game_type
-        self.game_date = game_date
+        self.game_time = game_time
         self.gamble_id = gamble_id
 
         self.bet = bet
@@ -14,7 +14,7 @@ class Decision:
     def __str__(self):
         return "type: %s, date: %s, id: %s, bet: %s, confidence: %s" % (
             self.game_type,
-            self.game_date,
+            self.game_time,
             self.gamble_id,
             self.bet,
             self.confidence,
@@ -22,7 +22,7 @@ class Decision:
 
     def get_response(self):
         gamble_info = Banker().get_gamble_info(
-            self.game_date, game_type=self.game_type, gamble_id=self.gamble_id,
+            self.game_time, game_type=self.game_type, gamble_id=self.gamble_id,
         )
         if len(gamble_info) != 1:
             raise Exception(f"unexpected gamble info result: {gamble_info}")

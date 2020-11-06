@@ -33,7 +33,7 @@ class Random(BaseBetStrategy, metaclass=Singleton):
             gamble_info = random.choice(gamble_info_list)
             decision = Decision(
                 game_type=gamble_info.game_type,
-                game_date=gamble_info.game_date,
+                game_time=gamble_info.game_time,
                 gamble_id=gamble_info.gamble_id,
                 bet=random.choice(self.candidate),
             )

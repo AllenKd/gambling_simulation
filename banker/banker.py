@@ -5,6 +5,7 @@ from functools import lru_cache
 from banker.objects import GambleInfo, GambleResult
 from db.collection.sports_data import SportsData
 from util.singleton import Singleton
+from strategy_provider.common.decision import Decision
 
 
 class Banker(metaclass=Singleton):
@@ -20,13 +21,16 @@ class Banker(metaclass=Singleton):
         return [GambleInfo(i) for i in a]
 
     @lru_cache(1024)
-    def get_gamble_result(self, game_date, gamble_id):
-        game_date = str(datetime.strptime(game_date, "%Y%m%d").date())
-        query_condition = {"game_time": {"$regex": game_date}, "gamble_id": gamble_id}
-        a = SportsData.objects(
-            timestamp__data=datetime.strptime(game_date, "%Y%m%d").date(),
-            gamble_id=gamble_id,
+    def _get_gamble_result(
+        self, game_time: datetime, gamble_id: str, game_type: str
+    ) -> SportsData:
+        return SportsData.objects(
+            gamble_id=gamble_id, game_type=game_type, game_time=game_time,
         )
-        # query_result = self.mongo_client.find_one(query_condition)
-        # self.logger.debug("query result: %s" % query_result)
-        return GambleResult(a)
+
+    def check(self, decision: Decision) -> bool:
+        sports_data = self._get_gamble_result(
+            decision.game_time, decision.gamble_id, decision.game_type
+        )
+        gamble_info = getattr(sports_data.gamble_info, decision.game_type)
+        return gamble_info.judgement == decision.bet.result

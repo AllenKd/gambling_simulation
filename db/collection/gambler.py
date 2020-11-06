@@ -16,13 +16,29 @@ class Strategy(mongoengine.Document):
     put = mongoengine.ReferenceField(Put)
 
 
+class BattleHistory(mongoengine.Document):
+    play_time = mongoengine.DateTimeField()
+    game_type = mongoengine.StringField("^[(NBA)|(MLB)|(NPB)]$")
+    game_time = mongoengine.DateTimeField()
+    gamble_id = mongoengine.StringField()
+    bet = mongoengine.ReferenceField(Bet)
+    win = mongoengine.BooleanField()
+    capital_before = mongoengine.IntField()
+    capital_after = mongoengine.IntField()
+
+
 class Gambler(mongoengine.Document):
-    name = mongoengine.StringField()
+    name = mongoengine.StringField(required=True)
     capital = mongoengine.IntField()
     strategy = mongoengine.ReferenceField(Strategy, db_field="strategy")
+    battle_history = mongoengine.ListField(mongoengine.ReferenceField(BattleHistory))
 
     meta = {
-        "indexes": ["strategy.bet.name", "strategy.put.name"],
+        "indexes": [
+            "strategy.bet.name",
+            "strategy.put.name",
+            {"fields": "name", "unique": True},
+        ],
     }
 
     def __str__(self):
