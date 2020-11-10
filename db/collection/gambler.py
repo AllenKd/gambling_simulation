@@ -1,9 +1,12 @@
 import mongoengine
+from strategy_provider.common.decision import Decision
 
 
 class Bet(mongoengine.Document):
-    name = mongoengine.StringField()
-    parameters = mongoengine.DictField()
+    banker_side = mongoengine.StringField("^[(local)|(national)]$")
+    type = mongoengine.StringField("^[(total_point)|(spread_point)|(original)]$")
+    result = mongoengine.StringField("^[(under)|(over)|(guest)|(host)]$")
+    unit = mongoengine.IntField(min_value=0)
 
 
 class Put(mongoengine.Document):
@@ -22,7 +25,8 @@ class BattleHistory(mongoengine.Document):
     game_time = mongoengine.DateTimeField()
     gamble_id = mongoengine.StringField()
     bet = mongoengine.ReferenceField(Bet)
-    win = mongoengine.BooleanField()
+    confidence = mongoengine.FloatField()
+    match = mongoengine.BooleanField()
     capital_before = mongoengine.IntField()
     capital_after = mongoengine.IntField()
 

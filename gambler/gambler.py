@@ -11,6 +11,8 @@ from gambler.gamble_record import GambleRecord
 from util.util import Util
 from strategy_provider.common.decision import Decision
 from mongoengine.errors import DoesNotExist
+from db.collection.gambler import Gambler as GamblerCollection, BattleHistory
+from gambler.document_builder import parse_decision
 
 
 class Gambler:
@@ -28,86 +30,22 @@ class Gambler:
         logging.debug(f"[{self.name}] start battle: {gamble_info[0].game_time}")
 
         decisions = self.strategy.bet.get_decisions(self, gamble_info)
-        self.decision_history += decisions
+        for decision in decisions:
+            self.battle(decision)
 
-
-        records = self.settle(decisions)
-        self.write_records(records)
         logging.debug(f"[{self.name}] finish battle: {gamble_info[0].game_time}")
 
-    # def battle(self, start_date, end_date=None, **target):
-    #     logging.debug(f"gambler_{self.name} start battle, {start_date} to {end_date}")
-    #
-    #     for game_date in pd.date_range(
-    #         datetime.strptime(start_date, "%Y%m%d"),
-    #         datetime.strptime(end_date, "%Y-%m-%d"),
-    #     ):
-    #         game_date = game_date.strftime("%Y%m%d")
-    #         gamble_info = Banker().get_gamble_info(game_date=game_date, **target)
-    #
-    #         # [decision, decision, ...]
-    #         decisions = self.strategy.get_decisions(self, gamble_info)
-    #         self.decision_history += decisions
-    #         records = self.settle(decisions)
-    #         self.write_records(records)
-    #
-    #     logging.debug(f"gambler {self.name} finished battle.")
-
-    def bettle(self, decision: Decision) -> Decision:
+    def battle(self, decision: Decision):
         try:
             decision.match = Banker().check(decision)
-            decision.ca
+            battle_history = parse_decision(decision)
+            battle_history.capital_before = self.capital
+            battle_history.capital_after = self.capital - decision.bet.unit + (
+                        decision.match * decision.bet.unit * decision.get_response())
+            GamblerCollection.objects.get(name=self.name).battle_history.append(battle_history)
+
         except DoesNotExist as e:
             logging.error(f"fail to check decision: {e}")
 
-
-        if Banker().check(decision):
-            logging.debug(f"gambler {self.name} make a correct decision: {decision}")
-
-            pass
-        else:
-            pass
-
-    def settle(self, decisions):
-        logging.debug("start settle")
-        records = []
-        for decision in decisions:
-            logging.debug(f"settling decision: {decision}")
-
-            record = GambleRecord(self.name, self.strategy)
-            gamble_result = Banker()._get_gamble_result(
-                decision.game_time, decision.gamble_id
-            )
-            record.content["decision"] = decision
-            record.content["principle"] = {"before": self.capital}
-            self.capital -= decision.bet.unit
-            if (
-                decision.bet.result
-                == gamble_result.judgement[decision.bet.banker_side][decision.bet.type]
-            ):
-                decision.match = True
-                gamble_info = Banker().get_gamble_info(
-                    game_date=decision.game_time, gamble_id=decision.gamble_id
-                )[0]
-                try:
-                    response_ratio = gamble_info.handicap[decision.bet.banker_side][
-                        decision.bet.type
-                    ]["response"][decision.bet.result]
-                except KeyError as e:
-                    logging.error(f"unable to get response ratio: {e}")
-                    raise e
-                self.capital += decision.bet.unit * response_ratio
-            else:
-                decision.match = False
-
-            logging.debug("settled decision: %s" % decision)
-            logging.debug("current principle: %s" % self.capital)
-            record.content["principle"]["after"] = self.capital
-            records.append(record)
-        return records
-
-    def write_records(self, records):
-        logging.debug(f"save decision to mongodb: {records}")
-        for record in records:
-            doc = json.loads(json.dumps(record.content, default=lambda o: o.__dict__))
-            self.mongo_client.update(doc, doc, upsert=True)
+        except Exception as e:
+            logging.error(e)

@@ -22,7 +22,7 @@ class Banker(metaclass=Singleton):
 
     @lru_cache(1024)
     def _get_gamble_result(
-        self, game_time: datetime, gamble_id: str, game_type: str
+            self, game_time: datetime, gamble_id: str, game_type: str
     ) -> SportsData:
         return SportsData.objects(
             gamble_id=gamble_id, game_type=game_type, game_time=game_time,
