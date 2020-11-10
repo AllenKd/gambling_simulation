@@ -1,18 +1,13 @@
-import json
 import logging
-from datetime import datetime
-from typing import List
 
-import pandas as pd
+from mongoengine.errors import DoesNotExist
 
 from banker.banker import Banker
 from banker.objects import GambleInfo
-from gambler.gamble_record import GambleRecord
-from util.util import Util
-from strategy_provider.common.decision import Decision
-from mongoengine.errors import DoesNotExist
-from db.collection.gambler import Gambler as GamblerCollection, BattleHistory
+from db.collection.gambler import Gambler as GamblerCollection
 from gambler.document_builder import parse_decision
+from strategy_provider.common.decision import Decision
+from util.util import Util
 
 
 class Gambler:
@@ -41,8 +36,9 @@ class Gambler:
             battle_history = parse_decision(decision)
             battle_history.capital_before = self.capital
             battle_history.capital_after = self.capital - decision.bet.unit + (
-                        decision.match * decision.bet.unit * decision.get_response())
+                    decision.match * decision.bet.unit * decision.get_response())
             GamblerCollection.objects.get(name=self.name).battle_history.append(battle_history)
+            GamblerCollection.save()
 
         except DoesNotExist as e:
             logging.error(f"fail to check decision: {e}")

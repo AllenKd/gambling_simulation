@@ -1,20 +1,22 @@
 import logging
-from datetime import datetime
+import datetime
 from functools import lru_cache
 
-from banker.objects import GambleInfo, GambleResult
+from banker.objects import GambleInfo
 from db.collection.sports_data import SportsData
-from util.singleton import Singleton
 from strategy_provider.common.decision import Decision
+from util.singleton import Singleton
+from datetime import datetime
+from mongoengine import Q
 
 
 class Banker(metaclass=Singleton):
     @lru_cache(1024)
-    def get_gamble_info(self, game_date, **kwargs) -> [GambleInfo]:
+    def get_gamble_info(self, game_date: datetime.date, **kwargs) -> [GambleInfo]:
         logging.debug(f"getting gamble info, game date: {game_date}")
-        game_date = str(datetime.strptime(game_date, "%Y%m%d").date())
+        # game_date = str(datetime.strptime(game_date, "%Y%m%d").date())
         a = SportsData.objects(
-            timestamp__data=datetime.strptime(game_date, "%Y%m%d").date()
+            Q(game_time__gte=game_date) & Q(game_time__lte=game_date + datetime.timedelta(days=1))
         )
         query_condition = {"game_time": {"$regex": game_date}}
         query_condition.update(**kwargs)

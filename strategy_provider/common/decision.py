@@ -22,7 +22,7 @@ class Decision:
 
     def get_response(self):
         gamble_info = Banker().get_gamble_info(
-            self.game_time, game_type=self.game_type, gamble_id=self.gamble_id,
+            self.game_time.date(), game_type=self.game_type, gamble_id=self.gamble_id,
         )
         if len(gamble_info) != 1:
             raise Exception(f"unexpected gamble info result: {gamble_info}")

@@ -27,7 +27,7 @@ class Simulator:
         threads = []
         gamblers = init_gamblers()
         for g in gamblers:
-            t = threading.Thread(target=g.play, args=(self.start_date,))
+            t = threading.Thread(target=g.play, args=())
             threads.append(t)
             t.start()
 
